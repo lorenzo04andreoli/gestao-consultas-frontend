@@ -1,1 +1,111 @@
-<p>usuarios-page works!</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Usuários</h1>
+      <p>Gerencie as contas de acesso e seus perfis no sistema.</p>
+    </div>
+
+    <button type="button" class="primary-button" (click)="abrirModalCadastro()">
+      Cadastrar usuário
+    </button>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
+  }
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Perfil</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (usuario of usuarios(); track usuario.id) {
+          <tr>
+            <td>{{ usuario.nome }}</td>
+            <td>{{ usuario.email }}</td>
+            <td>
+              <span class="profile" [class.admin]="usuario.perfil === 'ADMIN'">
+                {{ perfilLabel(usuario.perfil) }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="3" class="empty-state">Nenhum usuário cadastrado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (modalAberto()) {
+    <div class="modal-backdrop" (click)="fecharModal()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>Cadastrar usuário</h2>
+            <p>Crie uma conta de acesso para administrador ou dentista.</p>
+          </div>
+
+          <button type="button" class="close-button" (click)="fecharModal()">
+            &times;
+          </button>
+        </header>
+
+        <form (ngSubmit)="salvar()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nome</label>
+              <input type="text" name="nome" [(ngModel)]="usuarioForm.nome" required />
+            </div>
+
+            <div class="form-group">
+              <label>CPF</label>
+              <input type="text" name="cpf" [(ngModel)]="usuarioForm.cpf" required />
+            </div>
+
+            <div class="form-group">
+              <label>E-mail</label>
+              <input type="email" name="email" [(ngModel)]="usuarioForm.email" required />
+            </div>
+
+            <div class="form-group">
+              <label>Senha</label>
+              <input type="password" name="senha" [(ngModel)]="usuarioForm.senha" required />
+            </div>
+
+            <div class="form-group">
+              <label>Perfil</label>
+              <select name="perfil" [(ngModel)]="usuarioForm.perfil" required>
+                <option value="DENTISTA">Dentista</option>
+                <option value="ADMIN">Administrador</option>
+              </select>
+            </div>
+          </div>
+
+          <footer class="modal-actions end">
+            <div class="right-actions">
+              <button type="button" class="secondary-button" (click)="fecharModal()">
+                Cancelar
+              </button>
+
+              <button type="submit" class="primary-button">
+                Cadastrar
+              </button>
+            </div>
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
+</section>
