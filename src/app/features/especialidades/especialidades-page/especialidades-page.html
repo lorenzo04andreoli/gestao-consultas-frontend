@@ -1,0 +1,85 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Especialidades</h1>
+      <p>Gerencie as especialidades disponíveis para os profissionais.</p>
+    </div>
+
+    <button type="button" class="primary-button" (click)="abrirModalCadastro()">
+      Cadastrar especialidade
+    </button>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
+  }
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (especialidade of especialidades(); track especialidade.id ?? especialidade.nome) {
+          <tr>
+            <td>{{ especialidade.nome }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty-state">Nenhuma especialidade cadastrada.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (modalAberto()) {
+    <div class="modal-backdrop" (click)="fecharModal()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>Cadastrar especialidade</h2>
+            <p>Informe o nome da área de atuação odontológica.</p>
+          </div>
+
+          <button type="button" class="close-button" (click)="fecharModal()">
+            &times;
+          </button>
+        </header>
+
+        <form (ngSubmit)="salvar()">
+          <div class="form-grid single-column">
+            <div class="form-group">
+              <label>Nome</label>
+              <input
+                type="text"
+                name="nome"
+                [(ngModel)]="especialidadeForm.nome"
+                required
+              />
+            </div>
+          </div>
+
+          <footer class="modal-actions end">
+            <div class="right-actions">
+              <button type="button" class="secondary-button" (click)="fecharModal()">
+                Cancelar
+              </button>
+
+              <button type="submit" class="primary-button">
+                Cadastrar
+              </button>
+            </div>
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
+</section>

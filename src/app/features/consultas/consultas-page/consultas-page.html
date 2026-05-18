@@ -1,1 +1,188 @@
-<p>consultas-page works!</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Consultas</h1>
+      <p>Acompanhe agendamentos, cancelamentos e finalizações.</p>
+    </div>
+
+    <button type="button" class="primary-button" (click)="abrirModalCadastro()">
+      Agendar consulta
+    </button>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
+  }
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Paciente</th>
+          <th>Dentista</th>
+          <th>Descrição</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (consulta of consultas(); track consulta.id) {
+          <tr>
+            <td>{{ consulta.pacienteNome }}</td>
+            <td>{{ consulta.dentistaNome }}</td>
+            <td>{{ consulta.descricao }}</td>
+            <td>{{ formatarData(consulta.dataInicio) }}</td>
+            <td>{{ formatarData(consulta.dataFim) }}</td>
+            <td>
+              <span
+                class="status"
+                [class.cancelled]="consulta.status === 'CANCELADA'"
+                [class.done]="consulta.status === 'FINALIZADA'"
+              >
+                {{ consulta.status }}
+              </span>
+            </td>
+            <td>
+              <div class="row-actions">
+                @if (consulta.status === 'AGENDADA') {
+                  <button type="button" class="secondary-button compact" (click)="finalizarConsulta(consulta)">
+                    Finalizar
+                  </button>
+
+                  <button type="button" class="danger-button compact" (click)="abrirModalCancelamento(consulta)">
+                    Cancelar
+                  </button>
+                } @else {
+                  <span class="muted">Sem ações</span>
+                }
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="empty-state">Nenhuma consulta cadastrada.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (modalCadastroAberto()) {
+    <div class="modal-backdrop" (click)="fecharModalCadastro()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>Agendar consulta</h2>
+            <p>Selecione paciente, dentista e horário da consulta.</p>
+          </div>
+
+          <button type="button" class="close-button" (click)="fecharModalCadastro()">
+            &times;
+          </button>
+        </header>
+
+        <form (ngSubmit)="salvar()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Paciente</label>
+              <select name="pacienteId" [(ngModel)]="consultaForm.pacienteId" required>
+                <option [ngValue]="null">Selecione</option>
+                @for (paciente of pacientes(); track paciente.id ?? paciente.cpf) {
+                  @if (paciente.id) {
+                    <option [ngValue]="paciente.id">{{ paciente.nome }}</option>
+                  }
+                }
+              </select>
+              @if (pacientes().length === 0) {
+                <small>Nenhum paciente disponível.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Dentista</label>
+              <select name="dentistaId" [(ngModel)]="consultaForm.dentistaId" required>
+                <option [ngValue]="null">Selecione</option>
+                @for (dentista of dentistas(); track dentista.id) {
+                  <option [ngValue]="dentista.id">{{ dentista.nome }} - {{ dentista.cro }}</option>
+                }
+              </select>
+              @if (dentistas().length === 0) {
+                <small>Nenhum dentista ativo disponível.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Data e hora inicial</label>
+              <input type="datetime-local" name="dataInicio" [(ngModel)]="consultaForm.dataInicio" required />
+            </div>
+
+            <div class="form-group">
+              <label>Data e hora final</label>
+              <input type="datetime-local" name="dataFim" [(ngModel)]="consultaForm.dataFim" required />
+            </div>
+
+            <div class="form-group full-width">
+              <label>Descrição</label>
+              <textarea name="descricao" [(ngModel)]="consultaForm.descricao" required></textarea>
+            </div>
+          </div>
+
+          <footer class="modal-actions end">
+            <div class="right-actions">
+              <button type="button" class="secondary-button" (click)="fecharModalCadastro()">
+                Cancelar
+              </button>
+
+              <button type="submit" class="primary-button">
+                Agendar
+              </button>
+            </div>
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (modalCancelamentoAberto()) {
+    <div class="modal-backdrop" (click)="fecharModalCancelamento()">
+      <section class="modal small" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>Cancelar consulta</h2>
+            <p>O motivo é obrigatório para cancelar uma consulta.</p>
+          </div>
+
+          <button type="button" class="close-button" (click)="fecharModalCancelamento()">
+            &times;
+          </button>
+        </header>
+
+        <form (ngSubmit)="cancelarConsulta()">
+          <div class="form-group">
+            <label>Motivo</label>
+            <textarea name="motivoCancelamento" [(ngModel)]="motivoCancelamento" required></textarea>
+          </div>
+
+          <footer class="modal-actions end">
+            <div class="right-actions">
+              <button type="button" class="secondary-button" (click)="fecharModalCancelamento()">
+                Voltar
+              </button>
+
+              <button type="submit" class="danger-button">
+                Cancelar consulta
+              </button>
+            </div>
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
+</section>

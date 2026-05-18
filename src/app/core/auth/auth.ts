@@ -1,6 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { API_URL } from '../api';
 
 interface LoginRequest {
   email: string;
@@ -22,7 +23,7 @@ interface JwtPayload {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/auth';
+  private apiUrl = `${API_URL}/auth`;
 
   private tokenSignal = signal<string | null>(localStorage.getItem('token'));
 

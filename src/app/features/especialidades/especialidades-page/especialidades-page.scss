@@ -61,18 +61,12 @@ table {
   }
 }
 
-.clickable-row {
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: #f7f7f7;
-  }
+.empty-state {
+  color: #6b7280;
 }
 
 .primary-button,
 .secondary-button,
-.danger-button,
 .close-button {
   border: none;
   cursor: pointer;
@@ -88,12 +82,6 @@ table {
 .secondary-button {
   background: #e5e7eb;
   color: #111827;
-  padding: 10px 14px;
-}
-
-.danger-button {
-  background: #dc2626;
-  color: #fff;
   padding: 10px 14px;
 }
 
@@ -117,7 +105,7 @@ table {
 }
 
 .modal {
-  width: min(760px, 100%);
+  width: min(560px, 100%);
   background: #fff;
   border-radius: 16px;
   padding: 24px;
@@ -144,6 +132,10 @@ table {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+
+  &.single-column {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-group {
@@ -173,6 +165,10 @@ table {
   align-items: center;
   gap: 12px;
   margin-top: 24px;
+
+  &.end {
+    justify-content: flex-end;
+  }
 }
 
 .right-actions {
@@ -186,23 +182,13 @@ table {
     flex-direction: column;
   }
 
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-
   .right-actions {
     width: 100%;
     flex-direction: column-reverse;
   }
 
   .primary-button,
-  .secondary-button,
-  .danger-button {
+  .secondary-button {
     width: 100%;
   }
 }

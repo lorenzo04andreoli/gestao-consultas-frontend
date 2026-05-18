@@ -31,6 +31,13 @@ export const routes: Routes = [
           import('./features/dentistas/dentistas-page/dentistas-page').then(m => m.DentistasPage)
       },
       {
+        path: 'especialidades',
+        loadComponent: () =>
+          import('./features/especialidades/especialidades-page/especialidades-page').then(
+            m => m.EspecialidadesPage
+          )
+      },
+      {
         path: 'consultas',
         loadComponent: () =>
           import('./features/consultas/consultas-page/consultas-page').then(m => m.ConsultasPage)
