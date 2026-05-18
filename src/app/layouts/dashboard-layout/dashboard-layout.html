@@ -1,20 +1,23 @@
 <div class="layout">
   <aside class="sidebar">
-    <h2>Dentix</h2>
+    <div class="brand">
+      <h2>Dentix</h2>
+      <span>Gestão Dental</span>
+    </div>
 
-    <nav>
-      <a routerLink="/dashboard">Dashboard</a>
-      <a routerLink="/pacientes">Pacientes</a>
-      <a routerLink="/dentistas">Dentistas</a>
-      <a routerLink="/especialidades">Especialidades</a>
-      <a routerLink="/consultas">Consultas</a>
+    <nav class="nav">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/pacientes" routerLinkActive="active">Pacientes</a>
+      <a routerLink="/dentistas" routerLinkActive="active">Dentistas</a>
+      <a routerLink="/especialidades" routerLinkActive="active">Especialidades</a>
+      <a routerLink="/consultas" routerLinkActive="active">Consultas</a>
 
       @if (authService.isAdmin()) {
-        <a routerLink="/usuarios">Usuários</a>
+        <a routerLink="/usuarios" routerLinkActive="active">Usuários</a>
       }
     </nav>
 
-    <button type="button" (click)="sair()">Sair</button>
+    <button type="button" class="logout-button" (click)="sair()">Sair</button>
   </aside>
 
   <main class="content">

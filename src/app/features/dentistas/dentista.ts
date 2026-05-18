@@ -16,7 +16,7 @@ export class DentistaService {
   }
 
   criar(dentista: DentistaRequestModel) {
-    return this.http.post<DentistaModel>(this.apiUrl, dentista);
+    return this.http.post<DentistaResponseModel>(this.apiUrl, dentista);
   }
 
   buscarPorId(id: number) {
@@ -24,7 +24,7 @@ export class DentistaService {
   }
 
   atualizar(id: number, dentista: DentistaRequestModel) {
-    return this.http.put<DentistaModel>(`${this.apiUrl}/${id}`, dentista);
+    return this.http.put<DentistaResponseModel>(`${this.apiUrl}/${id}`, dentista);
   }
 
   deletar(id: number) {

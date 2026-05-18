@@ -61,7 +61,8 @@ table {
   }
 }
 
-.empty-state {
+.empty-state,
+.muted {
   color: #6b7280;
 }
 
@@ -82,8 +83,15 @@ table {
   }
 }
 
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .primary-button,
 .secondary-button,
+.danger-button,
 .close-button {
   border: none;
   cursor: pointer;
@@ -100,6 +108,16 @@ table {
   background: #e5e7eb;
   color: #111827;
   padding: 10px 14px;
+}
+
+.danger-button {
+  background: #dc2626;
+  color: #fff;
+  padding: 10px 14px;
+}
+
+.compact {
+  padding: 7px 10px;
 }
 
 .close-button {
@@ -160,6 +178,10 @@ table {
 
   label {
     font-weight: 500;
+  }
+
+  small {
+    color: #6b7280;
   }
 
   input,
