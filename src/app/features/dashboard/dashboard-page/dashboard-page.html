@@ -1,1 +1,76 @@
-<p>dashboard-page works!</p>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Visão geral dos pacientes, profissionais e consultas.</p>
+    </div>
+
+    <button type="button" class="secondary-button" (click)="carregarDados()">
+      Atualizar
+    </button>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <p class="alert info">Carregando indicadores...</p>
+  }
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span>Pacientes</span>
+      <strong>{{ totalPacientes() }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Dentistas ativos</span>
+      <strong>{{ totalDentistasAtivos() }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Consultas</span>
+      <strong>{{ totalConsultas() }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Agendadas</span>
+      <strong>{{ consultasAgendadas() }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Canceladas</span>
+      <strong>{{ consultasCanceladas() }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Finalizadas</span>
+      <strong>{{ consultasFinalizadas() }}</strong>
+    </article>
+  </section>
+
+  <section class="charts-grid">
+    <article class="chart-panel">
+      <header>
+        <h2>Status das consultas</h2>
+        <p>Distribuição por situação atual.</p>
+      </header>
+
+      <div class="chart-box">
+        <canvas #statusChart></canvas>
+      </div>
+    </article>
+
+    <article class="chart-panel">
+      <header>
+        <h2>Consultas por dentista</h2>
+        <p>Quantidade de consultas vinculadas aos profissionais.</p>
+      </header>
+
+      <div class="chart-box">
+        <canvas #dentistasChart></canvas>
+      </div>
+    </article>
+  </section>
+</section>
