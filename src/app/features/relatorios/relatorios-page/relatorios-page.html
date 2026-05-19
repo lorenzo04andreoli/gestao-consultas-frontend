@@ -1,0 +1,62 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Relat&oacute;rios</h1>
+      <p>Filtre consultas por paciente, dentista, especialidade e per&iacute;odo.</p>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  <section class="filter-card">
+    <form class="filter-grid">
+      <div class="form-group">
+        <label>Paciente</label>
+        <select name="pacienteId" [(ngModel)]="filtros.pacienteId">
+          <option [ngValue]="null">Todos</option>
+          @for (paciente of pacientes(); track paciente.id ?? paciente.cpf) {
+            @if (paciente.id) {
+              <option [ngValue]="paciente.id">{{ paciente.nome }}</option>
+            }
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Dentista</label>
+        <select name="dentistaId" [(ngModel)]="filtros.dentistaId">
+          <option [ngValue]="null">Todos</option>
+          @for (dentista of dentistas(); track dentista.id) {
+            <option [ngValue]="dentista.id">{{ dentista.nome }} - {{ dentista.cro }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Especialidade</label>
+        <select name="especialidadeId" [(ngModel)]="filtros.especialidadeId">
+          <option [ngValue]="null">Todas</option>
+          @for (especialidade of especialidades(); track especialidade.id) {
+            <option [ngValue]="especialidade.id">{{ especialidade.nome }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Data inicial</label>
+        <input type="datetime-local" name="dataInicio" [(ngModel)]="filtros.dataInicio" />
+      </div>
+
+      <div class="form-group">
+        <label>Data final</label>
+        <input type="datetime-local" name="dataFim" [(ngModel)]="filtros.dataFim" />
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </form>
+  </section>
+</section>
