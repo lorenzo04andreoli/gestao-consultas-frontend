@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConsultaService } from '../../consultas/consulta';
-import { ConsultaFiltros, ConsultaModel } from '../../consultas/consulta.model';
+import { ConsultaFiltros, ConsultaModel, StatusConsulta } from '../../consultas/consulta.model';
 import { DentistaService } from '../../dentistas/dentista';
 import { DentistaResponseModel } from '../../dentistas/dentista.model';
 import { EspecialidadeService } from '../../especialidades/especialidade';
@@ -36,6 +36,11 @@ export class RelatoriosPage implements OnInit {
     dataInicio: '',
     dataFim: ''
   };
+
+  totalConsultas = computed(() => this.consultas().length);
+  consultasAgendadas = computed(() => this.contarPorStatus('AGENDADA'));
+  consultasCanceladas = computed(() => this.contarPorStatus('CANCELADA'));
+  consultasFinalizadas = computed(() => this.contarPorStatus('FINALIZADA'));
 
   ngOnInit() {
     this.carregarFiltros();
@@ -94,5 +99,9 @@ export class RelatoriosPage implements OnInit {
       dateStyle: 'short',
       timeStyle: 'short'
     }).format(new Date(data));
+  }
+
+  private contarPorStatus(status: StatusConsulta) {
+    return this.consultas().filter(consulta => consulta.status === status).length;
   }
 }

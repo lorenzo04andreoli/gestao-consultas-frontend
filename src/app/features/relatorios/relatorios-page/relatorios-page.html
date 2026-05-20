@@ -61,6 +61,28 @@
     </form>
   </section>
 
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span>Total</span>
+      <strong>{{ totalConsultas() }}</strong>
+    </article>
+
+    <article class="summary-card blue">
+      <span>Agendadas</span>
+      <strong>{{ consultasAgendadas() }}</strong>
+    </article>
+
+    <article class="summary-card red">
+      <span>Canceladas</span>
+      <strong>{{ consultasCanceladas() }}</strong>
+    </article>
+
+    <article class="summary-card green">
+      <span>Finalizadas</span>
+      <strong>{{ consultasFinalizadas() }}</strong>
+    </article>
+  </section>
+
   <section class="table-card">
     @if (carregando()) {
       <p class="loading">Carregando relat&oacute;rio...</p>
