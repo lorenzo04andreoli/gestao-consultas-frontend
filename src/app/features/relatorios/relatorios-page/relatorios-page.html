@@ -84,6 +84,13 @@
   </section>
 
   <section class="table-card">
+    <header class="table-header">
+      <div>
+        <h2>Resultados</h2>
+        <p>{{ totalConsultas() }} consulta(s) encontrada(s).</p>
+      </div>
+    </header>
+
     @if (carregando()) {
       <p class="loading">Carregando relat&oacute;rio...</p>
     } @else {
@@ -96,6 +103,7 @@
             <th>In&iacute;cio</th>
             <th>Fim</th>
             <th>Status</th>
+            <th>Motivo</th>
           </tr>
         </thead>
 
@@ -107,11 +115,20 @@
               <td>{{ consulta.descricao }}</td>
               <td>{{ formatarData(consulta.dataInicio) }}</td>
               <td>{{ formatarData(consulta.dataFim) }}</td>
-              <td>{{ consulta.status }}</td>
+              <td>
+                <span
+                  class="status"
+                  [class.cancelled]="consulta.status === 'CANCELADA'"
+                  [class.done]="consulta.status === 'FINALIZADA'"
+                >
+                  {{ consulta.status }}
+                </span>
+              </td>
+              <td class="reason">{{ consulta.motivoCancelamento || '-' }}</td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="empty-state">Nenhuma consulta encontrada.</td>
+              <td colspan="7" class="empty-state">Nenhuma consulta encontrada.</td>
             </tr>
           }
         </tbody>
