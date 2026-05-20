@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConsultaFiltros } from '../../consultas/consulta.model';
+import { ConsultaService } from '../../consultas/consulta';
+import { ConsultaFiltros, ConsultaModel } from '../../consultas/consulta.model';
 import { DentistaService } from '../../dentistas/dentista';
 import { DentistaResponseModel } from '../../dentistas/dentista.model';
 import { EspecialidadeService } from '../../especialidades/especialidade';
@@ -16,13 +17,16 @@ import { PacienteModel } from '../../pacientes/paciente.model';
   styleUrl: './relatorios-page.scss'
 })
 export class RelatoriosPage implements OnInit {
+  private consultaService = inject(ConsultaService);
   private pacienteService = inject(PacienteService);
   private dentistaService = inject(DentistaService);
   private especialidadeService = inject(EspecialidadeService);
 
+  consultas = signal<ConsultaModel[]>([]);
   pacientes = signal<PacienteModel[]>([]);
   dentistas = signal<DentistaResponseModel[]>([]);
   especialidades = signal<EspecialidadeModel[]>([]);
+  carregando = signal(false);
   erro = signal('');
 
   filtros: ConsultaFiltros = {
@@ -35,6 +39,7 @@ export class RelatoriosPage implements OnInit {
 
   ngOnInit() {
     this.carregarFiltros();
+    this.filtrar();
   }
 
   carregarFiltros() {
@@ -62,5 +67,32 @@ export class RelatoriosPage implements OnInit {
       dataInicio: '',
       dataFim: ''
     };
+
+    this.filtrar();
+  }
+
+  filtrar() {
+    this.carregando.set(true);
+    this.erro.set('');
+
+    this.consultaService.relatorios(this.filtros).subscribe({
+      next: (dados) => {
+        this.consultas.set(dados);
+        this.carregando.set(false);
+      },
+      error: () => {
+        this.erro.set('Erro ao carregar relatorio.');
+        this.carregando.set(false);
+      }
+    });
+  }
+
+  formatarData(data: string) {
+    if (!data) return '-';
+
+    return new Intl.DateTimeFormat('pt-BR', {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    }).format(new Date(data));
   }
 }

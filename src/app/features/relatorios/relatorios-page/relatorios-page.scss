@@ -31,11 +31,16 @@
   color: #a10000;
 }
 
-.filter-card {
+.filter-card,
+.table-card {
   background: #fff;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.filter-card {
+  margin-bottom: 20px;
 }
 
 .filter-grid {
@@ -76,6 +81,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
+  gap: 10px;
 }
 
 button {
@@ -90,6 +96,42 @@ button {
 
   &:hover {
     background: #d1d5db;
+  }
+}
+
+.primary-button {
+  background: #2563eb;
+  color: #fff;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+}
+
+.table-card {
+  overflow-x: auto;
+}
+
+.loading,
+.empty-state {
+  color: #6b7280;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    color: #444;
+    font-weight: 600;
   }
 }
 

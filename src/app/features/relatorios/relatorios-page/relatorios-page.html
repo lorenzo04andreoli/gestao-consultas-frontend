@@ -11,7 +11,7 @@
   }
 
   <section class="filter-card">
-    <form class="filter-grid">
+    <form class="filter-grid" (ngSubmit)="filtrar()">
       <div class="form-group">
         <label>Paciente</label>
         <select name="pacienteId" [(ngModel)]="filtros.pacienteId">
@@ -56,7 +56,44 @@
 
       <div class="filter-actions">
         <button type="button" (click)="limparFiltros()">Limpar</button>
+        <button type="submit" class="primary-button">Filtrar</button>
       </div>
     </form>
+  </section>
+
+  <section class="table-card">
+    @if (carregando()) {
+      <p class="loading">Carregando relat&oacute;rio...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Dentista</th>
+            <th>Descri&ccedil;&atilde;o</th>
+            <th>In&iacute;cio</th>
+            <th>Fim</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (consulta of consultas(); track consulta.id) {
+            <tr>
+              <td>{{ consulta.pacienteNome }}</td>
+              <td>{{ consulta.dentistaNome }}</td>
+              <td>{{ consulta.descricao }}</td>
+              <td>{{ formatarData(consulta.dataInicio) }}</td>
+              <td>{{ formatarData(consulta.dataFim) }}</td>
+              <td>{{ consulta.status }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-state">Nenhuma consulta encontrada.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   </section>
 </section>
