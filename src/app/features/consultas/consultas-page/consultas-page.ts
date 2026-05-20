@@ -28,6 +28,8 @@ export class ConsultasPage implements OnInit {
   sucesso = signal('');
   modalCadastroAberto = signal(false);
   modalCancelamentoAberto = signal(false);
+  modoModal: 'cadastro' | 'edicao' = 'cadastro';
+  consultaSelecionadaId: number | null = null;
 
   consultaForm = {
     pacienteId: null as number | null,
@@ -82,14 +84,37 @@ export class ConsultasPage implements OnInit {
   }
 
   abrirModalCadastro() {
+    this.modoModal = 'cadastro';
+    this.consultaSelecionadaId = null;
     this.carregarPacientes();
     this.carregarDentistas();
     this.limparFormulario();
     this.modalCadastroAberto.set(true);
   }
 
+  abrirModalEdicao(consulta: ConsultaModel) {
+    if (!consulta.id) return;
+
+    this.modoModal = 'edicao';
+    this.consultaSelecionadaId = consulta.id;
+    this.carregarPacientes();
+    this.carregarDentistas();
+
+    this.consultaForm = {
+      pacienteId: consulta.pacienteId,
+      dentistaId: consulta.dentistaId,
+      descricao: consulta.descricao,
+      dataInicio: this.formatarDataParaInput(consulta.dataInicio),
+      dataFim: this.formatarDataParaInput(consulta.dataFim)
+    };
+
+    this.modalCadastroAberto.set(true);
+  }
+
   fecharModalCadastro() {
     this.modalCadastroAberto.set(false);
+    this.modoModal = 'cadastro';
+    this.consultaSelecionadaId = null;
     this.limparFormulario();
   }
 
@@ -139,14 +164,29 @@ export class ConsultasPage implements OnInit {
       dataFim: this.consultaForm.dataFim
     };
 
-    this.consultaService.criar(payload).subscribe({
+    const request$ = this.modoModal === 'edicao' && this.consultaSelecionadaId
+      ? this.consultaService.atualizar(this.consultaSelecionadaId, payload)
+      : this.consultaService.criar(payload);
+
+    request$.subscribe({
       next: () => {
-        this.sucesso.set('Consulta agendada com sucesso.');
+        this.sucesso.set(
+          this.modoModal === 'edicao'
+            ? 'Consulta atualizada com sucesso.'
+            : 'Consulta agendada com sucesso.'
+        );
         this.fecharModalCadastro();
         this.carregarConsultas();
       },
       error: (err) => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao agendar consulta.'));
+        this.erro.set(
+          this.extrairMensagemErro(
+            err,
+            this.modoModal === 'edicao'
+              ? 'Erro ao atualizar consulta.'
+              : 'Erro ao agendar consulta.'
+          )
+        );
       }
     });
   }
@@ -218,5 +258,9 @@ export class ConsultasPage implements OnInit {
     }
 
     return mensagemPadrao;
+  }
+
+  private formatarDataParaInput(data: string) {
+    return data ? data.slice(0, 16) : '';
   }
 }

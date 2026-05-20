@@ -12,6 +12,17 @@ export interface ConsultaModel {
   dataFim: string;
   status: StatusConsulta;
   motivoCancelamento?: string;
+  paciente?: {
+    id?: number;
+    nome?: string;
+  };
+  dentista?: {
+    id?: number;
+    nome?: string;
+  };
+  usuario?: {
+    nome?: string;
+  };
 }
 
 export interface ConsultaRequestModel {

@@ -52,6 +52,10 @@
             <td>
               <div class="row-actions">
                 @if (consulta.status === 'AGENDADA') {
+                  <button type="button" class="secondary-button compact" (click)="abrirModalEdicao(consulta)">
+                    Editar
+                  </button>
+
                   <button type="button" class="secondary-button compact" (click)="finalizarConsulta(consulta)">
                     Finalizar
                   </button>
@@ -79,7 +83,7 @@
       <section class="modal" (click)="$event.stopPropagation()">
         <header class="modal-header">
           <div>
-            <h2>Agendar consulta</h2>
+            <h2>{{ modoModal === 'edicao' ? 'Editar consulta' : 'Agendar consulta' }}</h2>
             <p>Selecione paciente, dentista e horário da consulta.</p>
           </div>
 
@@ -141,7 +145,7 @@
               </button>
 
               <button type="submit" class="primary-button">
-                Agendar
+                {{ modoModal === 'edicao' ? 'Salvar' : 'Agendar' }}
               </button>
             </div>
           </footer>

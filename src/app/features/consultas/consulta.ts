@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { map } from 'rxjs';
 import { API_URL } from '../../core/api';
 import { ConsultaFiltros, ConsultaModel, ConsultaRequestModel } from './consulta.model';
 
@@ -12,20 +13,34 @@ export class ConsultaService {
   constructor(private http: HttpClient) {}
 
   listar() {
-    return this.http.get<ConsultaModel[]>(this.apiUrl);
+    return this.http.get<ConsultaModel[]>(this.apiUrl).pipe(
+      map(consultas => consultas.map(consulta => this.normalizarConsulta(consulta)))
+    );
   }
 
   criar(consulta: ConsultaRequestModel) {
-    return this.http.post<ConsultaModel>(this.apiUrl, consulta);
+    return this.http.post<ConsultaModel>(this.apiUrl, consulta).pipe(
+      map(dados => this.normalizarConsulta(dados))
+    );
+  }
+
+  atualizar(id: number, consulta: ConsultaRequestModel) {
+    return this.http.put<ConsultaModel>(`${this.apiUrl}/${id}/editar`, consulta).pipe(
+      map(dados => this.normalizarConsulta(dados))
+    );
   }
 
   cancelar(id: number, motivo: string) {
     const params = new HttpParams().set('motivo', motivo);
-    return this.http.put<ConsultaModel>(`${this.apiUrl}/${id}/cancelar`, null, { params });
+    return this.http.put<ConsultaModel>(`${this.apiUrl}/${id}/cancelar`, null, { params }).pipe(
+      map(dados => this.normalizarConsulta(dados))
+    );
   }
 
   finalizar(id: number) {
-    return this.http.put<ConsultaModel>(`${this.apiUrl}/${id}/finalizar`, null);
+    return this.http.put<ConsultaModel>(`${this.apiUrl}/${id}/finalizar`, null).pipe(
+      map(dados => this.normalizarConsulta(dados))
+    );
   }
 
   relatorios(filtros: ConsultaFiltros) {
@@ -37,6 +52,19 @@ export class ConsultaService {
       }
     });
 
-    return this.http.get<ConsultaModel[]>(`${this.apiUrl}/relatorios`, { params });
+    return this.http.get<ConsultaModel[]>(`${this.apiUrl}/relatorios`, { params }).pipe(
+      map(consultas => consultas.map(consulta => this.normalizarConsulta(consulta)))
+    );
+  }
+
+  private normalizarConsulta(consulta: ConsultaModel): ConsultaModel {
+    return {
+      ...consulta,
+      pacienteId: consulta.pacienteId ?? consulta.paciente?.id ?? 0,
+      pacienteNome: consulta.pacienteNome ?? consulta.paciente?.nome ?? '-',
+      dentistaId: consulta.dentistaId ?? consulta.dentista?.id ?? 0,
+      dentistaNome: consulta.dentistaNome ?? consulta.dentista?.nome ?? '-',
+      usuarioNome: consulta.usuarioNome ?? consulta.usuario?.nome ?? '-'
+    };
   }
 }
