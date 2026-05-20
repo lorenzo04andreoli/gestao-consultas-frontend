@@ -12,7 +12,8 @@ import { PacienteModel } from '../../pacientes/paciente.model';
   selector: 'app-relatorios-page',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './relatorios-page.html'
+  templateUrl: './relatorios-page.html',
+  styleUrl: './relatorios-page.scss'
 })
 export class RelatoriosPage implements OnInit {
   private pacienteService = inject(PacienteService);
