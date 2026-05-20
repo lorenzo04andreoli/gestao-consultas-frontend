@@ -43,6 +43,13 @@ export const routes: Routes = [
           import('./features/consultas/consultas-page/consultas-page').then(m => m.ConsultasPage)
       },
       {
+        path: 'relatorios',
+        loadComponent: () =>
+          import('./features/relatorios/relatorios-page/relatorios-page').then(
+            m => m.RelatoriosPage
+          )
+      },
+      {
         path: 'usuarios',
         canActivate: [adminGuard],
         loadComponent: () =>
