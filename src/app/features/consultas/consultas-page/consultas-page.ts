@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../../../core/auth/auth';
 import { DentistaService } from '../../dentistas/dentista';
 import { DentistaResponseModel } from '../../dentistas/dentista.model';
 import { PacienteService } from '../../pacientes/paciente';
@@ -19,6 +20,7 @@ export class ConsultasPage implements OnInit {
   private consultaService = inject(ConsultaService);
   private pacienteService = inject(PacienteService);
   private dentistaService = inject(DentistaService);
+  private authService = inject(AuthService);
 
   consultas = signal<ConsultaModel[]>([]);
   pacientes = signal<PacienteModel[]>([]);
@@ -75,7 +77,8 @@ export class ConsultasPage implements OnInit {
   carregarDentistas() {
     this.dentistaService.listar().subscribe({
       next: (dados) => {
-        this.dentistas.set(dados.filter(dentista => dentista.ativo));
+        const dentistasAtivos = dados.filter(dentista => dentista.ativo);
+        this.dentistas.set(this.filtrarDentistasPermitidos(dentistasAtivos));
       },
       error: (err) => {
         this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar dentistas.'));
@@ -262,5 +265,12 @@ export class ConsultasPage implements OnInit {
 
   private formatarDataParaInput(data: string) {
     return data ? data.slice(0, 16) : '';
+  }
+
+  private filtrarDentistasPermitidos(dentistas: DentistaResponseModel[]) {
+    if (!this.authService.isDentista()) return dentistas;
+
+    const emailUsuario = this.authService.email();
+    return dentistas.filter(dentista => dentista.email === emailUsuario);
   }
 }

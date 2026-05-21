@@ -61,7 +61,7 @@ export class RelatoriosPage implements OnInit {
     });
 
     this.dentistaService.listar().subscribe({
-      next: (dados) => this.dentistas.set(dados),
+      next: (dados) => this.dentistas.set(this.filtrarDentistasPermitidos(dados)),
       error: () => this.erro.set('Erro ao carregar dentistas.')
     });
 
@@ -118,5 +118,12 @@ export class RelatoriosPage implements OnInit {
 
   private contarPorStatus(status: StatusConsulta) {
     return this.consultas().filter(consulta => consulta.status === status).length;
+  }
+
+  private filtrarDentistasPermitidos(dentistas: DentistaResponseModel[]) {
+    if (!this.authService.isDentista()) return dentistas;
+
+    const emailUsuario = this.authService.email();
+    return dentistas.filter(dentista => dentista.email === emailUsuario);
   }
 }
