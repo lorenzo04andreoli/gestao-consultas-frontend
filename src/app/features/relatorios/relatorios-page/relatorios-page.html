@@ -44,15 +44,17 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <label>Usuário responsável</label>
-        <select name="usuarioId" [(ngModel)]="filtros.usuarioId">
-          <option [ngValue]="null">Todos</option>
-          @for (usuario of usuarios(); track usuario.id) {
-            <option [ngValue]="usuario.id">{{ usuario.nome }} - {{ usuario.perfil }}</option>
-          }
-        </select>
-      </div>
+      @if (authService.isAdmin()) {
+        <div class="form-group">
+          <label>Usuário responsável</label>
+          <select name="usuarioId" [(ngModel)]="filtros.usuarioId">
+            <option [ngValue]="null">Todos</option>
+            @for (usuario of usuarios(); track usuario.id) {
+              <option [ngValue]="usuario.id">{{ usuario.nome }} - {{ usuario.perfil }}</option>
+            }
+          </select>
+        </div>
+      }
 
       <div class="form-group">
         <label>Data inicial</label>
