@@ -1,8 +1,8 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Relat&oacute;rios</h1>
-      <p>Filtre consultas por paciente, dentista, especialidade e per&iacute;odo.</p>
+      <h1>Relatórios</h1>
+      <p>Filtre consultas por paciente, dentista, especialidade e período.</p>
     </div>
   </header>
 
@@ -45,7 +45,7 @@
       </div>
 
       <div class="form-group">
-        <label>Usu&aacute;rio respons&aacute;vel</label>
+        <label>Usuário responsável</label>
         <select name="usuarioId" [(ngModel)]="filtros.usuarioId">
           <option [ngValue]="null">Todos</option>
           @for (usuario of usuarios(); track usuario.id) {
@@ -102,15 +102,15 @@
     </header>
 
     @if (carregando()) {
-      <p class="loading">Carregando relat&oacute;rio...</p>
+      <p class="loading">Carregando relatório...</p>
     } @else {
       <table>
         <thead>
           <tr>
             <th>Paciente</th>
             <th>Dentista</th>
-            <th>Descri&ccedil;&atilde;o</th>
-            <th>In&iacute;cio</th>
+            <th>Descrição</th>
+            <th>Início</th>
             <th>Fim</th>
             <th>Status</th>
             <th>Motivo</th>
