@@ -37,6 +37,7 @@ export interface ConsultaFiltros {
   pacienteId?: number | null;
   dentistaId?: number | null;
   especialidadeId?: number | null;
+  usuarioId?: number | null;
   dataInicio?: string | null;
   dataFim?: string | null;
 }

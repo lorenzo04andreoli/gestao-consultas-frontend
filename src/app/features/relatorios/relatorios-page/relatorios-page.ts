@@ -8,6 +8,8 @@ import { EspecialidadeService } from '../../especialidades/especialidade';
 import { EspecialidadeModel } from '../../especialidades/especialidade.model';
 import { PacienteService } from '../../pacientes/paciente';
 import { PacienteModel } from '../../pacientes/paciente.model';
+import { UsuarioService } from '../../usuarios/usuario';
+import { UsuarioResponseModel } from '../../usuarios/usuario.model';
 
 @Component({
   selector: 'app-relatorios-page',
@@ -21,11 +23,13 @@ export class RelatoriosPage implements OnInit {
   private pacienteService = inject(PacienteService);
   private dentistaService = inject(DentistaService);
   private especialidadeService = inject(EspecialidadeService);
+  private usuarioService = inject(UsuarioService);
 
   consultas = signal<ConsultaModel[]>([]);
   pacientes = signal<PacienteModel[]>([]);
   dentistas = signal<DentistaResponseModel[]>([]);
   especialidades = signal<EspecialidadeModel[]>([]);
+  usuarios = signal<UsuarioResponseModel[]>([]);
   carregando = signal(false);
   erro = signal('');
 
@@ -33,6 +37,7 @@ export class RelatoriosPage implements OnInit {
     pacienteId: null,
     dentistaId: null,
     especialidadeId: null,
+    usuarioId: null,
     dataInicio: '',
     dataFim: ''
   };
@@ -62,6 +67,11 @@ export class RelatoriosPage implements OnInit {
       next: (dados) => this.especialidades.set(dados),
       error: () => this.erro.set('Erro ao carregar especialidades.')
     });
+
+    this.usuarioService.listar().subscribe({
+      next: (dados) => this.usuarios.set(dados),
+      error: () => this.erro.set('Erro ao carregar usuarios.')
+    });
   }
 
   limparFiltros() {
@@ -69,6 +79,7 @@ export class RelatoriosPage implements OnInit {
       pacienteId: null,
       dentistaId: null,
       especialidadeId: null,
+      usuarioId: null,
       dataInicio: '',
       dataFim: ''
     };
