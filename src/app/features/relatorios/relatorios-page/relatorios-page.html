@@ -45,6 +45,16 @@
       </div>
 
       <div class="form-group">
+        <label>Usu&aacute;rio respons&aacute;vel</label>
+        <select name="usuarioId" [(ngModel)]="filtros.usuarioId">
+          <option [ngValue]="null">Todos</option>
+          @for (usuario of usuarios(); track usuario.id) {
+            <option [ngValue]="usuario.id">{{ usuario.nome }} - {{ usuario.perfil }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
         <label>Data inicial</label>
         <input type="datetime-local" name="dataInicio" [(ngModel)]="filtros.dataInicio" />
       </div>
