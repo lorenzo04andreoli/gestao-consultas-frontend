@@ -27,7 +27,10 @@ export class AuthService {
 
   private tokenSignal = signal<string | null>(localStorage.getItem('token'));
 
-  isLoggedIn = computed(() => !!this.tokenSignal());
+  isLoggedIn = computed(() => {
+    const token = this.tokenSignal();
+    return !!token && !this.isTokenExpirado();
+  });
   perfil = computed(() => this.getPayload()?.perfil ?? null);
   email = computed(() => this.getPayload()?.sub ?? null);
 
@@ -56,6 +59,14 @@ export class AuthService {
     localStorage.removeItem('token');
     this.tokenSignal.set(null);
     this.router.navigate(['/login']);
+  }
+
+  isTokenExpirado(): boolean {
+    const payload = this.getPayload();
+
+    if (!payload?.exp) return true;
+
+    return payload.exp * 1000 <= Date.now();
   }
 
   isAdmin(): boolean {
