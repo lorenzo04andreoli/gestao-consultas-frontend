@@ -1,36 +1,52 @@
 <main class="login-page">
-  <section class="login-card">
-    <h1>Acessar sistema</h1>
-    <p>Entre para gerenciar consultas odontológicas.</p>
+  <section class="login-panel" aria-label="Acesso ao sistema">
+    <div class="brand">
+      <img src="/dentix-logo.svg" alt="Dentix" />
+    </div>
+
+    <header class="login-header">
+      <h1>Login</h1>
+      <p>Entre com suas credenciais para acessar sua conta.</p>
+    </header>
 
     <form (ngSubmit)="entrar()">
       <div class="form-group">
         <label for="email">E-mail</label>
-        <input
-          id="email"
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          required
-        />
+        <div class="input-wrapper">
+          <input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="seu@email.com"
+            autocomplete="email"
+            [(ngModel)]="email"
+            required
+          />
+          <span aria-hidden="true">@</span>
+        </div>
       </div>
 
       <div class="form-group">
         <label for="senha">Senha</label>
-        <input
-          id="senha"
-          type="password"
-          name="senha"
-          [(ngModel)]="senha"
-          required
-        />
+        <div class="input-wrapper">
+          <input
+            id="senha"
+            type="password"
+            name="senha"
+            placeholder="Digite sua senha"
+            autocomplete="current-password"
+            [(ngModel)]="senha"
+            required
+          />
+          <span aria-hidden="true">*</span>
+        </div>
       </div>
 
       @if (erro) {
         <p class="erro">{{ erro }}</p>
       }
 
-      <button type="submit" [disabled]="carregando">
+      <button class="submit-button" type="submit" [disabled]="carregando">
         {{ carregando ? 'Entrando...' : 'Entrar' }}
       </button>
     </form>
