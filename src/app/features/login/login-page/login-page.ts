@@ -15,6 +15,7 @@ export class LoginPage {
   senha = '';
   erro = '';
   carregando = false;
+  mostrarSenha = false;
 
   constructor(
     private authService: AuthService,
@@ -38,5 +39,9 @@ export class LoginPage {
         this.carregando = false;
       }
     });
+  }
+
+  alternarVisibilidadeSenha() {
+    this.mostrarSenha = !this.mostrarSenha;
   }
 }

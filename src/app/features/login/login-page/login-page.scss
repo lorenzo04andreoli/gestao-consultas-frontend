@@ -82,7 +82,7 @@ form {
 .input-wrapper {
   height: 38px;
   display: grid;
-  grid-template-columns: 32px 1fr;
+  grid-template-columns: 32px 1fr 32px;
   align-items: center;
   border: 1px solid #dbe5ec;
   border-radius: 6px;
@@ -94,11 +94,11 @@ form {
     box-shadow: 0 0 0 4px rgba(13, 178, 247, 0.12);
   }
 
-  span {
+  .field-icon {
     display: grid;
     place-items: center;
     color: #8aa0b7;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     grid-column: 1;
     grid-row: 1;
   }
@@ -117,6 +117,27 @@ form {
     &::placeholder {
       color: #9aaec3;
     }
+  }
+}
+
+.toggle-password {
+  width: 32px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #8aa0b7;
+  cursor: pointer;
+  grid-column: 3;
+  grid-row: 1;
+
+  i {
+    font-size: 0.9rem;
+  }
+
+  &:hover {
+    color: var(--color-primary);
   }
 }
 
