@@ -33,6 +33,7 @@ export class ConsultasPage implements OnInit {
   modoModal: 'cadastro' | 'edicao' = 'cadastro';
   consultaSelecionadaId: number | null = null;
   dentistaFiltroId: number | null = null;
+  private readonly alturaHoraAgenda = 92;
   horarios = Array.from({ length: 13 }, (_, index) => index + 6);
   diasSemana = this.montarSemana(new Date());
 
@@ -280,6 +281,27 @@ export class ConsultasPage implements OnInit {
     const fim = new Date(consulta.dataFim);
 
     return `${this.formatarHoraMinuto(inicio)} - ${this.formatarHoraMinuto(fim)}`;
+  }
+
+  deslocamentoConsulta(consulta: ConsultaModel) {
+    const inicio = new Date(consulta.dataInicio);
+    return (inicio.getMinutes() / 60) * this.alturaHoraAgenda + 4;
+  }
+
+  alturaConsulta(consulta: ConsultaModel) {
+    const inicio = new Date(consulta.dataInicio).getTime();
+    const fim = new Date(consulta.dataFim).getTime();
+    const duracaoMinutos = Math.max((fim - inicio) / 60000, 0);
+
+    return Math.max((duracaoMinutos / 60) * this.alturaHoraAgenda - 8, 42);
+  }
+
+  larguraConsulta(total: number) {
+    return `calc(${100 / total}% - 8px)`;
+  }
+
+  posicaoConsulta(indice: number, total: number) {
+    return `calc(${indice * (100 / total)}% + 4px)`;
   }
 
   formatarData(data: string) {

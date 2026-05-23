@@ -56,11 +56,15 @@
 
         @for (dia of diasSemana; track dia.iso) {
           <div class="schedule-slot">
-            @for (consulta of consultasDoHorario(dia.data, hora); track consulta.id) {
+            @for (consulta of consultasDoHorario(dia.data, hora); track consulta.id; let indice = $index; let total = $count) {
               <article
                 class="appointment"
                 [class.cancelled]="consulta.status === 'CANCELADA'"
                 [class.done]="consulta.status === 'FINALIZADA'"
+                [style.top.px]="deslocamentoConsulta(consulta)"
+                [style.height.px]="alturaConsulta(consulta)"
+                [style.left]="posicaoConsulta(indice, total)"
+                [style.width]="larguraConsulta(total)"
               >
                 <strong>{{ consulta.pacienteNome }}</strong>
                 <span>{{ consulta.dentistaNome }}</span>
