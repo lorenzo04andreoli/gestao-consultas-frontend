@@ -99,6 +99,18 @@ export class ConsultasPage implements OnInit {
     this.modalCadastroAberto.set(true);
   }
 
+  abrirModalHorario(data: Date, hora: number) {
+    const inicio = new Date(data);
+    inicio.setHours(hora, 0, 0, 0);
+
+    const fim = new Date(inicio);
+    fim.setHours(hora + 1);
+
+    this.abrirModalCadastro();
+    this.consultaForm.dataInicio = this.formatarDataParaInputLocal(inicio);
+    this.consultaForm.dataFim = this.formatarDataParaInputLocal(fim);
+  }
+
   abrirModalEdicao(consulta: ConsultaModel) {
     if (!consulta.id) return;
 
@@ -339,6 +351,16 @@ export class ConsultasPage implements OnInit {
 
   private formatarDataParaInput(data: string) {
     return data ? data.slice(0, 16) : '';
+  }
+
+  private formatarDataParaInputLocal(data: Date) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    const hora = String(data.getHours()).padStart(2, '0');
+    const minuto = String(data.getMinutes()).padStart(2, '0');
+
+    return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
   }
 
   private filtrarDentistasPermitidos(dentistas: DentistaResponseModel[]) {
