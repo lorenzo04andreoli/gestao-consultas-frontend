@@ -118,6 +118,12 @@ export class ConsultasPage implements OnInit {
     this.modalCadastroAberto.set(true);
   }
 
+  selecionarConsulta(consulta: ConsultaModel) {
+    if (consulta.status !== 'AGENDADA') return;
+
+    this.abrirModalEdicao(consulta);
+  }
+
   fecharModalCadastro() {
     this.modalCadastroAberto.set(false);
     this.modoModal = 'cadastro';

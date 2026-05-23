@@ -65,6 +65,10 @@
                 [style.height.px]="alturaConsulta(consulta)"
                 [style.left]="posicaoConsulta(indice, total)"
                 [style.width]="larguraConsulta(total)"
+                [attr.tabindex]="consulta.status === 'AGENDADA' ? 0 : null"
+                [attr.role]="consulta.status === 'AGENDADA' ? 'button' : null"
+                (click)="selecionarConsulta(consulta)"
+                (keydown.enter)="selecionarConsulta(consulta)"
               >
                 <strong>{{ consulta.pacienteNome }}</strong>
                 <span>{{ consulta.dentistaNome }}</span>
