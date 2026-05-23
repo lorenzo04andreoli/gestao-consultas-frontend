@@ -32,6 +32,9 @@ export class ConsultasPage implements OnInit {
   modalCancelamentoAberto = signal(false);
   modoModal: 'cadastro' | 'edicao' = 'cadastro';
   consultaSelecionadaId: number | null = null;
+  dentistaFiltroId: number | null = null;
+  horarios = Array.from({ length: 13 }, (_, index) => index + 6);
+  diasSemana = this.montarSemana(new Date());
 
   consultaForm = {
     pacienteId: null as number | null,
@@ -236,6 +239,49 @@ export class ConsultasPage implements OnInit {
     });
   }
 
+  voltarParaHoje() {
+    this.diasSemana = this.montarSemana(new Date());
+  }
+
+  navegarSemana(direcao: -1 | 1) {
+    const referencia = new Date(this.diasSemana[0].data);
+    referencia.setDate(referencia.getDate() + direcao * 7);
+    this.diasSemana = this.montarSemana(referencia);
+  }
+
+  tituloSemana() {
+    const primeiroDia = this.diasSemana[0].data;
+    const ultimoDia = this.diasSemana[this.diasSemana.length - 1].data;
+
+    return `${this.formatarDiaCurto(primeiroDia)} - ${this.formatarDiaCurto(ultimoDia)}`;
+  }
+
+  consultasDoHorario(data: Date, hora: number) {
+    return this.consultas()
+      .filter(consulta => this.consultaPertenceAoHorario(consulta, data, hora))
+      .filter(consulta => !this.dentistaFiltroId || consulta.dentistaId === this.dentistaFiltroId)
+      .sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
+  }
+
+  formatarDiaAgenda(data: Date) {
+    return new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit'
+    }).format(data);
+  }
+
+  formatarHoraAgenda(hora: number) {
+    return `${String(hora).padStart(2, '0')}:00`;
+  }
+
+  formatarIntervalo(consulta: ConsultaModel) {
+    const inicio = new Date(consulta.dataInicio);
+    const fim = new Date(consulta.dataFim);
+
+    return `${this.formatarHoraMinuto(inicio)} - ${this.formatarHoraMinuto(fim)}`;
+  }
+
   formatarData(data: string) {
     if (!data) return '-';
 
@@ -272,5 +318,42 @@ export class ConsultasPage implements OnInit {
 
     const emailUsuario = this.authService.email();
     return dentistas.filter(dentista => dentista.email === emailUsuario);
+  }
+
+  private montarSemana(referencia: Date) {
+    const inicio = new Date(referencia);
+    const diaSemana = inicio.getDay();
+    inicio.setDate(inicio.getDate() - diaSemana);
+    inicio.setHours(0, 0, 0, 0);
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const data = new Date(inicio);
+      data.setDate(inicio.getDate() + index);
+
+      return {
+        data,
+        iso: data.toISOString()
+      };
+    });
+  }
+
+  private consultaPertenceAoHorario(consulta: ConsultaModel, data: Date, hora: number) {
+    const inicio = new Date(consulta.dataInicio);
+
+    return inicio.toDateString() === data.toDateString() && inicio.getHours() === hora;
+  }
+
+  private formatarDiaCurto(data: Date) {
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: 'short'
+    }).format(data);
+  }
+
+  private formatarHoraMinuto(data: Date) {
+    return new Intl.DateTimeFormat('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(data);
   }
 }

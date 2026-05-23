@@ -18,65 +18,60 @@
     <p class="alert success">{{ sucesso() }}</p>
   }
 
-  <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th>Paciente</th>
-          <th>Dentista</th>
-          <th>Descrição</th>
-          <th>Início</th>
-          <th>Fim</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
+  <section class="schedule-card">
+    <header class="schedule-toolbar">
+      <div class="dentist-filter">
+        <label>Profissional</label>
+        <select name="dentistaFiltroId" [(ngModel)]="dentistaFiltroId">
+          <option [ngValue]="null">Todos os dentistas</option>
+          @for (dentista of dentistas(); track dentista.id) {
+            <option [ngValue]="dentista.id">{{ dentista.nome }}</option>
+          }
+        </select>
+      </div>
 
-      <tbody>
-        @for (consulta of consultas(); track consulta.id) {
-          <tr>
-            <td>{{ consulta.pacienteNome }}</td>
-            <td>{{ consulta.dentistaNome }}</td>
-            <td>{{ consulta.descricao }}</td>
-            <td>{{ formatarData(consulta.dataInicio) }}</td>
-            <td>{{ formatarData(consulta.dataFim) }}</td>
-            <td>
-              <span
-                class="status"
+      <div class="week-controls">
+        <button type="button" class="secondary-button compact" (click)="voltarParaHoje()">Hoje</button>
+        <button type="button" class="icon-button" (click)="navegarSemana(-1)" aria-label="Semana anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button type="button" class="icon-button" (click)="navegarSemana(1)" aria-label="Próxima semana">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <strong>{{ tituloSemana() }}</strong>
+      </div>
+    </header>
+
+    <div class="schedule-grid">
+      <div class="time-column header-cell"></div>
+
+      @for (dia of diasSemana; track dia.iso) {
+        <div class="day-header">
+          {{ formatarDiaAgenda(dia.data) }}
+        </div>
+      }
+
+      @for (hora of horarios; track hora) {
+        <div class="time-column">{{ formatarHoraAgenda(hora) }}</div>
+
+        @for (dia of diasSemana; track dia.iso) {
+          <div class="schedule-slot">
+            @for (consulta of consultasDoHorario(dia.data, hora); track consulta.id) {
+              <article
+                class="appointment"
                 [class.cancelled]="consulta.status === 'CANCELADA'"
                 [class.done]="consulta.status === 'FINALIZADA'"
               >
-                {{ consulta.status }}
-              </span>
-            </td>
-            <td>
-              <div class="row-actions">
-                @if (consulta.status === 'AGENDADA') {
-                  <button type="button" class="secondary-button compact" (click)="abrirModalEdicao(consulta)">
-                    Editar
-                  </button>
-
-                  <button type="button" class="secondary-button compact" (click)="finalizarConsulta(consulta)">
-                    Finalizar
-                  </button>
-
-                  <button type="button" class="danger-button compact" (click)="abrirModalCancelamento(consulta)">
-                    Cancelar
-                  </button>
-                } @else {
-                  <span class="muted">Sem ações</span>
-                }
-              </div>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="7" class="empty-state">Nenhuma consulta cadastrada.</td>
-          </tr>
+                <strong>{{ consulta.pacienteNome }}</strong>
+                <span>{{ consulta.dentistaNome }}</span>
+                <small>{{ formatarIntervalo(consulta) }}</small>
+              </article>
+            }
+          </div>
         }
-      </tbody>
-    </table>
-  </div>
+      }
+    </div>
+  </section>
 
   @if (modalCadastroAberto()) {
     <div class="modal-backdrop" (click)="fecharModalCadastro()">
