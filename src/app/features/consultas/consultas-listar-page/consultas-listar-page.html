@@ -10,6 +10,17 @@
     <p class="alert error">{{ erro() }}</p>
   }
 
+  <div class="filters-card">
+    <label for="buscaConsulta">Pesquisar consulta</label>
+    <input
+      id="buscaConsulta"
+      type="search"
+      name="buscaConsulta"
+      placeholder="Paciente, dentista, descrição ou status"
+      [(ngModel)]="termoBusca"
+    />
+  </div>
+
   <section class="table-card">
     <table>
       <thead>
@@ -24,7 +35,7 @@
       </thead>
 
       <tbody>
-        @for (consulta of consultas(); track consulta.id) {
+        @for (consulta of consultasFiltradas(); track consulta.id) {
           <tr>
             <td>{{ consulta.pacienteNome }}</td>
             <td>{{ consulta.dentistaNome }}</td>
@@ -43,7 +54,7 @@
           </tr>
         } @empty {
           <tr>
-            <td colspan="6" class="empty-state">Nenhuma consulta cadastrada.</td>
+            <td colspan="6" class="empty-state">Nenhuma consulta encontrada.</td>
           </tr>
         }
       </tbody>
