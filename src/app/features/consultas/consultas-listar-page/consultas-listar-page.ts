@@ -16,6 +16,7 @@ export class ConsultasListarPage implements OnInit {
 
   consultas = signal<ConsultaModel[]>([]);
   erro = signal('');
+  sucesso = signal('');
   termoBusca = '';
   statusFiltro: StatusConsulta | '' = '';
   dataInicioFiltro = '';
@@ -30,6 +31,40 @@ export class ConsultasListarPage implements OnInit {
 
     this.consultaService.listar().subscribe({
       next: dados => this.consultas.set(dados),
+      error: err => this.erro.set(this.extrairMensagemErro(err))
+    });
+  }
+
+  finalizarConsulta(consulta: ConsultaModel) {
+    if (!consulta.id || !confirm('Deseja finalizar esta consulta?')) return;
+
+    this.erro.set('');
+    this.sucesso.set('');
+
+    this.consultaService.finalizar(consulta.id).subscribe({
+      next: () => {
+        this.sucesso.set('Consulta finalizada com sucesso.');
+        this.carregarConsultas();
+      },
+      error: err => this.erro.set(this.extrairMensagemErro(err))
+    });
+  }
+
+  cancelarConsulta(consulta: ConsultaModel) {
+    if (!consulta.id) return;
+
+    const motivo = prompt('Informe o motivo do cancelamento:')?.trim();
+
+    if (!motivo) return;
+
+    this.erro.set('');
+    this.sucesso.set('');
+
+    this.consultaService.cancelar(consulta.id, motivo).subscribe({
+      next: () => {
+        this.sucesso.set('Consulta cancelada com sucesso.');
+        this.carregarConsultas();
+      },
       error: err => this.erro.set(this.extrairMensagemErro(err))
     });
   }

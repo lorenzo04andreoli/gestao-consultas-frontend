@@ -27,6 +27,11 @@
   color: #a10000;
 }
 
+.success {
+  background: #e7ffe7;
+  color: #126b12;
+}
+
 .filters-card {
   display: flex;
   align-items: end;
@@ -123,6 +128,31 @@ table {
     background: #dcfce7;
     color: #166534;
   }
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.action-button {
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: #e5e7eb;
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  font-weight: 700;
+
+  &.danger {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.muted {
+  color: var(--color-muted);
 }
 
 .empty-state {
