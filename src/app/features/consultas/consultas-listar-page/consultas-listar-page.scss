@@ -1,0 +1,15 @@
+.page {
+  padding: 24px;
+}
+
+.page-header {
+  h1 {
+    margin: 0;
+    color: var(--color-primary-dark);
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--color-muted);
+  }
+}

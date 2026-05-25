@@ -38,6 +38,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'consultas/listar',
+        loadComponent: () =>
+          import('./features/consultas/consultas-listar-page/consultas-listar-page').then(
+            m => m.ConsultasListarPage
+          )
+      },
+      {
         path: 'consultas',
         loadComponent: () =>
           import('./features/consultas/consultas-page/consultas-page').then(m => m.ConsultasPage)
