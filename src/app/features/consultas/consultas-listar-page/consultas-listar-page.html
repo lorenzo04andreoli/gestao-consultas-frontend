@@ -11,14 +11,40 @@
   }
 
   <div class="filters-card">
-    <label for="buscaConsulta">Pesquisar consulta</label>
-    <input
-      id="buscaConsulta"
-      type="search"
-      name="buscaConsulta"
-      placeholder="Paciente, dentista, descrição ou status"
-      [(ngModel)]="termoBusca"
-    />
+    <div class="form-field">
+      <label for="buscaConsulta">Pesquisar consulta</label>
+      <input
+        id="buscaConsulta"
+        type="search"
+        name="buscaConsulta"
+        placeholder="Paciente, dentista, descrição ou status"
+        [(ngModel)]="termoBusca"
+      />
+    </div>
+
+    <div class="form-field">
+      <label for="statusConsulta">Status</label>
+      <select id="statusConsulta" name="statusConsulta" [(ngModel)]="statusFiltro">
+        <option value="">Todos</option>
+        <option value="AGENDADA">Agendada</option>
+        <option value="FINALIZADA">Finalizada</option>
+        <option value="CANCELADA">Cancelada</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label for="dataInicioFiltro">Data inicial</label>
+      <input id="dataInicioFiltro" type="date" name="dataInicioFiltro" [(ngModel)]="dataInicioFiltro" />
+    </div>
+
+    <div class="form-field">
+      <label for="dataFimFiltro">Data final</label>
+      <input id="dataFimFiltro" type="date" name="dataFimFiltro" [(ngModel)]="dataFimFiltro" />
+    </div>
+
+    <button type="button" class="secondary-button" (click)="limparFiltros()">
+      Limpar
+    </button>
   </div>
 
   <section class="table-card">
