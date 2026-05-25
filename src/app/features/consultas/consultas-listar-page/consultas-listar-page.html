@@ -5,4 +5,48 @@
       <p>Consulte e filtre os agendamentos cadastrados.</p>
     </div>
   </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  <section class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Paciente</th>
+          <th>Dentista</th>
+          <th>Descrição</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (consulta of consultas(); track consulta.id) {
+          <tr>
+            <td>{{ consulta.pacienteNome }}</td>
+            <td>{{ consulta.dentistaNome }}</td>
+            <td>{{ consulta.descricao }}</td>
+            <td>{{ formatarData(consulta.dataInicio) }}</td>
+            <td>{{ formatarData(consulta.dataFim) }}</td>
+            <td>
+              <span
+                class="status"
+                [class.cancelled]="consulta.status === 'CANCELADA'"
+                [class.done]="consulta.status === 'FINALIZADA'"
+              >
+                {{ consulta.status }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty-state">Nenhuma consulta cadastrada.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
 </section>
