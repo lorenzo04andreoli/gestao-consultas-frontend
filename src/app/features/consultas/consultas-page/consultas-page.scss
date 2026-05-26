@@ -287,6 +287,11 @@
   }
 }
 
+.modal-summary {
+  font-weight: 600;
+  color: var(--color-primary-dark) !important;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

@@ -50,6 +50,7 @@ export class ConsultasPage implements OnInit {
   };
 
   consultaCancelamentoId: number | null = null;
+  consultaCancelamento: ConsultaModel | null = null;
   motivoCancelamento = '';
 
   ngOnInit() {
@@ -237,7 +238,10 @@ export class ConsultasPage implements OnInit {
   abrirModalCancelamento(consulta: ConsultaModel) {
     if (!consulta.id) return;
 
+    this.erro.set('');
+    this.sucesso.set('');
     this.consultaCancelamentoId = consulta.id;
+    this.consultaCancelamento = consulta;
     this.motivoCancelamento = '';
     this.modalCancelamentoAberto.set(true);
   }
@@ -261,6 +265,7 @@ export class ConsultasPage implements OnInit {
   fecharModalCancelamento() {
     this.modalCancelamentoAberto.set(false);
     this.consultaCancelamentoId = null;
+    this.consultaCancelamento = null;
     this.motivoCancelamento = '';
   }
 
@@ -389,6 +394,7 @@ export class ConsultasPage implements OnInit {
 
   consultasDoHorario(data: Date, hora: number) {
     return this.consultas()
+      .filter(consulta => consulta.status !== 'CANCELADA')
       .filter(consulta => this.consultaPertenceAoHorario(consulta, data, hora))
       .filter(consulta => !this.dentistaFiltroId || consulta.dentistaId === this.dentistaFiltroId)
       .sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
@@ -451,6 +457,10 @@ export class ConsultasPage implements OnInit {
 
   resumoConsulta(consulta: ConsultaModel) {
     return `${consulta.pacienteNome} | ${consulta.dentistaNome} | ${this.formatarIntervalo(consulta)}`;
+  }
+
+  resumoConsultaCancelamento() {
+    return this.consultaCancelamento ? this.resumoConsulta(this.consultaCancelamento) : '';
   }
 
   larguraConsulta(total: number) {

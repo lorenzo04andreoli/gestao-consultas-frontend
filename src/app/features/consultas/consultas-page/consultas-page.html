@@ -217,6 +217,9 @@
           <div>
             <h2>Cancelar consulta</h2>
             <p>O motivo é obrigatório para cancelar uma consulta.</p>
+            @if (resumoConsultaCancelamento()) {
+              <p class="modal-summary">{{ resumoConsultaCancelamento() }}</p>
+            }
           </div>
 
           <button type="button" class="close-button" (click)="fecharModalCancelamento()">
