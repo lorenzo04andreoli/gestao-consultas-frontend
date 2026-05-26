@@ -88,7 +88,7 @@
                   <button type="button" class="action-button" (click)="finalizarConsulta(consulta)">
                     Finalizar
                   </button>
-                  <button type="button" class="action-button danger" (click)="cancelarConsulta(consulta)">
+                  <button type="button" class="action-button danger" (click)="abrirModalCancelamento(consulta)">
                     Cancelar
                   </button>
                 </div>
@@ -105,4 +105,42 @@
       </tbody>
     </table>
   </section>
+
+  @if (modalCancelamentoAberto()) {
+    <div class="modal-backdrop" (click)="fecharModalCancelamento()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>Cancelar consulta</h2>
+            <p>Informe o motivo para registrar o cancelamento.</p>
+          </div>
+
+          <button type="button" class="close-button" (click)="fecharModalCancelamento()">
+            &times;
+          </button>
+        </header>
+
+        <form (ngSubmit)="cancelarConsulta()">
+          <div class="form-field full-width">
+            <label for="motivoCancelamento">Motivo</label>
+            <textarea
+              id="motivoCancelamento"
+              name="motivoCancelamento"
+              [(ngModel)]="motivoCancelamento"
+              required
+            ></textarea>
+          </div>
+
+          <footer class="modal-actions">
+            <button type="button" class="secondary-button" (click)="fecharModalCancelamento()">
+              Voltar
+            </button>
+            <button type="submit" class="action-button danger">
+              Cancelar consulta
+            </button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
 </section>

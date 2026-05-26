@@ -17,10 +17,13 @@ export class ConsultasListarPage implements OnInit {
   consultas = signal<ConsultaModel[]>([]);
   erro = signal('');
   sucesso = signal('');
+  modalCancelamentoAberto = signal(false);
   termoBusca = '';
   statusFiltro: StatusConsulta | '' = '';
   dataInicioFiltro = '';
   dataFimFiltro = '';
+  consultaCancelamentoId: number | null = null;
+  motivoCancelamento = '';
 
   ngOnInit() {
     this.carregarConsultas();
@@ -50,19 +53,37 @@ export class ConsultasListarPage implements OnInit {
     });
   }
 
-  cancelarConsulta(consulta: ConsultaModel) {
+  abrirModalCancelamento(consulta: ConsultaModel) {
     if (!consulta.id) return;
 
-    const motivo = prompt('Informe o motivo do cancelamento:')?.trim();
+    this.consultaCancelamentoId = consulta.id;
+    this.motivoCancelamento = '';
+    this.modalCancelamentoAberto.set(true);
+  }
 
-    if (!motivo) return;
+  fecharModalCancelamento() {
+    this.modalCancelamentoAberto.set(false);
+    this.consultaCancelamentoId = null;
+    this.motivoCancelamento = '';
+  }
+
+  cancelarConsulta() {
+    const motivo = this.motivoCancelamento.trim();
+
+    if (!this.consultaCancelamentoId) return;
+
+    if (!motivo) {
+      this.erro.set('Informe o motivo do cancelamento.');
+      return;
+    }
 
     this.erro.set('');
     this.sucesso.set('');
 
-    this.consultaService.cancelar(consulta.id, motivo).subscribe({
+    this.consultaService.cancelar(this.consultaCancelamentoId, motivo).subscribe({
       next: () => {
         this.sucesso.set('Consulta cancelada com sucesso.');
+        this.fecharModalCancelamento();
         this.carregarConsultas();
       },
       error: err => this.erro.set(this.extrairMensagemErro(err))
