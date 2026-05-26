@@ -139,6 +139,8 @@
   background: var(--color-primary);
   color: #fff;
   box-shadow: 0 6px 14px rgba(13, 178, 247, 0.2);
+  line-height: 1.15;
+  overflow: hidden;
 
   strong,
   span,
@@ -162,6 +164,20 @@
   &.done {
     background: var(--color-success);
     box-shadow: none;
+  }
+
+  &.compact {
+    gap: 2px;
+    padding: 6px 8px;
+  }
+
+  &.tiny {
+    gap: 1px;
+    padding: 4px 8px;
+
+    strong {
+      line-height: 1.1;
+    }
   }
 }
 

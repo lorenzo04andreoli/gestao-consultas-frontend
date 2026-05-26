@@ -41,8 +41,9 @@ export class ConsultasPage implements OnInit {
     pacienteId: null as number | null,
     dentistaId: null as number | null,
     descricao: '',
-    dataInicio: '',
-    dataFim: ''
+    dataConsulta: '',
+    horarioInicio: '',
+    duracaoMinutos: 60
   };
 
   consultaCancelamentoId: number | null = null;
@@ -103,12 +104,9 @@ export class ConsultasPage implements OnInit {
     const inicio = new Date(data);
     inicio.setHours(hora, 0, 0, 0);
 
-    const fim = new Date(inicio);
-    fim.setHours(hora + 1);
-
     this.abrirModalCadastro();
-    this.consultaForm.dataInicio = this.formatarDataParaInputLocal(inicio);
-    this.consultaForm.dataFim = this.formatarDataParaInputLocal(fim);
+    this.consultaForm.dataConsulta = this.formatarDataParaInputLocal(inicio).slice(0, 10);
+    this.consultaForm.horarioInicio = this.formatarDataParaInputLocal(inicio).slice(11, 16);
   }
 
   abrirModalEdicao(consulta: ConsultaModel) {
@@ -119,12 +117,16 @@ export class ConsultasPage implements OnInit {
     this.carregarPacientes();
     this.carregarDentistas();
 
+    const inicio = new Date(consulta.dataInicio);
+    const fim = new Date(consulta.dataFim);
+
     this.consultaForm = {
       pacienteId: consulta.pacienteId,
       dentistaId: consulta.dentistaId,
       descricao: consulta.descricao,
-      dataInicio: this.formatarDataParaInput(consulta.dataInicio),
-      dataFim: this.formatarDataParaInput(consulta.dataFim)
+      dataConsulta: this.formatarDataParaInput(consulta.dataInicio).slice(0, 10),
+      horarioInicio: this.formatarDataParaInput(consulta.dataInicio).slice(11, 16),
+      duracaoMinutos: Math.max((fim.getTime() - inicio.getTime()) / 60000, 15)
     };
 
     this.modalCadastroAberto.set(true);
@@ -166,8 +168,13 @@ export class ConsultasPage implements OnInit {
       return;
     }
 
-    if (!this.consultaForm.dataInicio || !this.consultaForm.dataFim) {
-      this.erro.set('Informe data e hora inicial e final.');
+    if (!this.consultaForm.dataConsulta || !this.consultaForm.horarioInicio) {
+      this.erro.set('Informe data e horário inicial.');
+      return;
+    }
+
+    if (!this.consultaForm.duracaoMinutos || this.consultaForm.duracaoMinutos < 15) {
+      this.erro.set('Informe uma duração de pelo menos 15 minutos.');
       return;
     }
 
@@ -176,17 +183,15 @@ export class ConsultasPage implements OnInit {
       return;
     }
 
-    if (new Date(this.consultaForm.dataFim) <= new Date(this.consultaForm.dataInicio)) {
-      this.erro.set('A data final deve ser após a data inicial.');
-      return;
-    }
+
+    const { dataInicio, dataFim } = this.montarPeriodoConsulta();
 
     const payload: ConsultaRequestModel = {
       pacienteId: this.consultaForm.pacienteId,
       dentistaId: this.consultaForm.dentistaId,
       descricao: this.consultaForm.descricao.trim(),
-      dataInicio: this.consultaForm.dataInicio,
-      dataFim: this.consultaForm.dataFim
+      dataInicio,
+      dataFim
     };
 
     const request$ = this.modoModal === 'edicao' && this.consultaSelecionadaId
@@ -307,11 +312,28 @@ export class ConsultasPage implements OnInit {
   }
 
   alturaConsulta(consulta: ConsultaModel) {
-    const inicio = new Date(consulta.dataInicio).getTime();
-    const fim = new Date(consulta.dataFim).getTime();
-    const duracaoMinutos = Math.max((fim - inicio) / 60000, 0);
+    const duracaoMinutos = this.duracaoConsultaMinutos(consulta);
 
     return Math.max((duracaoMinutos / 60) * this.alturaHoraAgenda - 8, 42);
+  }
+
+  duracaoConsultaMinutos(consulta: ConsultaModel) {
+    const inicio = new Date(consulta.dataInicio).getTime();
+    const fim = new Date(consulta.dataFim).getTime();
+
+    return Math.max((fim - inicio) / 60000, 0);
+  }
+
+  consultaCompacta(consulta: ConsultaModel) {
+    return this.duracaoConsultaMinutos(consulta) < 60;
+  }
+
+  consultaMuitoCurta(consulta: ConsultaModel) {
+    return this.duracaoConsultaMinutos(consulta) <= 30;
+  }
+
+  resumoConsulta(consulta: ConsultaModel) {
+    return `${consulta.pacienteNome} | ${consulta.dentistaNome} | ${this.formatarIntervalo(consulta)}`;
   }
 
   larguraConsulta(total: number) {
@@ -336,8 +358,9 @@ export class ConsultasPage implements OnInit {
       pacienteId: null,
       dentistaId: null,
       descricao: '',
-      dataInicio: '',
-      dataFim: ''
+      dataConsulta: '',
+      horarioInicio: '',
+      duracaoMinutos: 60
     };
   }
 
@@ -361,6 +384,17 @@ export class ConsultasPage implements OnInit {
     const minuto = String(data.getMinutes()).padStart(2, '0');
 
     return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+  }
+
+  private montarPeriodoConsulta() {
+    const dataInicio = `${this.consultaForm.dataConsulta}T${this.consultaForm.horarioInicio}`;
+    const fim = new Date(dataInicio);
+    fim.setMinutes(fim.getMinutes() + Number(this.consultaForm.duracaoMinutos));
+
+    return {
+      dataInicio,
+      dataFim: this.formatarDataParaInputLocal(fim)
+    };
   }
 
   private filtrarDentistasPermitidos(dentistas: DentistaResponseModel[]) {

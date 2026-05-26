@@ -59,6 +59,8 @@
             @for (consulta of consultasDoHorario(dia.data, hora); track consulta.id; let indice = $index; let total = $count) {
               <article
                 class="appointment"
+                [class.compact]="consultaCompacta(consulta)"
+                [class.tiny]="consultaMuitoCurta(consulta)"
                 [class.cancelled]="consulta.status === 'CANCELADA'"
                 [class.done]="consulta.status === 'FINALIZADA'"
                 [style.top.px]="deslocamentoConsulta(consulta)"
@@ -67,12 +69,15 @@
                 [style.width]="larguraConsulta(total)"
                 [attr.tabindex]="consulta.status === 'AGENDADA' ? 0 : null"
                 [attr.role]="consulta.status === 'AGENDADA' ? 'button' : null"
+                [title]="resumoConsulta(consulta)"
                 (click)="$event.stopPropagation(); selecionarConsulta(consulta)"
                 (keydown.enter)="$event.stopPropagation(); selecionarConsulta(consulta)"
               >
                 <strong>{{ consulta.pacienteNome }}</strong>
-                <span>{{ consulta.dentistaNome }}</span>
                 <small>{{ formatarIntervalo(consulta) }}</small>
+                @if (!consultaCompacta(consulta)) {
+                  <span>{{ consulta.dentistaNome }}</span>
+                }
               </article>
             }
           </div>
@@ -126,13 +131,25 @@
             </div>
 
             <div class="form-group">
-              <label>Data e hora inicial</label>
-              <input type="datetime-local" name="dataInicio" [(ngModel)]="consultaForm.dataInicio" required />
+              <label>Data da consulta</label>
+              <input type="date" name="dataConsulta" [(ngModel)]="consultaForm.dataConsulta" required />
             </div>
 
             <div class="form-group">
-              <label>Data e hora final</label>
-              <input type="datetime-local" name="dataFim" [(ngModel)]="consultaForm.dataFim" required />
+              <label>Horário de início</label>
+              <input type="time" name="horarioInicio" [(ngModel)]="consultaForm.horarioInicio" required />
+            </div>
+
+            <div class="form-group">
+              <label>Duração da consulta (min)</label>
+              <input
+                type="number"
+                name="duracaoMinutos"
+                min="15"
+                step="15"
+                [(ngModel)]="consultaForm.duracaoMinutos"
+                required
+              />
             </div>
 
             <div class="form-group full-width">
