@@ -55,7 +55,12 @@
         <div class="time-column">{{ formatarHoraAgenda(hora) }}</div>
 
         @for (dia of diasSemana; track dia.iso) {
-          <div class="schedule-slot" (click)="abrirModalHorario(dia.data, hora)">
+          <div
+            class="schedule-slot"
+            (click)="abrirModalHorario(dia.data, hora)"
+            (dragover)="permitirSoltarConsulta($event)"
+            (drop)="soltarConsulta($event, dia.data, hora)"
+          >
             @for (consulta of consultasDoHorario(dia.data, hora); track consulta.id; let indice = $index; let total = $count) {
               <article
                 class="appointment"
@@ -69,7 +74,10 @@
                 [style.width]="larguraConsulta(total)"
                 [attr.tabindex]="consulta.status === 'AGENDADA' ? 0 : null"
                 [attr.role]="consulta.status === 'AGENDADA' ? 'button' : null"
+                [attr.draggable]="consulta.status === 'AGENDADA' ? true : null"
                 [title]="resumoConsulta(consulta)"
+                (dragstart)="iniciarArrasteConsulta($event, consulta)"
+                (dragend)="finalizarArrasteConsulta()"
                 (click)="$event.stopPropagation(); selecionarConsulta(consulta)"
                 (keydown.enter)="$event.stopPropagation(); selecionarConsulta(consulta)"
               >

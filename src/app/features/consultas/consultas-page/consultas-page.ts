@@ -33,6 +33,7 @@ export class ConsultasPage implements OnInit {
   modoModal: 'cadastro' | 'edicao' = 'cadastro';
   consultaSelecionadaId: number | null = null;
   dentistaFiltroId: number | null = null;
+  consultaArrastada: ConsultaModel | null = null;
   private readonly alturaHoraAgenda = 92;
   horarios = Array.from({ length: 13 }, (_, index) => index + 6);
   diasSemana = this.montarSemana(new Date());
@@ -136,6 +137,34 @@ export class ConsultasPage implements OnInit {
     if (consulta.status !== 'AGENDADA') return;
 
     this.abrirModalEdicao(consulta);
+  }
+
+  iniciarArrasteConsulta(event: DragEvent, consulta: ConsultaModel) {
+    if (consulta.status !== 'AGENDADA') {
+      event.preventDefault();
+      return;
+    }
+
+    this.consultaArrastada = consulta;
+    event.dataTransfer?.setData('text/plain', String(consulta.id ?? ''));
+    event.dataTransfer?.setDragImage(event.target as Element, 12, 12);
+  }
+
+  finalizarArrasteConsulta() {
+    this.consultaArrastada = null;
+  }
+
+  permitirSoltarConsulta(event: DragEvent) {
+    if (!this.consultaArrastada) return;
+
+    event.preventDefault();
+  }
+
+  soltarConsulta(event: DragEvent, data: Date, hora: number) {
+    if (!this.consultaArrastada) return;
+
+    event.preventDefault();
+    this.finalizarArrasteConsulta();
   }
 
   fecharModalCadastro() {
