@@ -57,8 +57,10 @@
         @for (dia of diasSemana; track dia.iso) {
           <div
             class="schedule-slot"
+            [class.drop-target]="slotEstaAtivo(dia.data, hora)"
             (click)="abrirModalHorario(dia.data, hora)"
-            (dragover)="permitirSoltarConsulta($event)"
+            (dragover)="permitirSoltarConsulta($event, dia.data, hora)"
+            (dragleave)="sairSlotArraste(dia.data, hora)"
             (drop)="soltarConsulta($event, dia.data, hora)"
           >
             @for (consulta of consultasDoHorario(dia.data, hora); track consulta.id; let indice = $index; let total = $count) {
@@ -66,6 +68,7 @@
                 class="appointment"
                 [class.compact]="consultaCompacta(consulta)"
                 [class.tiny]="consultaMuitoCurta(consulta)"
+                [class.dragging]="consultaEstaArrastando(consulta)"
                 [class.cancelled]="consulta.status === 'CANCELADA'"
                 [class.done]="consulta.status === 'FINALIZADA'"
                 [style.top.px]="deslocamentoConsulta(consulta)"

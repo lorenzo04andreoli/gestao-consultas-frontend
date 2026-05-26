@@ -35,6 +35,7 @@ export class ConsultasPage implements OnInit {
   consultaSelecionadaId: number | null = null;
   dentistaFiltroId: number | null = null;
   consultaArrastada: ConsultaModel | null = null;
+  slotArrasteAtivo: string | null = null;
   private readonly alturaHoraAgenda = 92;
   horarios = Array.from({ length: 13 }, (_, index) => index + 6);
   diasSemana = this.montarSemana(new Date());
@@ -155,12 +156,14 @@ export class ConsultasPage implements OnInit {
 
   finalizarArrasteConsulta() {
     this.consultaArrastada = null;
+    this.slotArrasteAtivo = null;
   }
 
-  permitirSoltarConsulta(event: DragEvent) {
+  permitirSoltarConsulta(event: DragEvent, data: Date, hora: number) {
     if (!this.consultaArrastada) return;
 
     event.preventDefault();
+    this.slotArrasteAtivo = this.chaveSlotAgenda(data, hora);
   }
 
   soltarConsulta(event: DragEvent, data: Date, hora: number) {
@@ -170,6 +173,20 @@ export class ConsultasPage implements OnInit {
     const consulta = this.consultaArrastada;
     this.finalizarArrasteConsulta();
     this.abrirModalReagendamento(consulta, data, hora);
+  }
+
+  sairSlotArraste(data: Date, hora: number) {
+    if (this.slotArrasteAtivo === this.chaveSlotAgenda(data, hora)) {
+      this.slotArrasteAtivo = null;
+    }
+  }
+
+  slotEstaAtivo(data: Date, hora: number) {
+    return this.slotArrasteAtivo === this.chaveSlotAgenda(data, hora);
+  }
+
+  consultaEstaArrastando(consulta: ConsultaModel) {
+    return !!consulta.id && this.consultaArrastada?.id === consulta.id;
   }
 
   abrirModalReagendamento(consulta: ConsultaModel, data: Date, hora: number) {
@@ -456,6 +473,10 @@ export class ConsultasPage implements OnInit {
       dataInicio,
       dataFim: this.formatarDataParaInputLocal(fim)
     };
+  }
+
+  private chaveSlotAgenda(data: Date, hora: number) {
+    return `${this.formatarDataParaInputLocal(data).slice(0, 10)}-${hora}`;
   }
 
   private filtrarDentistasPermitidos(dentistas: DentistaResponseModel[]) {
