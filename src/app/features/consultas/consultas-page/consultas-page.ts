@@ -143,8 +143,12 @@ export class ConsultasPage implements OnInit {
     this.abrirModalEdicao(consulta);
   }
 
+  podeMoverConsulta(consulta: ConsultaModel) {
+    return consulta.status === 'AGENDADA';
+  }
+
   iniciarArrasteConsulta(event: DragEvent, consulta: ConsultaModel) {
-    if (consulta.status !== 'AGENDADA') {
+    if (!this.podeMoverConsulta(consulta)) {
       event.preventDefault();
       return;
     }
@@ -172,6 +176,9 @@ export class ConsultasPage implements OnInit {
     event.preventDefault();
     const consulta = this.consultaArrastada;
     this.finalizarArrasteConsulta();
+
+    if (this.consultaEstaNoSlot(consulta, data, hora)) return;
+
     this.abrirModalReagendamento(consulta, data, hora);
   }
 
@@ -187,6 +194,12 @@ export class ConsultasPage implements OnInit {
 
   consultaEstaArrastando(consulta: ConsultaModel) {
     return !!consulta.id && this.consultaArrastada?.id === consulta.id;
+  }
+
+  private consultaEstaNoSlot(consulta: ConsultaModel, data: Date, hora: number) {
+    const inicio = new Date(consulta.dataInicio);
+
+    return inicio.toDateString() === data.toDateString() && inicio.getHours() === hora;
   }
 
   abrirModalReagendamento(consulta: ConsultaModel, data: Date, hora: number) {
