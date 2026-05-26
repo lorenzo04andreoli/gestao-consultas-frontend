@@ -31,6 +31,7 @@ export class ConsultasPage implements OnInit {
   modalCadastroAberto = signal(false);
   modalCancelamentoAberto = signal(false);
   modoModal: 'cadastro' | 'edicao' = 'cadastro';
+  confirmandoReagendamento = false;
   consultaSelecionadaId: number | null = null;
   dentistaFiltroId: number | null = null;
   consultaArrastada: ConsultaModel | null = null;
@@ -94,6 +95,7 @@ export class ConsultasPage implements OnInit {
 
   abrirModalCadastro() {
     this.modoModal = 'cadastro';
+    this.confirmandoReagendamento = false;
     this.consultaSelecionadaId = null;
     this.carregarPacientes();
     this.carregarDentistas();
@@ -114,6 +116,7 @@ export class ConsultasPage implements OnInit {
     if (!consulta.id) return;
 
     this.modoModal = 'edicao';
+    this.confirmandoReagendamento = false;
     this.consultaSelecionadaId = consulta.id;
     this.carregarPacientes();
     this.carregarDentistas();
@@ -164,12 +167,39 @@ export class ConsultasPage implements OnInit {
     if (!this.consultaArrastada) return;
 
     event.preventDefault();
+    const consulta = this.consultaArrastada;
     this.finalizarArrasteConsulta();
+    this.abrirModalReagendamento(consulta, data, hora);
+  }
+
+  abrirModalReagendamento(consulta: ConsultaModel, data: Date, hora: number) {
+    if (!consulta.id) return;
+
+    this.modoModal = 'edicao';
+    this.confirmandoReagendamento = true;
+    this.consultaSelecionadaId = consulta.id;
+    this.carregarPacientes();
+    this.carregarDentistas();
+
+    const novoInicio = new Date(data);
+    novoInicio.setHours(hora, 0, 0, 0);
+
+    this.consultaForm = {
+      pacienteId: consulta.pacienteId,
+      dentistaId: consulta.dentistaId,
+      descricao: consulta.descricao,
+      dataConsulta: this.formatarDataParaInputLocal(novoInicio).slice(0, 10),
+      horarioInicio: this.formatarDataParaInputLocal(novoInicio).slice(11, 16),
+      duracaoMinutos: Math.max(this.duracaoConsultaMinutos(consulta), 15)
+    };
+
+    this.modalCadastroAberto.set(true);
   }
 
   fecharModalCadastro() {
     this.modalCadastroAberto.set(false);
     this.modoModal = 'cadastro';
+    this.confirmandoReagendamento = false;
     this.consultaSelecionadaId = null;
     this.limparFormulario();
   }
@@ -230,7 +260,9 @@ export class ConsultasPage implements OnInit {
     request$.subscribe({
       next: () => {
         this.sucesso.set(
-          this.modoModal === 'edicao'
+          this.confirmandoReagendamento
+            ? 'Consulta reagendada com sucesso.'
+            : this.modoModal === 'edicao'
             ? 'Consulta atualizada com sucesso.'
             : 'Consulta agendada com sucesso.'
         );

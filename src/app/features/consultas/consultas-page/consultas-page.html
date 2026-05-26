@@ -99,8 +99,22 @@
       <section class="modal" (click)="$event.stopPropagation()">
         <header class="modal-header">
           <div>
-            <h2>{{ modoModal === 'edicao' ? 'Editar consulta' : 'Agendar consulta' }}</h2>
-            <p>Selecione paciente, dentista e horário da consulta.</p>
+            <h2>
+              {{
+                confirmandoReagendamento
+                  ? 'Confirmar novo horário'
+                  : modoModal === 'edicao'
+                    ? 'Editar consulta'
+                    : 'Agendar consulta'
+              }}
+            </h2>
+            <p>
+              {{
+                confirmandoReagendamento
+                  ? 'Confira os dados antes de salvar a alteração.'
+                  : 'Selecione paciente, dentista e horário da consulta.'
+              }}
+            </p>
           </div>
 
           <button type="button" class="close-button" (click)="fecharModalCadastro()">
