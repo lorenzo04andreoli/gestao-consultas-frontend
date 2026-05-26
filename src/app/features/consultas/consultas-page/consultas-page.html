@@ -183,7 +183,18 @@
             </div>
           </div>
 
-          <footer class="modal-actions end">
+          <footer class="modal-actions" [class.end]="!podeExibirAcoesModal()">
+            @if (podeExibirAcoesModal()) {
+              <div class="left-actions">
+                <button type="button" class="secondary-button" (click)="finalizarConsultaSelecionada()">
+                  Finalizar
+                </button>
+                <button type="button" class="danger-button" (click)="cancelarConsultaSelecionada()">
+                  Cancelar consulta
+                </button>
+              </div>
+            }
+
             <div class="right-actions">
               <button type="button" class="secondary-button" (click)="fecharModalCadastro()">
                 Cancelar

@@ -242,6 +242,22 @@ export class ConsultasPage implements OnInit {
     this.modalCancelamentoAberto.set(true);
   }
 
+  cancelarConsultaSelecionada() {
+    const consulta = this.consultaEmEdicao();
+    if (!consulta) return;
+
+    this.fecharModalCadastro();
+    this.abrirModalCancelamento(consulta);
+  }
+
+  finalizarConsultaSelecionada() {
+    const consulta = this.consultaEmEdicao();
+    if (!consulta) return;
+
+    this.fecharModalCadastro();
+    this.finalizarConsulta(consulta);
+  }
+
   fecharModalCancelamento() {
     this.modalCancelamentoAberto.set(false);
     this.consultaCancelamentoId = null;
@@ -421,6 +437,16 @@ export class ConsultasPage implements OnInit {
 
   consultaMuitoCurta(consulta: ConsultaModel) {
     return this.duracaoConsultaMinutos(consulta) <= 30;
+  }
+
+  podeExibirAcoesModal() {
+    return !!this.consultaEmEdicao() && this.modoModal === 'edicao';
+  }
+
+  consultaEmEdicao() {
+    if (!this.consultaSelecionadaId) return null;
+
+    return this.consultas().find(consulta => consulta.id === this.consultaSelecionadaId) ?? null;
   }
 
   resumoConsulta(consulta: ConsultaModel) {
