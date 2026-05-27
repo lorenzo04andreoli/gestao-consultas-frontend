@@ -19,6 +19,7 @@ export class PacientesPage implements OnInit {
 
   modalAberto = signal(false);
   modoModal: 'cadastro' | 'edicao' = 'cadastro';
+  termoBusca = '';
 
   pacienteForm: PacienteModel = {
     nome: '',
@@ -154,5 +155,30 @@ export class PacientesPage implements OnInit {
       cpf: '',
       telefone: ''
     };
+  }
+
+  pacientesFiltrados() {
+    const termo = this.normalizarTexto(this.termoBusca);
+
+    if (!termo) return this.pacientes();
+
+    return this.pacientes().filter(paciente => this.pacienteContemTermo(paciente, termo));
+  }
+
+  limparBusca() {
+    this.termoBusca = '';
+  }
+
+  private pacienteContemTermo(paciente: PacienteModel, termo: string) {
+    return [paciente.nome, paciente.email, paciente.cpf, paciente.telefone]
+      .filter(Boolean)
+      .some(valor => this.normalizarTexto(valor).includes(termo));
+  }
+
+  private normalizarTexto(valor: string) {
+    return valor
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 }

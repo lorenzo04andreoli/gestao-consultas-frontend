@@ -1,8 +1,8 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Pacientes</h1>
-      <p>Gerencie os pacientes cadastrados no sistema.</p>
+      <h1>Listar pacientes</h1>
+      <p>Consulte, cadastre e atualize os pacientes da clínica.</p>
     </div>
 
     <button type="button" class="primary-button" (click)="abrirModalCadastro()">
@@ -18,6 +18,23 @@
     <p class="alert success">{{ sucesso() }}</p>
   }
 
+  <section class="filters-card">
+    <div class="form-field">
+      <label for="buscaPaciente">Pesquisar paciente</label>
+      <input
+        id="buscaPaciente"
+        type="search"
+        name="buscaPaciente"
+        placeholder="Nome, e-mail, CPF ou telefone"
+        [(ngModel)]="termoBusca"
+      />
+    </div>
+
+    <button type="button" class="secondary-button" (click)="limparBusca()">
+      Limpar
+    </button>
+  </section>
+
   <div class="table-card">
     <table>
       <thead>
@@ -30,12 +47,16 @@
       </thead>
 
       <tbody>
-        @for (paciente of pacientes(); track paciente.id ?? paciente.cpf) {
+        @for (paciente of pacientesFiltrados(); track paciente.id ?? paciente.cpf) {
           <tr class="clickable-row" (click)="abrirModalEdicao(paciente)">
             <td>{{ paciente.nome }}</td>
             <td>{{ paciente.email }}</td>
             <td>{{ paciente.cpf }}</td>
             <td>{{ paciente.telefone }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="empty-state">Nenhum paciente encontrado.</td>
           </tr>
         }
       </tbody>

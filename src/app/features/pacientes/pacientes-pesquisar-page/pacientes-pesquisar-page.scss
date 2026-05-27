@@ -44,8 +44,7 @@
   font-weight: 700;
 }
 
-.search-card,
-.results-card {
+.search-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -55,9 +54,14 @@
 .search-card {
   padding: 22px;
   margin-bottom: 18px;
+
+  &.results-open {
+    padding-bottom: 14px;
+  }
 }
 
 .search-field {
+  position: relative;
   display: grid;
   gap: 8px;
 
@@ -101,31 +105,35 @@
   cursor: pointer;
 }
 
-.results-card {
-  padding: 20px;
-}
-
 .results-header {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 14px;
+  padding: 12px 14px 8px;
 
-  h2 {
-    margin: 0;
+  strong {
     color: var(--color-primary-dark);
-    font-size: 1.1rem;
   }
 
-  p {
-    margin: 4px 0 0;
+  span {
     color: var(--color-muted);
+    font-size: 0.9rem;
   }
+}
+
+.results-panel {
+  margin-top: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(23, 36, 66, 0.1);
+  overflow: hidden;
 }
 
 .results-list {
   display: grid;
-  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
 }
 
 .patient-result {
@@ -134,8 +142,7 @@
   align-items: center;
   gap: 14px;
   padding: 14px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-top: 1px solid #eef2f4;
   color: inherit;
   text-decoration: none;
   transition:
@@ -143,8 +150,7 @@
     border-color 0.2s ease;
 
   &:hover {
-    background: #f8fbfc;
-    border-color: var(--color-border);
+    background: #eef9ff;
   }
 }
 

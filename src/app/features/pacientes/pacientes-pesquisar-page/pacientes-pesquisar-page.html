@@ -14,10 +14,10 @@
     <p class="alert error">{{ erro() }}</p>
   }
 
-  <section class="search-card">
+  <section class="search-card" [class.results-open]="resultadosAbertos()">
     <div class="search-field">
       <label for="buscaPaciente">Buscar paciente</label>
-      <div class="search-control">
+      <div class="search-control" (focusout)="fecharResultados()">
         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         <input
           id="buscaPaciente"
@@ -26,6 +26,8 @@
           placeholder="Digite nome, telefone, e-mail ou CPF"
           [ngModel]="termoBusca()"
           (ngModelChange)="atualizarBusca($event)"
+          (focus)="abrirResultados()"
+          (click)="abrirResultados()"
           autocomplete="off"
         />
         @if (termoBusca()) {
@@ -34,56 +36,56 @@
           </button>
         }
       </div>
-    </div>
-  </section>
 
-  <section class="results-card">
-    <header class="results-header">
-      <div>
-        <h2>Resultados</h2>
-        <p>
-          @if (carregando()) {
-            Carregando pacientes...
-          } @else {
-            {{ pacientesFiltrados().length }} paciente(s) encontrado(s)
-          }
-        </p>
-      </div>
-    </header>
-
-    <div class="results-list">
-      @for (paciente of pacientesFiltrados(); track paciente.id ?? paciente.cpf) {
-        <a
-          class="patient-result"
-          routerLink="/pacientes/listar"
-          [queryParams]="{ editar: paciente.id }"
-        >
-          <span class="avatar">{{ paciente.nome.charAt(0) }}</span>
-
-          <span class="patient-info">
-            <strong>{{ paciente.nome }}</strong>
-            <small>
-              <i class="fa-regular fa-envelope" aria-hidden="true"></i>
-              {{ paciente.email }}
-            </small>
-          </span>
-
-          <span class="patient-meta">
+      @if (resultadosAbertos()) {
+        <section class="results-panel">
+          <header class="results-header">
+            <strong>Resultados</strong>
             <span>
-              <i class="fa-solid fa-phone" aria-hidden="true"></i>
-              {{ paciente.telefone || 'Sem telefone' }}
+              @if (carregando()) {
+                Carregando pacientes...
+              } @else {
+                {{ pacientesFiltrados().length }} paciente(s) encontrado(s)
+              }
             </span>
-            <span>CPF {{ paciente.cpf }}</span>
-          </span>
-        </a>
-      } @empty {
-        <p class="empty-state">
-          @if (termoBusca()) {
-            Nenhum paciente encontrado para essa busca.
-          } @else {
-            Nenhum paciente cadastrado.
-          }
-        </p>
+          </header>
+
+          <div class="results-list">
+            @for (paciente of pacientesFiltrados(); track paciente.id ?? paciente.cpf) {
+              <a
+                class="patient-result"
+                routerLink="/pacientes/listar"
+                [queryParams]="{ editar: paciente.id }"
+              >
+                <span class="avatar">{{ paciente.nome.charAt(0) }}</span>
+
+                <span class="patient-info">
+                  <strong>{{ paciente.nome }}</strong>
+                  <small>
+                    <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                    {{ paciente.email }}
+                  </small>
+                </span>
+
+                <span class="patient-meta">
+                  <span>
+                    <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                    {{ paciente.telefone || 'Sem telefone' }}
+                  </span>
+                  <span>CPF {{ paciente.cpf }}</span>
+                </span>
+              </a>
+            } @empty {
+              <p class="empty-state">
+                @if (termoBusca()) {
+                  Nenhum paciente encontrado para essa busca.
+                } @else {
+                  Nenhum paciente cadastrado.
+                }
+              </p>
+            }
+          </div>
+        </section>
       }
     </div>
   </section>

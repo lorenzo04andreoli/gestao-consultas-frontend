@@ -16,6 +16,7 @@ export class PacientesPesquisarPage implements OnInit {
   carregando = signal(false);
   erro = signal('');
   termoBusca = signal('');
+  resultadosAbertos = signal(false);
 
   pacientesFiltrados = computed(() => {
     const termo = this.normalizarTexto(this.termoBusca());
@@ -51,10 +52,20 @@ export class PacientesPesquisarPage implements OnInit {
 
   atualizarBusca(valor: string) {
     this.termoBusca.set(valor);
+    this.resultadosAbertos.set(true);
   }
 
   limparBusca() {
     this.termoBusca.set('');
+    this.resultadosAbertos.set(true);
+  }
+
+  abrirResultados() {
+    this.resultadosAbertos.set(true);
+  }
+
+  fecharResultados() {
+    window.setTimeout(() => this.resultadosAbertos.set(false), 150);
   }
 
   private pacienteContemTermo(paciente: PacienteModel, termo: string) {
