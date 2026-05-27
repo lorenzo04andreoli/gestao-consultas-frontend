@@ -1,13 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
 
 @Component({
   selector: 'app-pacientes-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './pacientes-page.html',
   styleUrl: './pacientes-page.scss'
 })
@@ -148,6 +148,27 @@ export class PacientesPage implements OnInit {
     });
   }
 
+  excluirPaciente(paciente: PacienteModel) {
+    if (!paciente.id) return;
+
+    const confirmar = confirm(`Deseja realmente excluir ${paciente.nome}?`);
+
+    if (!confirmar) return;
+
+    this.erro.set('');
+    this.sucesso.set('');
+
+    this.pacienteService.deletar(paciente.id).subscribe({
+      next: () => {
+        this.sucesso.set('Paciente excluído com sucesso.');
+        this.carregarPacientes();
+      },
+      error: () => {
+        this.erro.set('Erro ao excluir paciente.');
+      }
+    });
+  }
+
   limparFormulario() {
     this.pacienteForm = {
       nome: '',
@@ -163,6 +184,14 @@ export class PacientesPage implements OnInit {
     if (!termo) return this.pacientes();
 
     return this.pacientes().filter(paciente => this.pacienteContemTermo(paciente, termo));
+  }
+
+  totalPacientesFiltrados() {
+    return this.pacientesFiltrados().length;
+  }
+
+  inicialPaciente(paciente: PacienteModel) {
+    return paciente.nome.trim().charAt(0).toUpperCase() || 'P';
   }
 
   limparBusca() {
