@@ -21,9 +21,19 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard-page/dashboard-page').then(m => m.DashboardPage)
       },
       {
-        path: 'pacientes',
+        path: 'pacientes/listar',
         loadComponent: () =>
           import('./features/pacientes/pacientes-page/pacientes-page').then(m => m.PacientesPage)
+      },
+      {
+        path: 'pacientes/pesquisar',
+        redirectTo: 'pacientes/listar',
+        pathMatch: 'full'
+      },
+      {
+        path: 'pacientes',
+        redirectTo: 'pacientes/listar',
+        pathMatch: 'full'
       },
       {
         path: 'dentistas',
