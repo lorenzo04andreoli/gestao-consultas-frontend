@@ -75,21 +75,6 @@ export class PacientesPage implements OnInit {
     this.modalAberto.set(true);
   }
 
-  private abrirPacienteDaRota(pacientes: PacienteModel[]) {
-    const id = Number(this.route.snapshot.queryParamMap.get('editar'));
-    if (!id) return;
-
-    const paciente = pacientes.find(item => item.id === id);
-    if (!paciente) return;
-
-    this.abrirModalEdicao(paciente);
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {},
-      replaceUrl: true
-    });
-  }
-
   fecharModal() {
     this.modalAberto.set(false);
     this.limparFormulario();
@@ -214,6 +199,21 @@ export class PacientesPage implements OnInit {
 
   limparBusca() {
     this.termoBusca = '';
+  }
+
+  private abrirPacienteDaRota(pacientes: PacienteModel[]) {
+    const id = Number(this.route.snapshot.queryParamMap.get('editar'));
+    if (!id) return;
+
+    const paciente = pacientes.find(item => item.id === id);
+    if (!paciente) return;
+
+    this.abrirModalEdicao(paciente);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true
+    });
   }
 
   private pacienteContemTermo(paciente: PacienteModel, termo: string) {
