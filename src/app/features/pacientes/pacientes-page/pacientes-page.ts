@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
 
@@ -28,7 +29,11 @@ export class PacientesPage implements OnInit {
 
   pacienteSelecionadoId: number | null = null;
 
-  constructor(private pacienteService: PacienteService) {}
+  constructor(
+    private pacienteService: PacienteService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.carregarPacientes();
@@ -40,6 +45,7 @@ export class PacientesPage implements OnInit {
     this.pacienteService.listar().subscribe({
       next: (dados) => {
         this.pacientes.set(dados);
+        this.abrirPacienteDaRota(dados);
       },
       error: () => {
         this.erro.set('Erro ao carregar pacientes.');
@@ -66,6 +72,21 @@ export class PacientesPage implements OnInit {
     };
 
     this.modalAberto.set(true);
+  }
+
+  private abrirPacienteDaRota(pacientes: PacienteModel[]) {
+    const id = Number(this.route.snapshot.queryParamMap.get('editar'));
+    if (!id) return;
+
+    const paciente = pacientes.find(item => item.id === id);
+    if (!paciente) return;
+
+    this.abrirModalEdicao(paciente);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true
+    });
   }
 
   fecharModal() {
