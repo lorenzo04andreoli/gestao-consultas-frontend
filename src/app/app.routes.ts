@@ -27,8 +27,10 @@ export const routes: Routes = [
       },
       {
         path: 'pacientes/pesquisar',
-        redirectTo: 'pacientes/listar',
-        pathMatch: 'full'
+        loadComponent: () =>
+          import('./features/pacientes/pacientes-pesquisar-page/pacientes-pesquisar-page').then(
+            m => m.PacientesPesquisarPage
+          )
       },
       {
         path: 'pacientes',
