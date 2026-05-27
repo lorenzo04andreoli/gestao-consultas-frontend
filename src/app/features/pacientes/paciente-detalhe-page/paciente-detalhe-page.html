@@ -27,7 +27,10 @@
 
         <div>
           <h2>{{ paciente.nome }}</h2>
-          <p>{{ paciente.email }}</p>
+          <p>
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+            {{ paciente.email }}
+          </p>
         </div>
 
         @if (paciente.id) {
@@ -62,6 +65,67 @@
           <strong>{{ formatarData(paciente.dataCriacao) }}</strong>
         </div>
       </div>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>Total de consultas</span>
+        <strong>{{ totalConsultas() }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Consultas agendadas</span>
+        <strong>{{ consultasAgendadas() }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Última movimentação</span>
+        <strong>
+          @if (ultimaConsulta(); as consulta) {
+            {{ formatarData(consulta.dataInicio) }}
+          } @else {
+            -
+          }
+        </strong>
+      </article>
+    </section>
+
+    <section class="history-card">
+      <header class="section-header">
+        <div>
+          <h2>Histórico de consultas</h2>
+          <p>Atendimentos vinculados a este paciente.</p>
+        </div>
+      </header>
+
+      @if (carregandoConsultas()) {
+        <p class="muted">Carregando consultas...</p>
+      } @else {
+        <div class="appointments-list">
+          @for (consulta of consultas(); track consulta.id ?? consulta.dataInicio) {
+            <article class="appointment-item">
+              <div>
+                <strong>{{ consulta.descricao }}</strong>
+                <span>{{ consulta.dentistaNome }} | {{ formatarIntervalo(consulta) }}</span>
+              </div>
+
+              <div class="appointment-meta">
+                <time>{{ formatarData(consulta.dataInicio) }}</time>
+                <span
+                  class="status-badge"
+                  [class.agendada]="consulta.status === 'AGENDADA'"
+                  [class.finalizada]="consulta.status === 'FINALIZADA'"
+                  [class.cancelada]="consulta.status === 'CANCELADA'"
+                >
+                  {{ labelStatus(consulta.status) }}
+                </span>
+              </div>
+            </article>
+          } @empty {
+            <p class="empty-state">Nenhuma consulta encontrada para este paciente.</p>
+          }
+        </div>
+      }
     </section>
   }
 </section>
