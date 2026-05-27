@@ -1,0 +1,144 @@
+.page {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    color: var(--color-primary-dark);
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--color-muted);
+  }
+}
+
+.alert {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.error {
+  background: #ffe5e5;
+  color: #a10000;
+}
+
+.profile-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.profile-header {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--color-border);
+
+  h2 {
+    margin: 0;
+    color: var(--color-primary-dark);
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--color-muted);
+  }
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 28px;
+  padding-top: 22px;
+
+  div {
+    display: grid;
+    gap: 6px;
+  }
+
+  span {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+  }
+
+  strong {
+    color: var(--color-primary-dark);
+  }
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.primary-button {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.secondary-button {
+  background: #e5e7eb;
+  color: var(--color-primary-dark);
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+@media (max-width: 760px) {
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profile-header {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .primary-button {
+    grid-column: 1 / -1;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}

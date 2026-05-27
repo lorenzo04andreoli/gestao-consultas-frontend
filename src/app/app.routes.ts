@@ -33,6 +33,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'pacientes/:id',
+        loadComponent: () =>
+          import('./features/pacientes/paciente-detalhe-page/paciente-detalhe-page').then(
+            m => m.PacienteDetalhePage
+          )
+      },
+      {
         path: 'pacientes',
         redirectTo: 'pacientes/listar',
         pathMatch: 'full'

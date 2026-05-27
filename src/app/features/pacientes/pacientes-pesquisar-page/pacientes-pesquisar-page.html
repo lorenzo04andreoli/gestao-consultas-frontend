@@ -54,8 +54,7 @@
             @for (paciente of pacientesFiltrados(); track paciente.id ?? paciente.cpf) {
               <a
                 class="patient-result"
-                routerLink="/pacientes/listar"
-                [queryParams]="{ editar: paciente.id }"
+                [routerLink]="['/pacientes', paciente.id]"
               >
                 <span class="avatar">{{ paciente.nome.charAt(0) }}</span>
 

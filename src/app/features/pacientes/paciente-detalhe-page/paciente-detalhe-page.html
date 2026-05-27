@@ -1,0 +1,67 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Ficha do paciente</h1>
+      <p>Consulte os principais dados cadastrais.</p>
+    </div>
+
+    <a class="secondary-button" routerLink="/pacientes/pesquisar">
+      Voltar para pesquisa
+    </a>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <section class="profile-card">
+      <p class="muted">Carregando paciente...</p>
+    </section>
+  }
+
+  @if (paciente(); as paciente) {
+    <section class="profile-card">
+      <header class="profile-header">
+        <span class="avatar">{{ paciente.nome.charAt(0) }}</span>
+
+        <div>
+          <h2>{{ paciente.nome }}</h2>
+          <p>{{ paciente.email }}</p>
+        </div>
+
+        @if (paciente.id) {
+          <a
+            class="primary-button"
+            routerLink="/pacientes/listar"
+            [queryParams]="{ editar: paciente.id }"
+          >
+            Editar paciente
+          </a>
+        }
+      </header>
+
+      <div class="details-grid">
+        <div>
+          <span>CPF</span>
+          <strong>{{ paciente.cpf }}</strong>
+        </div>
+
+        <div>
+          <span>Telefone</span>
+          <strong>{{ paciente.telefone || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>E-mail</span>
+          <strong>{{ paciente.email }}</strong>
+        </div>
+
+        <div>
+          <span>Data de cadastro</span>
+          <strong>{{ formatarData(paciente.dataCriacao) }}</strong>
+        </div>
+      </div>
+    </section>
+  }
+</section>

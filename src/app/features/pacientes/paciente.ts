@@ -15,6 +15,10 @@ export class PacienteService {
     return this.http.get<PacienteModel[]>(this.apiUrl);
   }
 
+  buscarPorId(id: number) {
+    return this.http.get<PacienteModel>(`${this.apiUrl}/${id}`);
+  }
+
   criar(paciente: PacienteModel) {
     return this.http.post<PacienteModel>(this.apiUrl, paciente);
   }
