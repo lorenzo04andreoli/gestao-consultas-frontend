@@ -155,6 +155,57 @@
   margin: 18px 0 0;
 }
 
+.patient-list {
+  display: grid;
+  gap: 10px;
+
+  a {
+    align-items: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: inherit;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 12px;
+    text-decoration: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  a:hover {
+    border-color: #2563eb;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+  }
+
+  span {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  strong,
+  small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    color: #111827;
+  }
+
+  small,
+  em {
+    color: #64748b;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  em {
+    flex: 0 0 auto;
+  }
+}
+
 @media (max-width: 1200px) {
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

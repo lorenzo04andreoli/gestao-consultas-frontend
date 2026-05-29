@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { forkJoin } from 'rxjs';
 import { ConsultaService } from '../../consultas/consulta';
@@ -13,7 +14,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './dashboard-page.html',
   styleUrl: './dashboard-page.scss'
 })
@@ -33,6 +34,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   consultasAgendadas = signal(0);
   consultasCanceladas = signal(0);
   consultasFinalizadas = signal(0);
+  pacientesRecentes = signal<PacienteModel[]>([]);
 
   private consultas: ConsultaModel[] = [];
   private dentistas: DentistaResponseModel[] = [];
@@ -89,6 +91,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
   private atualizarResumo(pacientes: PacienteModel[], consultas: ConsultaModel[]) {
     this.totalPacientes.set(pacientes.length);
+    this.pacientesRecentes.set(this.montarPacientesRecentes(pacientes));
     this.pacientesAdicionadosMes.set(
       pacientes.filter(paciente => this.dataNoMesAtual(paciente.dataCriacao)).length
     );
@@ -110,6 +113,12 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
   rankingDentistas() {
     return this.montarRankingDentistas();
+  }
+
+  formatarDataPaciente(data?: string) {
+    if (!data) return 'Sem data';
+
+    return new Intl.DateTimeFormat('pt-BR').format(new Date(data));
   }
 
   private contarConsultasPorStatus(consultas: ConsultaModel[], status: StatusConsulta) {
@@ -349,6 +358,16 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
       .filter(item => item.total > 0)
       .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome))
       .slice(0, 6);
+  }
+
+  private montarPacientesRecentes(pacientes: PacienteModel[]) {
+    return [...pacientes]
+      .sort((a, b) => this.timestampData(b.dataCriacao) - this.timestampData(a.dataCriacao))
+      .slice(0, 5);
+  }
+
+  private timestampData(data?: string) {
+    return data ? new Date(data).getTime() : 0;
   }
 
   private montarUltimosMeses(quantidade: number) {

@@ -113,6 +113,11 @@ export class PacienteDetalhePage implements OnInit {
       return;
     }
 
+    if (origem === 'dashboard') {
+      this.voltarPara = '/dashboard';
+      return;
+    }
+
     this.voltarPara = '/pacientes/pesquisar';
   }
 
