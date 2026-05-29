@@ -65,6 +65,19 @@
       <div class="chart-box">
         <canvas #dentistasChart></canvas>
       </div>
+
+      @if (rankingDentistas().length) {
+        <ol class="ranking-list">
+          @for (dentista of rankingDentistas(); track dentista.id) {
+            <li>
+              <span>{{ dentista.nome }}</span>
+              <strong>{{ dentista.total }}</strong>
+            </li>
+          }
+        </ol>
+      } @else {
+        <p class="empty-state">Nenhuma consulta vinculada aos dentistas.</p>
+      }
     </article>
 
     <article class="chart-panel chart-panel-wide">

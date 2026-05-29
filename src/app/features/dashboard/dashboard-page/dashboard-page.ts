@@ -108,6 +108,10 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.consultasFinalizadas.set(this.contarConsultasPorStatus(consultas, 'FINALIZADA'));
   }
 
+  rankingDentistas() {
+    return this.montarRankingDentistas();
+  }
+
   private contarConsultasPorStatus(consultas: ConsultaModel[], status: StatusConsulta) {
     return consultas.filter(consulta => consulta.status === status).length;
   }
@@ -184,13 +188,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.dentistasChart?.destroy();
 
-    const totaisPorDentista = this.dentistas
-      .map(dentista => ({
-        nome: dentista.nome,
-        total: this.consultas.filter(consulta => consulta.dentistaId === dentista.id).length
-      }))
-      .filter(item => item.total > 0)
-      .slice(0, 6);
+    const totaisPorDentista = this.montarRankingDentistas();
 
     const labels = totaisPorDentista.length
       ? totaisPorDentista.map(item => item.nome)
@@ -339,6 +337,18 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     };
 
     this.cancelamentosChart = new Chart(canvas, config);
+  }
+
+  private montarRankingDentistas() {
+    return this.dentistas
+      .map(dentista => ({
+        id: dentista.id,
+        nome: dentista.nome,
+        total: this.consultas.filter(consulta => consulta.dentistaId === dentista.id).length
+      }))
+      .filter(item => item.total > 0)
+      .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome))
+      .slice(0, 6);
   }
 
   private montarUltimosMeses(quantidade: number) {
