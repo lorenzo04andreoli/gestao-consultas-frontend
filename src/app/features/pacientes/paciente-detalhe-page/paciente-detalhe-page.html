@@ -1,13 +1,13 @@
 <section class="page">
   <header class="page-header">
+    <a class="back-button" [routerLink]="voltarPara" aria-label="Voltar">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+    </a>
+
     <div>
       <h1>Ficha do paciente</h1>
       <p>Consulte os principais dados cadastrais.</p>
     </div>
-
-    <a class="secondary-button" routerLink="/pacientes/pesquisar">
-      Voltar para pesquisa
-    </a>
   </header>
 
   @if (erro()) {

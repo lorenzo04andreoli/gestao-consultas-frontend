@@ -55,6 +55,7 @@
               <a
                 class="patient-result"
                 [routerLink]="['/pacientes', paciente.id]"
+                [queryParams]="{ origem: 'pesquisar' }"
               >
                 <span class="avatar">{{ paciente.nome.charAt(0) }}</span>
 

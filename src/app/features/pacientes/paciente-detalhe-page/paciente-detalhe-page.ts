@@ -18,6 +18,7 @@ export class PacienteDetalhePage implements OnInit {
   carregando = signal(true);
   carregandoConsultas = signal(true);
   erro = signal('');
+  voltarPara = '/pacientes/pesquisar';
 
   constructor(
     private route: ActivatedRoute,
@@ -26,6 +27,7 @@ export class PacienteDetalhePage implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.definirRetorno();
     const id = Number(this.route.snapshot.paramMap.get('id'));
 
     if (!id) {
@@ -101,6 +103,17 @@ export class PacienteDetalhePage implements OnInit {
     };
 
     return labels[status];
+  }
+
+  private definirRetorno() {
+    const origem = this.route.snapshot.queryParamMap.get('origem');
+
+    if (origem === 'listar') {
+      this.voltarPara = '/pacientes/listar';
+      return;
+    }
+
+    this.voltarPara = '/pacientes/pesquisar';
   }
 
   private formatarHora(data: Date) {

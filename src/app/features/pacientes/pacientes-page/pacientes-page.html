@@ -64,7 +64,11 @@
         @for (paciente of pacientesFiltrados(); track paciente.id ?? paciente.cpf) {
           <tr>
             <td>
-              <a class="patient-link" [routerLink]="['/pacientes', paciente.id]">
+              <a
+                class="patient-link"
+                [routerLink]="['/pacientes', paciente.id]"
+                [queryParams]="{ origem: 'listar' }"
+              >
                 <span class="patient-avatar">{{ inicialPaciente(paciente) }}</span>
                 <span>{{ paciente.nome }}</span>
               </a>
@@ -84,7 +88,12 @@
             </td>
             <td>
               <div class="row-actions">
-                <a class="icon-button" [routerLink]="['/pacientes', paciente.id]" title="Ver ficha">
+                <a
+                  class="icon-button"
+                  [routerLink]="['/pacientes', paciente.id]"
+                  [queryParams]="{ origem: 'listar' }"
+                  title="Ver ficha"
+                >
                   <i class="fa-regular fa-address-card" aria-hidden="true"></i>
                 </a>
 
