@@ -1,6 +1,15 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {
+  criarPacienteForm,
+  extrairMensagemErro,
+  formatarCpf,
+  formatarTelefone,
+  montarPacienteForm,
+  montarPacientePayload,
+  validarPacienteForm
+} from '../paciente-form';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
 
@@ -19,14 +28,7 @@ export class PacientesPage implements OnInit {
 
   modalAberto = signal(false);
   termoBusca = '';
-
-  pacienteForm: PacienteModel = {
-    nome: '',
-    email: '',
-    cpf: '',
-    telefone: ''
-  };
-
+  pacienteForm = criarPacienteForm();
   pacienteSelecionadoId: number | null = null;
 
   constructor(
@@ -55,14 +57,7 @@ export class PacientesPage implements OnInit {
 
   abrirModalEdicao(paciente: PacienteModel) {
     this.pacienteSelecionadoId = paciente.id ?? null;
-
-    this.pacienteForm = {
-      nome: paciente.nome,
-      email: paciente.email,
-      cpf: this.formatarCpf(paciente.cpf),
-      telefone: this.formatarTelefone(paciente.telefone)
-    };
-
+    this.pacienteForm = montarPacienteForm(paciente);
     this.modalAberto.set(true);
   }
 
@@ -75,26 +70,25 @@ export class PacientesPage implements OnInit {
     this.erro.set('');
     this.sucesso.set('');
 
-    if (!this.pacienteSelecionadoId || !this.formularioValido()) return;
+    const mensagemErro = validarPacienteForm(this.pacienteForm);
 
-    const payload: PacienteModel = {
-      ...this.pacienteForm,
-      nome: this.pacienteForm.nome.trim(),
-      email: this.pacienteForm.email.trim(),
-      cpf: this.apenasNumeros(this.pacienteForm.cpf),
-      telefone: this.apenasNumeros(this.pacienteForm.telefone)
-    };
+    if (!this.pacienteSelecionadoId || mensagemErro) {
+      this.erro.set(mensagemErro);
+      return;
+    }
 
-    this.pacienteService.atualizar(this.pacienteSelecionadoId, payload).subscribe({
-      next: () => {
-        this.sucesso.set('Paciente atualizado com sucesso.');
-        this.fecharModal();
-        this.carregarPacientes();
-      },
-      error: (err) => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao atualizar paciente.'));
-      }
-    });
+    this.pacienteService
+      .atualizar(this.pacienteSelecionadoId, montarPacientePayload(this.pacienteForm))
+      .subscribe({
+        next: () => {
+          this.sucesso.set('Paciente atualizado com sucesso.');
+          this.fecharModal();
+          this.carregarPacientes();
+        },
+        error: (err) => {
+          this.erro.set(extrairMensagemErro(err, 'Erro ao atualizar paciente.'));
+        }
+      });
   }
 
   deletarPaciente() {
@@ -141,20 +135,15 @@ export class PacientesPage implements OnInit {
   }
 
   atualizarCpf(valor: string) {
-    this.pacienteForm.cpf = this.formatarCpf(valor);
+    this.pacienteForm.cpf = formatarCpf(valor);
   }
 
   atualizarTelefone(valor: string) {
-    this.pacienteForm.telefone = this.formatarTelefone(valor);
+    this.pacienteForm.telefone = formatarTelefone(valor);
   }
 
   limparFormulario() {
-    this.pacienteForm = {
-      nome: '',
-      email: '',
-      cpf: '',
-      telefone: ''
-    };
+    this.pacienteForm = criarPacienteForm();
   }
 
   pacientesFiltrados() {
@@ -203,71 +192,5 @@ export class PacientesPage implements OnInit {
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
-  }
-
-  private formularioValido() {
-    const nome = this.pacienteForm.nome.trim();
-    const email = this.pacienteForm.email.trim();
-    const cpf = this.apenasNumeros(this.pacienteForm.cpf);
-
-    if (!nome || !email || !cpf) {
-      this.erro.set('Preencha nome, e-mail e CPF.');
-      return false;
-    }
-
-    if (!email.includes('@')) {
-      this.erro.set('Informe um e-mail válido.');
-      return false;
-    }
-
-    if (cpf.length !== 11) {
-      this.erro.set('Informe um CPF com 11 dígitos.');
-      return false;
-    }
-
-    return true;
-  }
-
-  private formatarCpf(valor: string) {
-    const numeros = this.apenasNumeros(valor).slice(0, 11);
-
-    return numeros
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  }
-
-  private formatarTelefone(valor: string) {
-    const numeros = this.apenasNumeros(valor).slice(0, 11);
-
-    if (numeros.length <= 10) {
-      return numeros
-        .replace(/(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{4})(\d)/, '$1-$2');
-    }
-
-    return numeros
-      .replace(/(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{5})(\d)/, '$1-$2');
-  }
-
-  private apenasNumeros(valor: string) {
-    return (valor || '').replace(/\D/g, '');
-  }
-
-  private extrairMensagemErro(err: unknown, mensagemPadrao: string) {
-    if (
-      typeof err === 'object' &&
-      err !== null &&
-      'error' in err &&
-      typeof err.error === 'object' &&
-      err.error !== null &&
-      'message' in err.error &&
-      typeof err.error.message === 'string'
-    ) {
-      return err.error.message;
-    }
-
-    return mensagemPadrao;
   }
 }
