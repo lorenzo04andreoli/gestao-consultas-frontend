@@ -1,14 +1,13 @@
 <section class="page">
   <header class="page-header">
+    <a class="back-button" [routerLink]="voltarPara" aria-label="Voltar">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+    </a>
+
     <div>
       <h1>Cadastrar paciente</h1>
       <p>Preencha os dados iniciais do paciente para criar a ficha.</p>
     </div>
-
-    <a class="secondary-button" routerLink="/pacientes/pesquisar">
-      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-      Voltar
-    </a>
   </header>
 
   @if (erro) {
@@ -80,7 +79,7 @@
     </section>
 
     <footer class="form-actions">
-      <a class="secondary-button" routerLink="/pacientes/listar">Cancelar</a>
+      <a class="secondary-button" [routerLink]="voltarPara">Cancelar</a>
       <button type="submit" class="primary-button" [disabled]="salvando">
         {{ salvando ? 'Salvando...' : 'Cadastrar paciente' }}
       </button>

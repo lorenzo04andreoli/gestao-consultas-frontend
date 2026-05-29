@@ -5,7 +5,11 @@
       <p>Consulte, cadastre e atualize os pacientes da clínica.</p>
     </div>
 
-    <a class="primary-button" routerLink="/pacientes/cadastrar">
+    <a
+      class="primary-button"
+      routerLink="/pacientes/cadastrar"
+      [queryParams]="{ origem: 'listar' }"
+    >
       Cadastrar paciente
     </a>
   </header>

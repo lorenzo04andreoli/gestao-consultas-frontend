@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   criarPacienteForm,
   extrairMensagemErro,
@@ -22,11 +22,15 @@ export class PacienteCadastroPage {
   erro = '';
   salvando = false;
   pacienteForm = criarPacienteForm();
+  voltarPara = '/pacientes/pesquisar';
 
   constructor(
     private pacienteService: PacienteService,
+    private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) {
+    this.definirRetorno();
+  }
 
   salvar() {
     this.erro = validarPacienteForm(this.pacienteForm);
@@ -53,5 +57,16 @@ export class PacienteCadastroPage {
 
   atualizarTelefone(valor: string) {
     this.pacienteForm.telefone = formatarTelefone(valor);
+  }
+
+  private definirRetorno() {
+    const origem = this.route.snapshot.queryParamMap.get('origem');
+
+    if (origem === 'listar') {
+      this.voltarPara = '/pacientes/listar';
+      return;
+    }
+
+    this.voltarPara = '/pacientes/pesquisar';
   }
 }

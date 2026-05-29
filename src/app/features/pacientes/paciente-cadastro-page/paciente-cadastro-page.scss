@@ -5,8 +5,7 @@
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   margin-bottom: 24px;
 
   h1 {
@@ -17,6 +16,26 @@
   p {
     margin: 6px 0 0;
     color: var(--color-muted);
+  }
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  text-decoration: none;
+  box-shadow: var(--shadow-card);
+
+  &:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
   }
 }
 
@@ -140,7 +159,6 @@
 @media (max-width: 760px) {
   .page-header {
     align-items: flex-start;
-    flex-direction: column;
   }
 
   .form-grid {

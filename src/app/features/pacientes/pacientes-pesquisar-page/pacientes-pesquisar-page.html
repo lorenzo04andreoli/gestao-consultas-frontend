@@ -5,7 +5,11 @@
       <p>Encontre pacientes por nome, telefone, e-mail ou CPF.</p>
     </div>
 
-    <a class="primary-button" routerLink="/pacientes/cadastrar">
+    <a
+      class="primary-button"
+      routerLink="/pacientes/cadastrar"
+      [queryParams]="{ origem: 'pesquisar' }"
+    >
       Cadastrar paciente
     </a>
   </header>
