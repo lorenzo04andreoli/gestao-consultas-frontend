@@ -208,9 +208,13 @@ table {
 }
 
 .primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: #2563eb;
   color: #fff;
   padding: 10px 14px;
+  text-decoration: none;
 }
 
 .secondary-button {

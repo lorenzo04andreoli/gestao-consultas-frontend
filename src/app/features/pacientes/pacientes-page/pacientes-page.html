@@ -5,9 +5,9 @@
       <p>Consulte, cadastre e atualize os pacientes da clínica.</p>
     </div>
 
-    <button type="button" class="primary-button" (click)="abrirModalCadastro()">
+    <a class="primary-button" routerLink="/pacientes/cadastrar">
       Cadastrar paciente
-    </button>
+    </a>
   </header>
 
   @if (erro()) {

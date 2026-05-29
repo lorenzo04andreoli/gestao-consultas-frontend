@@ -33,6 +33,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'pacientes/cadastrar',
+        loadComponent: () =>
+          import('./features/pacientes/paciente-cadastro-page/paciente-cadastro-page').then(
+            m => m.PacienteCadastroPage
+          )
+      },
+      {
         path: 'pacientes/:id',
         loadComponent: () =>
           import('./features/pacientes/paciente-detalhe-page/paciente-detalhe-page').then(
