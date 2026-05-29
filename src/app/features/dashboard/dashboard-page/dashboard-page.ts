@@ -21,6 +21,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('statusChart') statusChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('dentistasChart') dentistasChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('mensalChart') mensalChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('cancelamentosChart') cancelamentosChartRef?: ElementRef<HTMLCanvasElement>;
 
   carregando = signal(true);
   erro = signal('');
@@ -39,6 +40,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   private statusChart?: Chart;
   private dentistasChart?: Chart;
   private mensalChart?: Chart;
+  private cancelamentosChart?: Chart;
 
   constructor(
     private pacienteService: PacienteService,
@@ -59,6 +61,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.statusChart?.destroy();
     this.dentistasChart?.destroy();
     this.mensalChart?.destroy();
+    this.cancelamentosChart?.destroy();
   }
 
   carregarDados() {
@@ -136,6 +139,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.renderizarGraficoStatus();
     this.renderizarGraficoDentistas();
     this.renderizarGraficoMensal();
+    this.renderizarGraficoCancelamentos();
   }
 
   private renderizarGraficoStatus() {
@@ -290,6 +294,53 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.mensalChart = new Chart(canvas, config);
   }
 
+  private renderizarGraficoCancelamentos() {
+    const canvas = this.cancelamentosChartRef?.nativeElement;
+    if (!canvas) return;
+
+    this.cancelamentosChart?.destroy();
+
+    const dias = this.montarUltimosDias(7);
+
+    const config: ChartConfiguration<'line'> = {
+      type: 'line',
+      data: {
+        labels: dias.map(dia => dia.rotulo),
+        datasets: [
+          {
+            label: 'Cancelamentos',
+            data: dias.map(dia => this.contarCancelamentosNoDia(dia.data)),
+            borderColor: '#dc2626',
+            backgroundColor: 'rgba(220, 38, 38, 0.12)',
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#dc2626',
+            pointRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    };
+
+    this.cancelamentosChart = new Chart(canvas, config);
+  }
+
   private montarUltimosMeses(quantidade: number) {
     const hoje = new Date();
 
@@ -306,6 +357,23 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private montarUltimosDias(quantidade: number) {
+    const hoje = new Date();
+
+    return Array.from({ length: quantidade }, (_, index) => {
+      const data = new Date(hoje);
+      data.setDate(hoje.getDate() - (quantidade - 1 - index));
+
+      return {
+        data,
+        rotulo: new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit'
+        }).format(data)
+      };
+    });
+  }
+
   private contarConsultasNoMes(data: Date, status: StatusConsulta) {
     return this.consultas.filter(consulta => {
       const inicio = new Date(consulta.dataInicio);
@@ -315,6 +383,14 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
         inicio.getFullYear() === data.getFullYear() &&
         inicio.getMonth() === data.getMonth()
       );
+    }).length;
+  }
+
+  private contarCancelamentosNoDia(data: Date) {
+    return this.consultas.filter(consulta => {
+      const inicio = new Date(consulta.dataInicio);
+
+      return consulta.status === 'CANCELADA' && inicio.toDateString() === data.toDateString();
     }).length;
   }
 }
