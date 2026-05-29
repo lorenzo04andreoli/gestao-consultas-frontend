@@ -11,6 +11,12 @@ import { PacienteModel } from '../../pacientes/paciente.model';
 
 Chart.register(...registerables);
 
+interface RankingDentista {
+  id?: number;
+  nome: string;
+  total: number;
+}
+
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
@@ -35,9 +41,9 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   consultasCanceladas = signal(0);
   consultasFinalizadas = signal(0);
   pacientesRecentes = signal<PacienteModel[]>([]);
+  rankingDentistas = signal<RankingDentista[]>([]);
 
   private consultas: ConsultaModel[] = [];
-  private dentistas: DentistaResponseModel[] = [];
   private graficosProntos = false;
   private statusChart?: Chart;
   private dentistasChart?: Chart;
@@ -77,8 +83,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     }).subscribe({
       next: ({ pacientes, dentistas, consultas }) => {
         this.consultas = consultas;
-        this.dentistas = dentistas;
-        this.atualizarResumo(pacientes, consultas);
+        this.atualizarResumo(pacientes, dentistas, consultas);
         this.carregando.set(false);
         this.renderizarGraficos();
       },
@@ -89,9 +94,14 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private atualizarResumo(pacientes: PacienteModel[], consultas: ConsultaModel[]) {
+  private atualizarResumo(
+    pacientes: PacienteModel[],
+    dentistas: DentistaResponseModel[],
+    consultas: ConsultaModel[]
+  ) {
     this.totalPacientes.set(pacientes.length);
     this.pacientesRecentes.set(this.montarPacientesRecentes(pacientes));
+    this.rankingDentistas.set(this.montarRankingDentistas(dentistas, consultas));
     this.pacientesAdicionadosMes.set(
       pacientes.filter(paciente => this.dataNoMesAtual(paciente.dataCriacao)).length
     );
@@ -109,10 +119,6 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.consultasAgendadas.set(this.contarConsultasPorStatus(consultas, 'AGENDADA'));
     this.consultasCanceladas.set(this.contarConsultasPorStatus(consultas, 'CANCELADA'));
     this.consultasFinalizadas.set(this.contarConsultasPorStatus(consultas, 'FINALIZADA'));
-  }
-
-  rankingDentistas() {
-    return this.montarRankingDentistas();
   }
 
   formatarDataPaciente(data?: string) {
@@ -197,7 +203,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.dentistasChart?.destroy();
 
-    const totaisPorDentista = this.montarRankingDentistas();
+    const totaisPorDentista = this.rankingDentistas();
 
     const labels = totaisPorDentista.length
       ? totaisPorDentista.map(item => item.nome)
@@ -348,12 +354,12 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.cancelamentosChart = new Chart(canvas, config);
   }
 
-  private montarRankingDentistas() {
-    return this.dentistas
+  private montarRankingDentistas(dentistas: DentistaResponseModel[], consultas: ConsultaModel[]) {
+    return dentistas
       .map(dentista => ({
         id: dentista.id,
         nome: dentista.nome,
-        total: this.consultas.filter(consulta => consulta.dentistaId === dentista.id).length
+        total: consultas.filter(consulta => consulta.dentistaId === dentista.id).length
       }))
       .filter(item => item.total > 0)
       .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome))
