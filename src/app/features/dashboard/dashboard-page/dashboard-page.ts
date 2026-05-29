@@ -20,6 +20,7 @@ Chart.register(...registerables);
 export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('statusChart') statusChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('dentistasChart') dentistasChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('mensalChart') mensalChartRef?: ElementRef<HTMLCanvasElement>;
 
   carregando = signal(true);
   erro = signal('');
@@ -37,6 +38,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   private graficosProntos = false;
   private statusChart?: Chart;
   private dentistasChart?: Chart;
+  private mensalChart?: Chart;
 
   constructor(
     private pacienteService: PacienteService,
@@ -56,6 +58,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.statusChart?.destroy();
     this.dentistasChart?.destroy();
+    this.mensalChart?.destroy();
   }
 
   carregarDados() {
@@ -132,6 +135,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.renderizarGraficoStatus();
     this.renderizarGraficoDentistas();
+    this.renderizarGraficoMensal();
   }
 
   private renderizarGraficoStatus() {
@@ -225,5 +229,92 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     };
 
     this.dentistasChart = new Chart(canvas, config);
+  }
+
+  private renderizarGraficoMensal() {
+    const canvas = this.mensalChartRef?.nativeElement;
+    if (!canvas) return;
+
+    this.mensalChart?.destroy();
+
+    const meses = this.montarUltimosMeses(6);
+
+    const config: ChartConfiguration<'bar'> = {
+      type: 'bar',
+      data: {
+        labels: meses.map(mes => mes.rotulo),
+        datasets: [
+          {
+            label: 'Agendadas',
+            data: meses.map(mes => this.contarConsultasNoMes(mes.data, 'AGENDADA')),
+            backgroundColor: '#2563eb',
+            borderRadius: 6
+          },
+          {
+            label: 'Finalizadas',
+            data: meses.map(mes => this.contarConsultasNoMes(mes.data, 'FINALIZADA')),
+            backgroundColor: '#16a34a',
+            borderRadius: 6
+          },
+          {
+            label: 'Canceladas',
+            data: meses.map(mes => this.contarConsultasNoMes(mes.data, 'CANCELADA')),
+            backgroundColor: '#dc2626',
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            stacked: true
+          },
+          y: {
+            beginAtZero: true,
+            stacked: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    };
+
+    this.mensalChart = new Chart(canvas, config);
+  }
+
+  private montarUltimosMeses(quantidade: number) {
+    const hoje = new Date();
+
+    return Array.from({ length: quantidade }, (_, index) => {
+      const data = new Date(hoje.getFullYear(), hoje.getMonth() - (quantidade - 1 - index), 1);
+
+      return {
+        data,
+        rotulo: new Intl.DateTimeFormat('pt-BR', {
+          month: 'short',
+          year: '2-digit'
+        }).format(data)
+      };
+    });
+  }
+
+  private contarConsultasNoMes(data: Date, status: StatusConsulta) {
+    return this.consultas.filter(consulta => {
+      const inicio = new Date(consulta.dataInicio);
+
+      return (
+        consulta.status === status &&
+        inicio.getFullYear() === data.getFullYear() &&
+        inicio.getMonth() === data.getMonth()
+      );
+    }).length;
   }
 }
