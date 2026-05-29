@@ -2,7 +2,7 @@
   <header class="page-header">
     <div>
       <h1>Dashboard</h1>
-      <p>Visão geral dos pacientes, profissionais e consultas.</p>
+      <p>Visão geral dos pacientes e consultas da clínica.</p>
     </div>
 
     <button type="button" class="secondary-button" (click)="carregarDados()">
@@ -20,33 +20,27 @@
 
   <section class="summary-grid">
     <article class="summary-card">
-      <span>Pacientes</span>
+      <span>Pacientes cadastrados</span>
       <strong>{{ totalPacientes() }}</strong>
+      <small>Total</small>
     </article>
 
     <article class="summary-card">
-      <span>Dentistas ativos</span>
-      <strong>{{ totalDentistasAtivos() }}</strong>
+      <span>Pacientes adicionados</span>
+      <strong>{{ pacientesAdicionadosMes() }}</strong>
+      <small>No mês atual</small>
     </article>
 
     <article class="summary-card">
-      <span>Consultas</span>
-      <strong>{{ totalConsultas() }}</strong>
+      <span>Consultas hoje</span>
+      <strong>{{ consultasHoje() }}</strong>
+      <small>Agendadas ou finalizadas</small>
     </article>
 
     <article class="summary-card">
-      <span>Agendadas</span>
-      <strong>{{ consultasAgendadas() }}</strong>
-    </article>
-
-    <article class="summary-card">
-      <span>Canceladas</span>
-      <strong>{{ consultasCanceladas() }}</strong>
-    </article>
-
-    <article class="summary-card">
-      <span>Finalizadas</span>
-      <strong>{{ consultasFinalizadas() }}</strong>
+      <span>Consultas canceladas</span>
+      <strong>{{ consultasCanceladasMes() }}</strong>
+      <small>No mês atual</small>
     </article>
   </section>
 

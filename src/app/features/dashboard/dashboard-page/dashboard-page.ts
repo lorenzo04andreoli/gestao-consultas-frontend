@@ -25,8 +25,9 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   erro = signal('');
 
   totalPacientes = signal(0);
-  totalDentistasAtivos = signal(0);
-  totalConsultas = signal(0);
+  pacientesAdicionadosMes = signal(0);
+  consultasHoje = signal(0);
+  consultasCanceladasMes = signal(0);
   consultasAgendadas = signal(0);
   consultasCanceladas = signal(0);
   consultasFinalizadas = signal(0);
@@ -69,7 +70,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
       next: ({ pacientes, dentistas, consultas }) => {
         this.consultas = consultas;
         this.dentistas = dentistas;
-        this.atualizarResumo(pacientes, dentistas, consultas);
+        this.atualizarResumo(pacientes, consultas);
         this.carregando.set(false);
         this.renderizarGraficos();
       },
@@ -80,14 +81,22 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private atualizarResumo(
-    pacientes: PacienteModel[],
-    dentistas: DentistaResponseModel[],
-    consultas: ConsultaModel[]
-  ) {
+  private atualizarResumo(pacientes: PacienteModel[], consultas: ConsultaModel[]) {
     this.totalPacientes.set(pacientes.length);
-    this.totalDentistasAtivos.set(dentistas.filter(dentista => dentista.ativo).length);
-    this.totalConsultas.set(consultas.length);
+    this.pacientesAdicionadosMes.set(
+      pacientes.filter(paciente => this.dataNoMesAtual(paciente.dataCriacao)).length
+    );
+    this.consultasHoje.set(
+      consultas.filter(consulta =>
+        this.dataHoje(consulta.dataInicio) &&
+        ['AGENDADA', 'FINALIZADA'].includes(consulta.status)
+      ).length
+    );
+    this.consultasCanceladasMes.set(
+      consultas.filter(consulta =>
+        consulta.status === 'CANCELADA' && this.dataNoMesAtual(consulta.dataInicio)
+      ).length
+    );
     this.consultasAgendadas.set(this.contarConsultasPorStatus(consultas, 'AGENDADA'));
     this.consultasCanceladas.set(this.contarConsultasPorStatus(consultas, 'CANCELADA'));
     this.consultasFinalizadas.set(this.contarConsultasPorStatus(consultas, 'FINALIZADA'));
@@ -95,6 +104,27 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
   private contarConsultasPorStatus(consultas: ConsultaModel[], status: StatusConsulta) {
     return consultas.filter(consulta => consulta.status === status).length;
+  }
+
+  private dataHoje(data?: string) {
+    if (!data) return false;
+
+    const hoje = new Date();
+    const referencia = new Date(data);
+
+    return hoje.toDateString() === referencia.toDateString();
+  }
+
+  private dataNoMesAtual(data?: string) {
+    if (!data) return false;
+
+    const hoje = new Date();
+    const referencia = new Date(data);
+
+    return (
+      hoje.getFullYear() === referencia.getFullYear() &&
+      hoje.getMonth() === referencia.getMonth()
+    );
   }
 
   private renderizarGraficos() {
