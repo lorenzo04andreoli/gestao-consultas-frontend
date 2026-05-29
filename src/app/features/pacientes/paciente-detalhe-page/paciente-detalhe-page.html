@@ -36,8 +36,8 @@
         @if (paciente.id) {
           <a
             class="primary-button"
-            routerLink="/pacientes/listar"
-            [queryParams]="{ editar: paciente.id }"
+            [routerLink]="['/pacientes', paciente.id, 'editar']"
+            [queryParams]="{ origem: 'ficha' }"
           >
             Editar paciente
           </a>

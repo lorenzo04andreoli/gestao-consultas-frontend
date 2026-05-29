@@ -199,9 +199,7 @@ table {
 }
 
 .primary-button,
-.secondary-button,
-.danger-button,
-.close-button {
+.secondary-button {
   border: none;
   cursor: pointer;
   border-radius: 8px;
@@ -223,127 +221,18 @@ table {
   padding: 10px 14px;
 }
 
-.danger-button {
-  background: #dc2626;
-  color: #fff;
-  padding: 10px 14px;
-}
-
-.close-button {
-  width: 36px;
-  height: 36px;
-  font-size: 24px;
-  background: transparent;
-  color: #555;
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  z-index: 1000;
-}
-
-.modal {
-  width: min(760px, 100%);
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-
-  h2 {
-    margin: 0;
-  }
-
-  p {
-    margin: 6px 0 0;
-    color: #666;
-  }
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  label {
-    font-weight: 500;
-  }
-
-  input {
-    padding: 11px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    outline: none;
-
-    &:focus {
-      border-color: #2563eb;
-    }
-  }
-
-  small {
-    color: #64748b;
-    font-size: 0.78rem;
-  }
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.right-actions {
-  display: flex;
-  gap: 12px;
-}
-
 @media (max-width: 700px) {
   .page-header {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
   .filters-card {
     grid-template-columns: 1fr;
   }
 
-  .modal-actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-
-  .right-actions {
-    width: 100%;
-    flex-direction: column-reverse;
-  }
-
   .primary-button,
-  .secondary-button,
-  .danger-button {
+  .secondary-button {
     width: 100%;
   }
 }

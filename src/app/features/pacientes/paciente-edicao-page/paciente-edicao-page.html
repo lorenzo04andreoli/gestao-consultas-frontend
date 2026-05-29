@@ -1,0 +1,94 @@
+<section class="page">
+  <header class="page-header">
+    <a class="back-button" [routerLink]="voltarPara" aria-label="Voltar">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+    </a>
+
+    <div>
+      <h1>Editar paciente</h1>
+      <p>Atualize os dados cadastrais do paciente.</p>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <section class="form-card">
+      <p class="muted">Carregando paciente...</p>
+    </section>
+  } @else {
+    <form class="form-card" (ngSubmit)="salvar()">
+      <section class="form-section">
+        <header>
+          <h2>Dados pessoais</h2>
+          <p>Essas informações serão usadas na busca, ficha e agendamentos.</p>
+        </header>
+
+        <div class="form-grid">
+          <div class="form-group span-2">
+            <label for="nome">Nome completo</label>
+            <input
+              id="nome"
+              type="text"
+              name="nome"
+              [(ngModel)]="pacienteForm.nome"
+              autocomplete="name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-mail</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              [(ngModel)]="pacienteForm.email"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cpf">CPF</label>
+            <input
+              id="cpf"
+              type="text"
+              name="cpf"
+              [ngModel]="pacienteForm.cpf"
+              (ngModelChange)="atualizarCpf($event)"
+              inputmode="numeric"
+              maxlength="14"
+              placeholder="000.000.000-00"
+              required
+            />
+            <small>Use 11 dígitos.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="telefone">Telefone</label>
+            <input
+              id="telefone"
+              type="text"
+              name="telefone"
+              [ngModel]="pacienteForm.telefone"
+              (ngModelChange)="atualizarTelefone($event)"
+              inputmode="tel"
+              maxlength="15"
+              placeholder="(00) 00000-0000"
+            />
+          </div>
+        </div>
+      </section>
+
+      <footer class="form-actions">
+        <a class="secondary-button" [routerLink]="voltarPara">Cancelar</a>
+        <button type="submit" class="primary-button" [disabled]="salvando()">
+          {{ salvando() ? 'Salvando...' : 'Salvar alterações' }}
+        </button>
+      </footer>
+    </form>
+  }
+</section>

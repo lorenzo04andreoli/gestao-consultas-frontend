@@ -1,15 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  criarPacienteForm,
-  extrairMensagemErro,
-  formatarCpf,
-  formatarTelefone,
-  montarPacienteForm,
-  montarPacientePayload,
-  validarPacienteForm
-} from '../paciente-form';
+import { RouterLink } from '@angular/router';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
 
@@ -25,17 +16,9 @@ export class PacientesPage implements OnInit {
 
   erro = signal('');
   sucesso = signal('');
-
-  modalAberto = signal(false);
   termoBusca = '';
-  pacienteForm = criarPacienteForm();
-  pacienteSelecionadoId: number | null = null;
 
-  constructor(
-    private pacienteService: PacienteService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
+  constructor(private pacienteService: PacienteService) {}
 
   ngOnInit() {
     this.carregarPacientes();
@@ -47,68 +30,9 @@ export class PacientesPage implements OnInit {
     this.pacienteService.listar().subscribe({
       next: (dados) => {
         this.pacientes.set(dados);
-        this.abrirPacienteDaRota(dados);
       },
       error: () => {
         this.erro.set('Erro ao carregar pacientes.');
-      }
-    });
-  }
-
-  abrirModalEdicao(paciente: PacienteModel) {
-    this.pacienteSelecionadoId = paciente.id ?? null;
-    this.pacienteForm = montarPacienteForm(paciente);
-    this.modalAberto.set(true);
-  }
-
-  fecharModal() {
-    this.modalAberto.set(false);
-    this.limparFormulario();
-  }
-
-  salvar() {
-    this.erro.set('');
-    this.sucesso.set('');
-
-    const mensagemErro = validarPacienteForm(this.pacienteForm);
-
-    if (!this.pacienteSelecionadoId || mensagemErro) {
-      this.erro.set(mensagemErro);
-      return;
-    }
-
-    this.pacienteService
-      .atualizar(this.pacienteSelecionadoId, montarPacientePayload(this.pacienteForm))
-      .subscribe({
-        next: () => {
-          this.sucesso.set('Paciente atualizado com sucesso.');
-          this.fecharModal();
-          this.carregarPacientes();
-        },
-        error: (err) => {
-          this.erro.set(extrairMensagemErro(err, 'Erro ao atualizar paciente.'));
-        }
-      });
-  }
-
-  deletarPaciente() {
-    if (!this.pacienteSelecionadoId) return;
-
-    const confirmar = confirm('Deseja realmente excluir este paciente?');
-
-    if (!confirmar) return;
-
-    this.erro.set('');
-    this.sucesso.set('');
-
-    this.pacienteService.deletar(this.pacienteSelecionadoId).subscribe({
-      next: () => {
-        this.sucesso.set('Paciente excluído com sucesso.');
-        this.fecharModal();
-        this.carregarPacientes();
-      },
-      error: () => {
-        this.erro.set('Erro ao excluir paciente.');
       }
     });
   }
@@ -134,18 +58,6 @@ export class PacientesPage implements OnInit {
     });
   }
 
-  atualizarCpf(valor: string) {
-    this.pacienteForm.cpf = formatarCpf(valor);
-  }
-
-  atualizarTelefone(valor: string) {
-    this.pacienteForm.telefone = formatarTelefone(valor);
-  }
-
-  limparFormulario() {
-    this.pacienteForm = criarPacienteForm();
-  }
-
   pacientesFiltrados() {
     const termo = this.normalizarTexto(this.termoBusca);
 
@@ -164,21 +76,6 @@ export class PacientesPage implements OnInit {
 
   limparBusca() {
     this.termoBusca = '';
-  }
-
-  private abrirPacienteDaRota(pacientes: PacienteModel[]) {
-    const id = Number(this.route.snapshot.queryParamMap.get('editar'));
-    if (!id) return;
-
-    const paciente = pacientes.find(item => item.id === id);
-    if (!paciente) return;
-
-    this.abrirModalEdicao(paciente);
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {},
-      replaceUrl: true
-    });
   }
 
   private pacienteContemTermo(paciente: PacienteModel, termo: string) {
