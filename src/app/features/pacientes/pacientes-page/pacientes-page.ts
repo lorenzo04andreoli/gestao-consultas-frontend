@@ -18,7 +18,6 @@ export class PacientesPage implements OnInit {
   sucesso = signal('');
 
   modalAberto = signal(false);
-  modoModal: 'cadastro' | 'edicao' = 'cadastro';
   termoBusca = '';
 
   pacienteForm: PacienteModel = {
@@ -54,15 +53,7 @@ export class PacientesPage implements OnInit {
     });
   }
 
-  abrirModalCadastro() {
-    this.modoModal = 'cadastro';
-    this.pacienteSelecionadoId = null;
-    this.limparFormulario();
-    this.modalAberto.set(true);
-  }
-
   abrirModalEdicao(paciente: PacienteModel) {
-    this.modoModal = 'edicao';
     this.pacienteSelecionadoId = paciente.id ?? null;
 
     this.pacienteForm = {
@@ -84,7 +75,7 @@ export class PacientesPage implements OnInit {
     this.erro.set('');
     this.sucesso.set('');
 
-    if (!this.formularioValido()) return;
+    if (!this.pacienteSelecionadoId || !this.formularioValido()) return;
 
     const payload: PacienteModel = {
       ...this.pacienteForm,
@@ -94,29 +85,14 @@ export class PacientesPage implements OnInit {
       telefone: this.apenasNumeros(this.pacienteForm.telefone)
     };
 
-    if (this.modoModal === 'edicao' && this.pacienteSelecionadoId) {
-      this.pacienteService.atualizar(this.pacienteSelecionadoId, payload).subscribe({
-        next: () => {
-          this.sucesso.set('Paciente atualizado com sucesso.');
-          this.fecharModal();
-          this.carregarPacientes();
-        },
-        error: (err) => {
-          this.erro.set(this.extrairMensagemErro(err, 'Erro ao atualizar paciente.'));
-        }
-      });
-
-      return;
-    }
-
-    this.pacienteService.criar(payload).subscribe({
+    this.pacienteService.atualizar(this.pacienteSelecionadoId, payload).subscribe({
       next: () => {
-        this.sucesso.set('Paciente cadastrado com sucesso.');
+        this.sucesso.set('Paciente atualizado com sucesso.');
         this.fecharModal();
         this.carregarPacientes();
       },
       error: (err) => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao cadastrar paciente.'));
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao atualizar paciente.'));
       }
     });
   }

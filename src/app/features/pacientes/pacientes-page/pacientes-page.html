@@ -133,15 +133,8 @@
       <section class="modal" (click)="$event.stopPropagation()">
         <header class="modal-header">
           <div>
-            <h2>
-              {{ modoModal === 'cadastro' ? 'Cadastrar paciente' : 'Editar paciente' }}
-            </h2>
-
-            <p>
-              {{ modoModal === 'cadastro'
-                ? 'Preencha os dados para cadastrar um novo paciente.'
-                : 'Atualize os dados do paciente selecionado.' }}
-            </p>
+            <h2>Editar paciente</h2>
+            <p>Atualize os dados do paciente selecionado.</p>
           </div>
 
           <button type="button" class="close-button" (click)="fecharModal()">
@@ -203,11 +196,9 @@
           </div>
 
           <footer class="modal-actions">
-            @if (modoModal === 'edicao') {
-              <button type="button" class="danger-button" (click)="deletarPaciente()">
-                Excluir paciente
-              </button>
-            }
+            <button type="button" class="danger-button" (click)="deletarPaciente()">
+              Excluir paciente
+            </button>
 
             <div class="right-actions">
               <button type="button" class="secondary-button" (click)="fecharModal()">
@@ -215,7 +206,7 @@
               </button>
 
               <button type="submit" class="primary-button">
-                {{ modoModal === 'cadastro' ? 'Cadastrar' : 'Salvar alterações' }}
+                Salvar alterações
               </button>
             </div>
           </footer>
