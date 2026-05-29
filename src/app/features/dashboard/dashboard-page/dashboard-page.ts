@@ -42,6 +42,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   consultasFinalizadas = signal(0);
   pacientesRecentes = signal<PacienteModel[]>([]);
   rankingDentistas = signal<RankingDentista[]>([]);
+  proximasConsultas = signal<ConsultaModel[]>([]);
 
   private consultas: ConsultaModel[] = [];
   private graficosProntos = false;
@@ -102,6 +103,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.totalPacientes.set(pacientes.length);
     this.pacientesRecentes.set(this.montarPacientesRecentes(pacientes));
     this.rankingDentistas.set(this.montarRankingDentistas(dentistas, consultas));
+    this.proximasConsultas.set(this.montarProximasConsultas(consultas));
     this.pacientesAdicionadosMes.set(
       pacientes.filter(paciente => this.dataNoMesAtual(paciente.dataCriacao)).length
     );
@@ -125,6 +127,17 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     if (!data) return 'Sem data';
 
     return new Intl.DateTimeFormat('pt-BR').format(new Date(data));
+  }
+
+  formatarDataConsulta(data?: string) {
+    if (!data) return '-';
+
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(data));
   }
 
   private contarConsultasPorStatus(consultas: ConsultaModel[], status: StatusConsulta) {
@@ -369,6 +382,18 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   private montarPacientesRecentes(pacientes: PacienteModel[]) {
     return [...pacientes]
       .sort((a, b) => this.timestampData(b.dataCriacao) - this.timestampData(a.dataCriacao))
+      .slice(0, 5);
+  }
+
+  private montarProximasConsultas(consultas: ConsultaModel[]) {
+    const agora = new Date().getTime();
+
+    return consultas
+      .filter(consulta =>
+        consulta.status === 'AGENDADA' &&
+        this.timestampData(consulta.dataInicio) >= agora
+      )
+      .sort((a, b) => this.timestampData(a.dataInicio) - this.timestampData(b.dataInicio))
       .slice(0, 5);
   }
 

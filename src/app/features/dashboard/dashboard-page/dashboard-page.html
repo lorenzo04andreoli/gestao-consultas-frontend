@@ -103,6 +103,29 @@
       }
     </article>
 
+    <article class="chart-panel">
+      <header>
+        <h2>Próximas consultas</h2>
+        <p>Agenda futura mais próxima.</p>
+      </header>
+
+      @if (proximasConsultas().length) {
+        <div class="appointment-list">
+          @for (consulta of proximasConsultas(); track consulta.id) {
+            <a routerLink="/consultas">
+              <span>
+                <strong>{{ consulta.pacienteNome }}</strong>
+                <small>{{ consulta.dentistaNome }}</small>
+              </span>
+              <em>{{ formatarDataConsulta(consulta.dataInicio) }}</em>
+            </a>
+          }
+        </div>
+      } @else {
+        <p class="empty-state">Nenhuma consulta futura agendada.</p>
+      }
+    </article>
+
     <article class="chart-panel chart-panel-wide">
       <header>
         <h2>Consultas dos últimos 6 meses</h2>
