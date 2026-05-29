@@ -100,10 +100,12 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     dentistas: DentistaResponseModel[],
     consultas: ConsultaModel[]
   ) {
+    this.atualizarIndicadores(pacientes, consultas);
+    this.atualizarListas(pacientes, dentistas, consultas);
+  }
+
+  private atualizarIndicadores(pacientes: PacienteModel[], consultas: ConsultaModel[]) {
     this.totalPacientes.set(pacientes.length);
-    this.pacientesRecentes.set(this.montarPacientesRecentes(pacientes));
-    this.rankingDentistas.set(this.montarRankingDentistas(dentistas, consultas));
-    this.proximasConsultas.set(this.montarProximasConsultas(consultas));
     this.pacientesAdicionadosMes.set(
       pacientes.filter(paciente => this.dataNoMesAtual(paciente.dataCriacao)).length
     );
@@ -121,6 +123,16 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.consultasAgendadas.set(this.contarConsultasPorStatus(consultas, 'AGENDADA'));
     this.consultasCanceladas.set(this.contarConsultasPorStatus(consultas, 'CANCELADA'));
     this.consultasFinalizadas.set(this.contarConsultasPorStatus(consultas, 'FINALIZADA'));
+  }
+
+  private atualizarListas(
+    pacientes: PacienteModel[],
+    dentistas: DentistaResponseModel[],
+    consultas: ConsultaModel[]
+  ) {
+    this.pacientesRecentes.set(this.montarPacientesRecentes(pacientes));
+    this.rankingDentistas.set(this.montarRankingDentistas(dentistas, consultas));
+    this.proximasConsultas.set(this.montarProximasConsultas(consultas));
   }
 
   formatarDataPaciente(data?: string) {
