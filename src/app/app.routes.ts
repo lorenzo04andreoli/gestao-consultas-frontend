@@ -59,9 +59,37 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'dentistas',
+        path: 'dentistas/listar',
         loadComponent: () =>
           import('./features/dentistas/dentistas-page/dentistas-page').then(m => m.DentistasPage)
+      },
+      {
+        path: 'dentistas/pesquisar',
+        loadComponent: () =>
+          import('./features/dentistas/dentistas-pesquisar-page/dentistas-pesquisar-page').then(
+            m => m.DentistasPesquisarPage
+          )
+      },
+      {
+        path: 'dentistas/cadastrar',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/dentistas/dentista-cadastro-page/dentista-cadastro-page').then(
+            m => m.DentistaCadastroPage
+          )
+      },
+      {
+        path: 'dentistas/:id/editar',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/dentistas/dentista-edicao-page/dentista-edicao-page').then(
+            m => m.DentistaEdicaoPage
+          )
+      },
+      {
+        path: 'dentistas',
+        redirectTo: 'dentistas/listar',
+        pathMatch: 'full'
       },
       {
         path: 'especialidades',

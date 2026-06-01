@@ -1,0 +1,111 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Pesquisar dentistas</h1>
+      <p>Encontre profissionais por nome, e-mail, CPF, CRO ou especialidade.</p>
+    </div>
+
+    @if (authService.isAdmin()) {
+      <a
+        class="primary-button"
+        routerLink="/dentistas/cadastrar"
+        [queryParams]="{ origem: 'pesquisar' }"
+      >
+        Cadastrar dentista
+      </a>
+    }
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  <section class="search-card" [class.results-open]="resultadosAbertos()">
+    <div class="search-field">
+      <label for="buscaDentista">Buscar dentista</label>
+      <div class="search-control" (focusout)="fecharResultados()">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input
+          id="buscaDentista"
+          type="search"
+          name="buscaDentista"
+          placeholder="Digite nome, e-mail, CPF, CRO ou especialidade"
+          [ngModel]="termoBusca()"
+          (ngModelChange)="atualizarBusca($event)"
+          (focus)="abrirResultados()"
+          (click)="abrirResultados()"
+          autocomplete="off"
+        />
+        @if (termoBusca()) {
+          <button type="button" class="clear-button" aria-label="Limpar busca" (click)="limparBusca()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+
+      @if (resultadosAbertos()) {
+        <section class="results-panel">
+          <header class="results-header">
+            <strong>Resultados</strong>
+            <span>
+              @if (carregando()) {
+                Carregando dentistas...
+              } @else {
+                {{ dentistasFiltrados().length }} dentista(s) encontrado(s)
+              }
+            </span>
+          </header>
+
+          <div class="results-list">
+            @for (dentista of dentistasFiltrados(); track dentista.id) {
+              @if (authService.isAdmin()) {
+                <a
+                  class="dentist-result"
+                  [routerLink]="['/dentistas', dentista.id, 'editar']"
+                  [queryParams]="{ origem: 'pesquisar' }"
+                >
+                  <ng-container
+                    [ngTemplateOutlet]="dentistaResultado"
+                    [ngTemplateOutletContext]="{ dentista: dentista }"
+                  />
+                </a>
+              } @else {
+                <div class="dentist-result">
+                  <ng-container
+                    [ngTemplateOutlet]="dentistaResultado"
+                    [ngTemplateOutletContext]="{ dentista: dentista }"
+                  />
+                </div>
+              }
+            } @empty {
+              <p class="empty-state">
+                @if (termoBusca()) {
+                  Nenhum dentista encontrado para essa busca.
+                } @else {
+                  Nenhum dentista cadastrado.
+                }
+              </p>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  </section>
+</section>
+
+<ng-template #dentistaResultado let-dentista="dentista">
+  <span class="avatar">{{ inicialDentista(dentista) }}</span>
+
+  <span class="dentist-info">
+    <strong>{{ dentista.nome }}</strong>
+    <small>
+      <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+      {{ dentista.email }}
+    </small>
+  </span>
+
+  <span class="dentist-meta">
+    <span>CRO {{ dentista.cro }}</span>
+    <span>{{ dentista.especialidades.join(', ') || 'Sem especialidade' }}</span>
+  </span>
+</ng-template>

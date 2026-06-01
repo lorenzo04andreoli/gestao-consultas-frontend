@@ -1,0 +1,102 @@
+<section class="page">
+  <header class="page-header">
+    <a class="back-button" [routerLink]="voltarPara" aria-label="Voltar">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+    </a>
+
+    <div>
+      <h1>Cadastrar dentista</h1>
+      <p>Preencha os dados profissionais e crie o acesso inicial.</p>
+    </div>
+  </header>
+
+  @if (erro) {
+    <p class="alert error">{{ erro }}</p>
+  }
+
+  <form class="form-card" (ngSubmit)="salvar()">
+    <section class="form-section">
+      <header>
+        <h2>Dados profissionais</h2>
+        <p>Essas informações serão usadas na agenda, busca e relatórios.</p>
+      </header>
+
+      <div class="form-grid">
+        <div class="form-group span-2">
+          <label for="nome">Nome completo</label>
+          <input id="nome" type="text" name="nome" [(ngModel)]="dentistaForm.nome" autocomplete="name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input id="email" type="email" name="email" [(ngModel)]="dentistaForm.email" autocomplete="email" required />
+        </div>
+
+        <div class="form-group">
+          <label for="cpf">CPF</label>
+          <input
+            id="cpf"
+            type="text"
+            name="cpf"
+            [ngModel]="dentistaForm.cpf"
+            (ngModelChange)="atualizarCpf($event)"
+            inputmode="numeric"
+            maxlength="14"
+            placeholder="000.000.000-00"
+            required
+          />
+          <small>Use 11 dígitos.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="cro">CRO</label>
+          <input id="cro" type="text" name="cro" [(ngModel)]="dentistaForm.cro" required />
+        </div>
+
+        <div class="form-group">
+          <label for="senha">Senha inicial</label>
+          <input id="senha" type="password" name="senha" [(ngModel)]="dentistaForm.senha" required />
+        </div>
+
+        <div class="form-group">
+          <label for="ativo">Status</label>
+          <select id="ativo" name="ativo" [(ngModel)]="dentistaForm.ativo">
+            <option [ngValue]="true">Ativo</option>
+            <option [ngValue]="false">Inativo</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <header>
+        <h2>Especialidades</h2>
+        <p>Selecione ao menos uma especialidade atendida pelo profissional.</p>
+      </header>
+
+      <div class="checkbox-grid">
+        @for (especialidade of especialidades; track especialidade.id ?? especialidade.nome) {
+          @if (especialidade.id) {
+            <label class="checkbox-option">
+              <input
+                type="checkbox"
+                [checked]="especialidadeSelecionada(especialidade.id)"
+                (change)="alternarEspecialidade(especialidade.id, $any($event.target).checked)"
+              />
+              {{ especialidade.nome }}
+            </label>
+          }
+        } @empty {
+          <p class="muted">Nenhuma especialidade cadastrada.</p>
+        }
+      </div>
+    </section>
+
+    <footer class="form-actions">
+      <a class="secondary-button" [routerLink]="voltarPara">Cancelar</a>
+      <button type="submit" class="primary-button" [disabled]="salvando">
+        {{ salvando ? 'Salvando...' : 'Cadastrar dentista' }}
+      </button>
+    </footer>
+  </form>
+</section>

@@ -1,14 +1,18 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Dentistas</h1>
-      <p>Gerencie os profissionais, acessos e especialidades.</p>
+      <h1>Listar dentistas</h1>
+      <p>Consulte, cadastre e atualize os profissionais da clínica.</p>
     </div>
 
     @if (authService.isAdmin()) {
-      <button type="button" class="primary-button" (click)="abrirModalCadastro()">
+      <a
+        class="primary-button"
+        routerLink="/dentistas/cadastrar"
+        [queryParams]="{ origem: 'listar' }"
+      >
         Cadastrar dentista
-      </button>
+      </a>
     }
   </header>
 
@@ -20,15 +24,43 @@
     <p class="alert success">{{ sucesso() }}</p>
   }
 
+  <section class="filters-card">
+    <div class="form-field">
+      <label for="buscaDentista">Pesquisar dentista</label>
+      <div class="search-input">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input
+          id="buscaDentista"
+          type="search"
+          name="buscaDentista"
+          placeholder="Nome, e-mail, CPF, CRO ou especialidade"
+          [(ngModel)]="termoBusca"
+        />
+      </div>
+    </div>
+
+    <button type="button" class="secondary-button" (click)="limparBusca()">
+      Limpar
+    </button>
+  </section>
+
   <div class="table-card">
+    <header class="table-header">
+      <div>
+        <h2>Dentistas cadastrados</h2>
+        <p>
+          {{ totalDentistasFiltrados() }}
+          {{ totalDentistasFiltrados() === 1 ? 'dentista encontrado' : 'dentistas encontrados' }}
+        </p>
+      </div>
+    </header>
+
     <table>
       <thead>
         <tr>
           <th>Nome</th>
-          <th>CPF</th>
           <th>E-mail</th>
           <th>CRO</th>
-          <th>Conta</th>
           <th>Especialidades</th>
           <th>Status</th>
           @if (authService.isAdmin()) {
@@ -38,14 +70,27 @@
       </thead>
 
       <tbody>
-        @for (dentista of dentistas(); track dentista.id) {
+        @for (dentista of dentistasFiltrados(); track dentista.id) {
           <tr>
-            <td>{{ dentista.nome }}</td>
-            <td>{{ dentista.cpf || '-' }}</td>
-            <td>{{ dentista.email }}</td>
+            <td>
+              <span class="dentist-link">
+                <span class="dentist-avatar">{{ inicialDentista(dentista) }}</span>
+                <span>{{ dentista.nome }}</span>
+              </span>
+            </td>
+            <td>
+              <span class="muted-cell">
+                <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                {{ dentista.email }}
+              </span>
+            </td>
             <td>{{ dentista.cro }}</td>
-            <td>{{ dentista.usuarioId ? 'ID ' + dentista.usuarioId : '-' }}</td>
-            <td>{{ dentista.especialidades.join(', ') || '-' }}</td>
+            <td>
+              <span class="muted-cell">
+                <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
+                {{ dentista.especialidades.join(', ') || '-' }}
+              </span>
+            </td>
             <td>
               <span class="status" [class.inactive]="!dentista.ativo">
                 {{ dentista.ativo ? 'Ativo' : 'Inativo' }}
@@ -54,13 +99,23 @@
             @if (authService.isAdmin()) {
               <td>
                 <div class="row-actions">
-                  <button type="button" class="secondary-button compact" (click)="abrirModalEdicao(dentista)">
-                    Editar
-                  </button>
+                  <a
+                    class="icon-button"
+                    [routerLink]="['/dentistas', dentista.id, 'editar']"
+                    [queryParams]="{ origem: 'listar' }"
+                    title="Editar dentista"
+                  >
+                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                  </a>
 
                   @if (dentista.ativo) {
-                    <button type="button" class="danger-button compact" (click)="desativarDentista(dentista)">
-                      Desativar
+                    <button
+                      type="button"
+                      class="icon-button danger-icon"
+                      title="Desativar dentista"
+                      (click)="desativarDentista(dentista)"
+                    >
+                      <i class="fa-regular fa-circle-xmark" aria-hidden="true"></i>
                     </button>
                   } @else {
                     <span class="muted">Desativado</span>
@@ -71,99 +126,12 @@
           </tr>
         } @empty {
           <tr>
-            <td [attr.colspan]="authService.isAdmin() ? 8 : 7" class="empty-state">
-              Nenhum dentista cadastrado.
+            <td [attr.colspan]="authService.isAdmin() ? 6 : 5" class="empty-state">
+              Nenhum dentista encontrado.
             </td>
           </tr>
         }
       </tbody>
     </table>
   </div>
-
-  @if (modalAberto()) {
-    <div class="modal-backdrop" (click)="fecharModal()">
-      <section class="modal" (click)="$event.stopPropagation()">
-        <header class="modal-header">
-          <div>
-            <h2>{{ modoModal === 'cadastro' ? 'Cadastrar dentista' : 'Editar dentista' }}</h2>
-            <p>{{ modoModal === 'cadastro' ? 'Crie o acesso do dentista e selecione suas especialidades.' : 'Atualize dados profissionais e especialidades.' }}</p>
-          </div>
-
-          <button type="button" class="close-button" (click)="fecharModal()">
-            &times;
-          </button>
-        </header>
-
-        <form (ngSubmit)="salvar()">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Nome</label>
-              <input type="text" name="nome" [(ngModel)]="dentistaForm.nome" required />
-            </div>
-
-            <div class="form-group">
-              <label>CPF</label>
-              <input type="text" name="cpf" [(ngModel)]="dentistaForm.cpf" required />
-            </div>
-
-            <div class="form-group">
-              <label>E-mail</label>
-              <input type="email" name="email" [(ngModel)]="dentistaForm.email" required />
-            </div>
-
-            @if (modoModal === 'cadastro') {
-              <div class="form-group">
-                <label>Senha inicial</label>
-                <input type="password" name="senha" [(ngModel)]="dentistaForm.senha" required />
-              </div>
-            }
-
-            <div class="form-group">
-              <label>CRO</label>
-              <input type="text" name="cro" [(ngModel)]="dentistaForm.cro" required />
-            </div>
-
-            <div class="form-group">
-              <label>Status</label>
-              <select name="ativo" [(ngModel)]="dentistaForm.ativo">
-                <option [ngValue]="true">Ativo</option>
-                <option [ngValue]="false">Inativo</option>
-              </select>
-            </div>
-          </div>
-
-          <fieldset class="checkbox-group">
-            <legend>Especialidades</legend>
-
-            @for (especialidade of especialidades(); track especialidade.id ?? especialidade.nome) {
-              @if (especialidade.id) {
-                <label>
-                  <input
-                    type="checkbox"
-                    [checked]="especialidadeSelecionada(especialidade.id)"
-                    (change)="alternarEspecialidade(especialidade.id, $any($event.target).checked)"
-                  />
-                  {{ especialidade.nome }}
-                </label>
-              }
-            } @empty {
-              <span class="muted">Nenhuma especialidade cadastrada.</span>
-            }
-          </fieldset>
-
-          <footer class="modal-actions end">
-            <div class="right-actions">
-              <button type="button" class="secondary-button" (click)="fecharModal()">
-                Cancelar
-              </button>
-
-              <button type="submit" class="primary-button">
-                {{ modoModal === 'cadastro' ? 'Cadastrar' : 'Salvar alterações' }}
-              </button>
-            </div>
-          </footer>
-        </form>
-      </section>
-    </div>
-  }
 </section>

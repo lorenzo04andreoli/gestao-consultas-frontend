@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { API_URL } from '../../core/api';
 import {
   DentistaAtualizacaoRequestModel,
-  DentistaModel,
   DentistaRequestModel,
   DentistaResponseModel
 } from './dentista.model';
@@ -25,11 +24,15 @@ export class DentistaService {
   }
 
   buscarPorId(id: number) {
-    return this.http.get<DentistaModel>(`${this.apiUrl}/${id}`);
+    return this.http.get<DentistaResponseModel>(`${this.apiUrl}/${id}`);
   }
 
   atualizar(id: number, dentista: DentistaAtualizacaoRequestModel) {
     return this.http.put<DentistaResponseModel>(`${this.apiUrl}/${id}`, dentista);
+  }
+
+  desativar(id: number) {
+    return this.http.put<DentistaResponseModel>(`${this.apiUrl}/${id}/desativar`, {});
   }
 
   deletar(id: number) {
