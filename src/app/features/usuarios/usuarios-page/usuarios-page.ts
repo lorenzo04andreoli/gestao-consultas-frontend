@@ -23,7 +23,7 @@ export class UsuariosPage implements OnInit {
     cpf: '',
     email: '',
     senha: '',
-    perfil: 'DENTISTA'
+    perfil: 'ADMIN'
   };
 
   constructor(private usuarioService: UsuarioService) {}
@@ -94,7 +94,7 @@ export class UsuariosPage implements OnInit {
       cpf: '',
       email: '',
       senha: '',
-      perfil: 'DENTISTA'
+      perfil: 'ADMIN'
     };
   }
 

@@ -28,12 +28,17 @@ export interface DentistaRequestModel {
   nome: string;
   cpf: string;
   email: string;
+  senha: string;
   cro: string;
   ativo: boolean;
-  usuario: {
-    id: number;
-  };
-  especialidades: Array<{
-    id: number;
-  }>;
+  especialidadeIds: number[];
+}
+
+export interface DentistaAtualizacaoRequestModel {
+  nome: string;
+  cpf: string;
+  email: string;
+  cro: string;
+  ativo: boolean;
+  especialidadeIds: number[];
 }

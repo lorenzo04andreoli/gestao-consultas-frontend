@@ -87,16 +87,38 @@
       </header>
 
       @if (pacientesRecentes().length) {
-        <div class="patient-list">
-          @for (paciente of pacientesRecentes(); track paciente.id) {
-            <a [routerLink]="['/pacientes', paciente.id]" [queryParams]="{ origem: 'dashboard' }">
-              <span>
-                <strong>{{ paciente.nome }}</strong>
-                <small>{{ paciente.email }}</small>
-              </span>
-              <em>{{ formatarDataPaciente(paciente.dataCriacao) }}</em>
-            </a>
-          }
+        <div class="recent-patients-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (paciente of pacientesRecentes(); track paciente.id) {
+                <tr>
+                  <td>
+                    <a
+                      class="patient-link"
+                      [routerLink]="['/pacientes', paciente.id]"
+                      [queryParams]="{ origem: 'dashboard' }"
+                    >
+                      <span class="patient-avatar">{{ inicialPaciente(paciente.nome) }}</span>
+                      <span>{{ paciente.nome }}</span>
+                    </a>
+                  </td>
+                  <td>
+                    <span class="muted-cell">
+                      <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                      {{ paciente.email }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       } @else {
         <p class="empty-state">Nenhum paciente cadastrado.</p>

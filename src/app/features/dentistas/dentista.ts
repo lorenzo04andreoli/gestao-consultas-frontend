@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_URL } from '../../core/api';
-import { DentistaModel, DentistaRequestModel, DentistaResponseModel } from './dentista.model';
+import {
+  DentistaAtualizacaoRequestModel,
+  DentistaModel,
+  DentistaRequestModel,
+  DentistaResponseModel
+} from './dentista.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +28,7 @@ export class DentistaService {
     return this.http.get<DentistaModel>(`${this.apiUrl}/${id}`);
   }
 
-  atualizar(id: number, dentista: DentistaRequestModel) {
+  atualizar(id: number, dentista: DentistaAtualizacaoRequestModel) {
     return this.http.put<DentistaResponseModel>(`${this.apiUrl}/${id}`, dentista);
   }
 

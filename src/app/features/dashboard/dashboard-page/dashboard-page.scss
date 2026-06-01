@@ -179,7 +179,52 @@
   margin: 18px 0 0;
 }
 
-.patient-list,
+.recent-patients-table {
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    border-bottom: 1px solid #eee;
+    padding: 14px 12px;
+  }
+
+  th {
+    color: #444;
+    font-weight: 600;
+  }
+}
+
+.patient-link {
+  align-items: center;
+  color: #0f172a;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.patient-avatar {
+  background: #b7ecff;
+  border-radius: 50%;
+  color: #075985;
+  display: inline-grid;
+  flex: 0 0 36px;
+  font-weight: 800;
+  height: 36px;
+  place-items: center;
+  width: 36px;
+}
+
+.muted-cell {
+  align-items: center;
+  color: #475569;
+  display: inline-flex;
+  gap: 8px;
+}
+
 .appointment-list {
   display: grid;
   gap: 10px;
@@ -269,7 +314,6 @@
     width: 100%;
   }
 
-  .patient-list,
   .appointment-list {
     a {
       align-items: flex-start;

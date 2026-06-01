@@ -2,7 +2,7 @@
   <header class="page-header">
     <div>
       <h1>Dentistas</h1>
-      <p>Gerencie os profissionais, vínculos de usuário e especialidades.</p>
+      <p>Gerencie os profissionais, acessos e especialidades.</p>
     </div>
 
     @if (authService.isAdmin()) {
@@ -28,7 +28,7 @@
           <th>CPF</th>
           <th>E-mail</th>
           <th>CRO</th>
-          <th>Usuário vinculado</th>
+          <th>Conta</th>
           <th>Especialidades</th>
           <th>Status</th>
           @if (authService.isAdmin()) {
@@ -44,7 +44,7 @@
             <td>{{ dentista.cpf || '-' }}</td>
             <td>{{ dentista.email }}</td>
             <td>{{ dentista.cro }}</td>
-            <td>{{ usuarioVinculadoLabel(dentista.usuarioId) }}</td>
+            <td>{{ dentista.usuarioId ? 'ID ' + dentista.usuarioId : '-' }}</td>
             <td>{{ dentista.especialidades.join(', ') || '-' }}</td>
             <td>
               <span class="status" [class.inactive]="!dentista.ativo">
@@ -86,7 +86,7 @@
         <header class="modal-header">
           <div>
             <h2>{{ modoModal === 'cadastro' ? 'Cadastrar dentista' : 'Editar dentista' }}</h2>
-            <p>Vincule o profissional a um usuário dentista e às suas especialidades.</p>
+            <p>{{ modoModal === 'cadastro' ? 'Crie o acesso do dentista e selecione suas especialidades.' : 'Atualize dados profissionais e especialidades.' }}</p>
           </div>
 
           <button type="button" class="close-button" (click)="fecharModal()">
@@ -111,22 +111,16 @@
               <input type="email" name="email" [(ngModel)]="dentistaForm.email" required />
             </div>
 
+            @if (modoModal === 'cadastro') {
+              <div class="form-group">
+                <label>Senha inicial</label>
+                <input type="password" name="senha" [(ngModel)]="dentistaForm.senha" required />
+              </div>
+            }
+
             <div class="form-group">
               <label>CRO</label>
               <input type="text" name="cro" [(ngModel)]="dentistaForm.cro" required />
-            </div>
-
-            <div class="form-group">
-              <label>Usuário vinculado</label>
-              <select name="usuarioId" [(ngModel)]="dentistaForm.usuarioId" required>
-                <option [ngValue]="null">Selecione</option>
-                @for (usuario of usuariosDentistas(); track usuario.id) {
-                  <option [ngValue]="usuario.id">{{ usuario.nome }} - {{ usuario.email }}</option>
-                }
-              </select>
-              @if (usuariosDentistas().length === 0) {
-                <small>Nenhum usuário com perfil DENTISTA disponível.</small>
-              }
             </div>
 
             <div class="form-group">

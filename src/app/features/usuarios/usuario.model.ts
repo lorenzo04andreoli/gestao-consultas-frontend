@@ -15,6 +15,8 @@ export interface UsuarioModel {
 export interface UsuarioResponseModel {
   id: number;
   nome: string;
+  cpf: string;
   email: string;
   perfil: PerfilUsuario;
+  ativo: boolean;
 }

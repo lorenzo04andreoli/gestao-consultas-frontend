@@ -4,10 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth';
 import { EspecialidadeService } from '../../especialidades/especialidade';
 import { EspecialidadeModel } from '../../especialidades/especialidade.model';
-import { UsuarioService } from '../../usuarios/usuario';
-import { UsuarioResponseModel } from '../../usuarios/usuario.model';
 import { DentistaService } from '../dentista';
-import { DentistaRequestModel, DentistaResponseModel } from '../dentista.model';
+import {
+  DentistaAtualizacaoRequestModel,
+  DentistaRequestModel,
+  DentistaResponseModel
+} from '../dentista.model';
 
 @Component({
   selector: 'app-dentistas-page',
@@ -19,7 +21,6 @@ import { DentistaRequestModel, DentistaResponseModel } from '../dentista.model';
 export class DentistasPage implements OnInit {
   dentistas = signal<DentistaResponseModel[]>([]);
   especialidades = signal<EspecialidadeModel[]>([]);
-  usuariosDentistas = signal<UsuarioResponseModel[]>([]);
 
   erro = signal('');
   sucesso = signal('');
@@ -31,26 +32,21 @@ export class DentistasPage implements OnInit {
     nome: '',
     cpf: '',
     email: '',
+    senha: '',
     cro: '',
     ativo: true,
-    usuarioId: null as number | null,
     especialidadeIds: [] as number[]
   };
 
   constructor(
     public authService: AuthService,
     private dentistaService: DentistaService,
-    private especialidadeService: EspecialidadeService,
-    private usuarioService: UsuarioService
+    private especialidadeService: EspecialidadeService
   ) {}
 
   ngOnInit() {
     this.carregarDentistas();
     this.carregarEspecialidades();
-
-    if (this.authService.isAdmin()) {
-      this.carregarUsuariosDentistas();
-    }
   }
 
   carregarDentistas() {
@@ -77,22 +73,10 @@ export class DentistasPage implements OnInit {
     });
   }
 
-  carregarUsuariosDentistas() {
-    this.usuarioService.listar().subscribe({
-      next: (dados) => {
-        this.usuariosDentistas.set(dados.filter(usuario => usuario.perfil === 'DENTISTA'));
-      },
-      error: (err) => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar usuários dentistas.'));
-      }
-    });
-  }
-
   abrirModalCadastro() {
     this.modoModal = 'cadastro';
     this.dentistaSelecionadoId = null;
     this.carregarEspecialidades();
-    this.carregarUsuariosDentistas();
     this.limparFormulario();
     this.modalAberto.set(true);
   }
@@ -101,15 +85,14 @@ export class DentistasPage implements OnInit {
     this.modoModal = 'edicao';
     this.dentistaSelecionadoId = dentista.id;
     this.carregarEspecialidades();
-    this.carregarUsuariosDentistas();
 
     this.dentistaForm = {
       nome: dentista.nome,
       cpf: dentista.cpf ?? '',
       email: dentista.email,
+      senha: '',
       cro: dentista.cro,
       ativo: dentista.ativo,
-      usuarioId: dentista.usuarioId ?? null,
       especialidadeIds: this.obterEspecialidadeIdsPorNome(dentista.especialidades)
     };
 
@@ -143,8 +126,8 @@ export class DentistasPage implements OnInit {
       return;
     }
 
-    if (!this.dentistaForm.usuarioId) {
-      this.erro.set('Selecione o usuário vinculado ao dentista.');
+    if (this.modoModal === 'cadastro' && !this.dentistaForm.senha.trim()) {
+      this.erro.set('Informe a senha inicial do dentista.');
       return;
     }
 
@@ -153,10 +136,9 @@ export class DentistasPage implements OnInit {
       return;
     }
 
-    const payload = this.montarPayload(this.dentistaForm.ativo);
     const request$ = this.modoModal === 'edicao' && this.dentistaSelecionadoId
-      ? this.dentistaService.atualizar(this.dentistaSelecionadoId, payload)
-      : this.dentistaService.criar(payload);
+      ? this.dentistaService.atualizar(this.dentistaSelecionadoId, this.montarPayloadAtualizacao(this.dentistaForm.ativo))
+      : this.dentistaService.criar(this.montarPayloadCadastro(this.dentistaForm.ativo));
 
     request$.subscribe({
       next: () => {
@@ -188,21 +170,13 @@ export class DentistasPage implements OnInit {
 
     if (!confirmar) return;
 
-    if (!dentista.usuarioId) {
-      this.erro.set('Dentista sem usuário vinculado.');
-      return;
-    }
-
-    const payload: DentistaRequestModel = {
+    const payload: DentistaAtualizacaoRequestModel = {
       nome: dentista.nome,
       cpf: dentista.cpf ?? '',
       email: dentista.email,
       cro: dentista.cro,
       ativo: false,
-      usuario: {
-        id: dentista.usuarioId
-      },
-      especialidades: this.obterEspecialidadeIdsPorNome(dentista.especialidades).map(id => ({ id }))
+      especialidadeIds: this.obterEspecialidadeIdsPorNome(dentista.especialidades)
     };
 
     this.erro.set('');
@@ -219,36 +193,38 @@ export class DentistasPage implements OnInit {
     });
   }
 
-  usuarioVinculadoLabel(usuarioId?: number) {
-    if (!usuarioId) return '-';
-
-    const usuario = this.usuariosDentistas().find(item => item.id === usuarioId);
-    return usuario ? `${usuario.nome} - ${usuario.email}` : `ID ${usuarioId}`;
-  }
-
   limparFormulario() {
     this.dentistaForm = {
       nome: '',
       cpf: '',
       email: '',
+      senha: '',
       cro: '',
       ativo: true,
-      usuarioId: null,
       especialidadeIds: []
     };
   }
 
-  private montarPayload(ativo: boolean): DentistaRequestModel {
+  private montarPayloadCadastro(ativo: boolean): DentistaRequestModel {
+    return {
+      nome: this.dentistaForm.nome.trim(),
+      cpf: this.dentistaForm.cpf.trim(),
+      email: this.dentistaForm.email.trim(),
+      senha: this.dentistaForm.senha.trim(),
+      cro: this.dentistaForm.cro.trim(),
+      ativo,
+      especialidadeIds: this.dentistaForm.especialidadeIds
+    };
+  }
+
+  private montarPayloadAtualizacao(ativo: boolean): DentistaAtualizacaoRequestModel {
     return {
       nome: this.dentistaForm.nome.trim(),
       cpf: this.dentistaForm.cpf.trim(),
       email: this.dentistaForm.email.trim(),
       cro: this.dentistaForm.cro.trim(),
       ativo,
-      usuario: {
-        id: this.dentistaForm.usuarioId as number
-      },
-      especialidades: this.dentistaForm.especialidadeIds.map(id => ({ id }))
+      especialidadeIds: this.dentistaForm.especialidadeIds
     };
   }
 

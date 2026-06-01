@@ -141,6 +141,10 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     return new Intl.DateTimeFormat('pt-BR').format(new Date(data));
   }
 
+  inicialPaciente(nome?: string) {
+    return nome?.trim().charAt(0).toUpperCase() || '?';
+  }
+
   formatarDataConsulta(data?: string) {
     if (!data) return '-';
 
