@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
 import { PacienteModel } from './paciente.model';
 import { API_URL } from '../../core/api';
 
@@ -12,7 +13,15 @@ export class PacienteService {
   constructor(private http: HttpClient) {}
 
   listar() {
-    return this.http.get<PacienteModel[]>(this.apiUrl);
+    return this.http.get<PacienteModel[]>(this.apiUrl).pipe(
+      map(pacientes => pacientes.filter(paciente => paciente.ativo !== false))
+    );
+  }
+
+  listarArquivados() {
+    return this.http.get<PacienteModel[]>(this.apiUrl).pipe(
+      map(pacientes => pacientes.filter(paciente => paciente.ativo === false))
+    );
   }
 
   buscarPorId(id: number) {
@@ -28,6 +37,10 @@ export class PacienteService {
   }
 
   deletar(id: number) {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<PacienteModel>(`${this.apiUrl}/${id}`);
+  }
+
+  desativar(id: number) {
+    return this.http.put<PacienteModel>(`${this.apiUrl}/${id}/desativar`, {});
   }
 }

@@ -4,5 +4,6 @@ export interface PacienteModel {
   email: string;
   cpf: string;
   telefone: string;
+  ativo?: boolean;
   dataCriacao?: string;
 }

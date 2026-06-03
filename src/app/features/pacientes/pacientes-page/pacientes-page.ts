@@ -37,23 +37,23 @@ export class PacientesPage implements OnInit {
     });
   }
 
-  excluirPaciente(paciente: PacienteModel) {
+  arquivarPaciente(paciente: PacienteModel) {
     if (!paciente.id) return;
 
-    const confirmar = confirm(`Deseja realmente excluir ${paciente.nome}?`);
+    const confirmar = confirm(`Deseja realmente arquivar ${paciente.nome}?`);
 
     if (!confirmar) return;
 
     this.erro.set('');
     this.sucesso.set('');
 
-    this.pacienteService.deletar(paciente.id).subscribe({
+    this.pacienteService.desativar(paciente.id).subscribe({
       next: () => {
-        this.sucesso.set('Paciente excluído com sucesso.');
-        this.carregarPacientes();
+        this.sucesso.set('Paciente arquivado com sucesso.');
+        this.pacientes.update(pacientes => pacientes.filter(item => item.id !== paciente.id));
       },
       error: () => {
-        this.erro.set('Erro ao excluir paciente.');
+        this.erro.set('Erro ao arquivar paciente.');
       }
     });
   }
@@ -91,3 +91,4 @@ export class PacientesPage implements OnInit {
       .replace(/[\u0300-\u036f]/g, '');
   }
 }
+
