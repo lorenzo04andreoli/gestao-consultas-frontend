@@ -47,7 +47,7 @@ export class DentistaEdicaoPage implements OnInit {
     }
 
     this.dentistaId = id;
-    this.definirRetorno();
+    this.definirRetorno(id);
     this.carregarDados(id);
   }
 
@@ -144,8 +144,13 @@ export class DentistaEdicaoPage implements OnInit {
       .replace(/[\u0300-\u036f]/g, '');
   }
 
-  private definirRetorno() {
+  private definirRetorno(id: number) {
     const origem = this.route.snapshot.queryParamMap.get('origem');
+
+    if (origem === 'ficha') {
+      this.voltarPara = `/dentistas/${id}`;
+      return;
+    }
 
     if (origem === 'pesquisar') {
       this.voltarPara = '/dentistas/pesquisar';

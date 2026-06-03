@@ -101,6 +101,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'dentistas/:id',
+        loadComponent: () =>
+          import('./features/dentistas/dentista-detalhe-page/dentista-detalhe-page').then(
+            m => m.DentistaDetalhePage
+          )
+      },
+      {
         path: 'dentistas',
         redirectTo: 'dentistas/listar',
         pathMatch: 'full'

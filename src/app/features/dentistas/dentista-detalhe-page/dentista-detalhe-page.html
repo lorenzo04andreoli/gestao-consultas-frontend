@@ -1,0 +1,145 @@
+<section class="page">
+  <header class="page-header">
+    <a class="back-button" [routerLink]="voltarPara" aria-label="Voltar">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+    </a>
+
+    <div>
+      <h1>Ficha do dentista</h1>
+      <p>Consulte os principais dados profissionais.</p>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (carregando()) {
+    <section class="profile-card">
+      <p class="muted">Carregando dentista...</p>
+    </section>
+  }
+
+  @if (dentista(); as dentista) {
+    <section class="profile-card">
+      <header class="profile-header">
+        <span class="avatar">{{ dentista.nome.charAt(0) }}</span>
+
+        <div>
+          <h2>{{ dentista.nome }}</h2>
+          <p>
+            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+            {{ dentista.email }}
+          </p>
+          <p>
+            <i class="fa-regular fa-id-card" aria-hidden="true"></i>
+            CRO {{ dentista.cro }}
+          </p>
+        </div>
+
+        @if (dentista.ativo !== false) {
+          <a
+            class="primary-button"
+            [routerLink]="['/dentistas', dentista.id, 'editar']"
+            [queryParams]="{ origem: 'ficha' }"
+          >
+            Editar dentista
+          </a>
+        }
+      </header>
+
+      <div class="details-grid">
+        <div>
+          <span>CPF</span>
+          <strong>{{ dentista.cpf || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>CRO</span>
+          <strong>{{ dentista.cro }}</strong>
+        </div>
+
+        <div>
+          <span>E-mail</span>
+          <strong>{{ dentista.email }}</strong>
+        </div>
+
+        <div>
+          <span>Status profissional</span>
+          <strong>{{ dentista.ativo ? 'Ativo' : 'Arquivado' }}</strong>
+        </div>
+
+        <div>
+          <span>Especialidades</span>
+          <strong>{{ especialidadesFormatadas(dentista) }}</strong>
+        </div>
+
+        <div>
+          <span>Usuário vinculado</span>
+          <strong>{{ dentista.usuarioId || '-' }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>Total de consultas</span>
+        <strong>{{ totalConsultas() }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Consultas agendadas</span>
+        <strong>{{ consultasAgendadas() }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Última movimentação</span>
+        <strong>
+          @if (ultimaConsulta(); as consulta) {
+            {{ formatarData(consulta.dataInicio) }}
+          } @else {
+            -
+          }
+        </strong>
+      </article>
+    </section>
+
+    <section class="history-card">
+      <header class="section-header">
+        <div>
+          <h2>Histórico de consultas</h2>
+          <p>Atendimentos vinculados a este profissional.</p>
+        </div>
+      </header>
+
+      @if (carregandoConsultas()) {
+        <p class="muted">Carregando consultas...</p>
+      } @else {
+        <div class="appointments-list">
+          @for (consulta of consultas(); track consulta.id ?? consulta.dataInicio) {
+            <article class="appointment-item">
+              <div>
+                <strong>{{ consulta.descricao }}</strong>
+                <span>{{ consulta.pacienteNome }} | {{ formatarIntervalo(consulta) }}</span>
+              </div>
+
+              <div class="appointment-meta">
+                <time>{{ formatarData(consulta.dataInicio) }}</time>
+                <span
+                  class="status-badge"
+                  [class.agendada]="consulta.status === 'AGENDADA'"
+                  [class.finalizada]="consulta.status === 'FINALIZADA'"
+                  [class.cancelada]="consulta.status === 'CANCELADA'"
+                >
+                  {{ labelStatus(consulta.status) }}
+                </span>
+              </div>
+            </article>
+          } @empty {
+            <p class="empty-state">Nenhuma consulta encontrada para este dentista.</p>
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

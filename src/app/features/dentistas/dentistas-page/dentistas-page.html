@@ -72,10 +72,14 @@
         @for (dentista of dentistasFiltrados(); track dentista.id) {
           <tr>
             <td>
-              <span class="dentist-link">
+              <a
+                class="dentist-link"
+                [routerLink]="['/dentistas', dentista.id]"
+                [queryParams]="{ origem: 'listar' }"
+              >
                 <span class="dentist-avatar">{{ inicialDentista(dentista) }}</span>
                 <span>{{ dentista.nome }}</span>
-              </span>
+              </a>
             </td>
             <td>
               <span class="muted-cell">
@@ -93,6 +97,15 @@
             @if (authService.isAdmin()) {
               <td>
                 <div class="row-actions">
+                  <a
+                    class="icon-button"
+                    [routerLink]="['/dentistas', dentista.id]"
+                    [queryParams]="{ origem: 'listar' }"
+                    title="Ver ficha"
+                  >
+                    <i class="fa-regular fa-address-card" aria-hidden="true"></i>
+                  </a>
+
                   <a
                     class="icon-button"
                     [routerLink]="['/dentistas', dentista.id, 'editar']"

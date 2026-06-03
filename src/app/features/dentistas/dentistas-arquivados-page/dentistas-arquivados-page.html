@@ -64,10 +64,14 @@
         @for (dentista of dentistasFiltrados(); track dentista.id) {
           <tr>
             <td>
-              <span class="dentist-link">
+              <a
+                class="dentist-link"
+                [routerLink]="['/dentistas', dentista.id]"
+                [queryParams]="{ origem: 'arquivados' }"
+              >
                 <span class="dentist-avatar">{{ inicialDentista(dentista) }}</span>
                 <span>{{ dentista.nome }}</span>
-              </span>
+              </a>
             </td>
             <td>
               <span class="muted-cell">
@@ -84,6 +88,15 @@
             </td>
             <td>
               <div class="row-actions">
+                <a
+                  class="icon-button"
+                  [routerLink]="['/dentistas', dentista.id]"
+                  [queryParams]="{ origem: 'arquivados' }"
+                  title="Ver ficha"
+                >
+                  <i class="fa-regular fa-address-card" aria-hidden="true"></i>
+                </a>
+
                 <button
                   type="button"
                   class="icon-button"

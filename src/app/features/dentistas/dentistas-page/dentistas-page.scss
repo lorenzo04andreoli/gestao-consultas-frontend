@@ -131,6 +131,11 @@ table {
   gap: 10px;
   color: #0f172a;
   font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-primary);
+  }
 }
 
 .dentist-avatar {

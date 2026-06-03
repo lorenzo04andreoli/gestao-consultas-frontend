@@ -58,25 +58,16 @@
 
           <div class="results-list">
             @for (dentista of dentistasFiltrados(); track dentista.id) {
-              @if (authService.isAdmin()) {
-                <a
-                  class="dentist-result"
-                  [routerLink]="['/dentistas', dentista.id, 'editar']"
-                  [queryParams]="{ origem: 'pesquisar' }"
-                >
-                  <ng-container
-                    [ngTemplateOutlet]="dentistaResultado"
-                    [ngTemplateOutletContext]="{ dentista: dentista }"
-                  />
-                </a>
-              } @else {
-                <div class="dentist-result">
-                  <ng-container
-                    [ngTemplateOutlet]="dentistaResultado"
-                    [ngTemplateOutletContext]="{ dentista: dentista }"
-                  />
-                </div>
-              }
+              <a
+                class="dentist-result"
+                [routerLink]="['/dentistas', dentista.id]"
+                [queryParams]="{ origem: 'pesquisar' }"
+              >
+                <ng-container
+                  [ngTemplateOutlet]="dentistaResultado"
+                  [ngTemplateOutletContext]="{ dentista: dentista }"
+                />
+              </a>
             } @empty {
               <p class="empty-state">
                 @if (termoBusca()) {
