@@ -67,14 +67,36 @@
       </div>
 
       @if (rankingDentistas().length) {
-        <ol class="ranking-list">
-          @for (dentista of rankingDentistas(); track dentista.id) {
-            <li>
-              <span>{{ dentista.nome }}</span>
-              <strong>{{ dentista.total }}</strong>
-            </li>
-          }
-        </ol>
+        <div class="dashboard-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Profissional</th>
+                <th>Consultas</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (dentista of rankingDentistas(); track dentista.id ?? dentista.nome) {
+                <tr>
+                  <td>
+                    <a
+                      class="person-link"
+                      [routerLink]="['/dentistas', dentista.id]"
+                      [queryParams]="{ origem: 'dashboard' }"
+                    >
+                      <span class="person-avatar">{{ inicialPessoa(dentista.nome) }}</span>
+                      <span>{{ dentista.nome }}</span>
+                    </a>
+                  </td>
+                  <td>
+                    <span class="count-cell">{{ dentista.total }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       } @else {
         <p class="empty-state">Nenhuma consulta vinculada aos dentistas.</p>
       }
@@ -87,7 +109,7 @@
       </header>
 
       @if (pacientesRecentes().length) {
-        <div class="recent-patients-table">
+        <div class="dashboard-table">
           <table>
             <thead>
               <tr>
@@ -101,11 +123,11 @@
                 <tr>
                   <td>
                     <a
-                      class="patient-link"
+                      class="person-link"
                       [routerLink]="['/pacientes', paciente.id]"
                       [queryParams]="{ origem: 'dashboard' }"
                     >
-                      <span class="patient-avatar">{{ inicialPaciente(paciente.nome) }}</span>
+                      <span class="person-avatar">{{ inicialPessoa(paciente.nome) }}</span>
                       <span>{{ paciente.nome }}</span>
                     </a>
                   </td>
@@ -132,16 +154,39 @@
       </header>
 
       @if (proximasConsultas().length) {
-        <div class="appointment-list">
-          @for (consulta of proximasConsultas(); track consulta.id) {
-            <a routerLink="/consultas">
-              <span>
-                <strong>{{ consulta.pacienteNome }}</strong>
-                <small>{{ consulta.dentistaNome }}</small>
-              </span>
-              <em>{{ formatarDataConsulta(consulta.dataInicio) }}</em>
-            </a>
-          }
+        <div class="dashboard-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Paciente</th>
+                <th>Dentista</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (consulta of proximasConsultas(); track consulta.id ?? consulta.dataInicio) {
+                <tr>
+                  <td>
+                    <a
+                      class="person-link"
+                      [routerLink]="['/pacientes', consulta.pacienteId]"
+                      [queryParams]="{ origem: 'dashboard' }"
+                    >
+                      <span class="person-avatar">{{ inicialPessoa(consulta.pacienteNome) }}</span>
+                      <span>{{ consulta.pacienteNome }}</span>
+                    </a>
+                  </td>
+                  <td>
+                    <span class="muted-cell">{{ consulta.dentistaNome }}</span>
+                  </td>
+                  <td>
+                    <span class="date-pill">{{ formatarDataConsulta(consulta.dataInicio) }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       } @else {
         <p class="empty-state">Nenhuma consulta futura agendada.</p>

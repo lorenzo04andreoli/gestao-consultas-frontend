@@ -35,7 +35,7 @@
 
 .info {
   background: #dbeafe;
-  color: #1d4ed8;
+  color: var(--color-primary);
 }
 
 .secondary-button {
@@ -140,46 +140,13 @@
   min-height: 340px;
 }
 
-.ranking-list {
-  display: grid;
-  gap: 10px;
-  list-style: none;
-  margin: 18px 0 0;
-  padding: 0;
-
-  li {
-    align-items: center;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-    padding: 10px 12px;
-  }
-
-  span {
-    color: #374151;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  strong {
-    color: var(--color-primary);
-    font-size: 17px;
-    line-height: 1;
-  }
-}
-
 .empty-state {
   color: #64748b;
   font-weight: 600;
   margin: 18px 0 0;
 }
 
-.recent-patients-table {
+.dashboard-table {
   table {
     border-collapse: collapse;
     width: 100%;
@@ -197,16 +164,20 @@
   }
 }
 
-.patient-link {
+.person-link {
   align-items: center;
   color: #0f172a;
   display: inline-flex;
   font-weight: 700;
   gap: 10px;
   text-decoration: none;
+
+  &:hover {
+    color: var(--color-primary);
+  }
 }
 
-.patient-avatar {
+.person-avatar {
   background: #b7ecff;
   border-radius: 50%;
   color: #075985;
@@ -225,63 +196,23 @@
   gap: 8px;
 }
 
-.appointment-list {
-  display: grid;
-  gap: 10px;
-  margin-top: 2px;
+.count-cell {
+  color: var(--color-primary);
+  font-size: 17px;
+  font-weight: 800;
+}
 
-  a {
-    align-items: center;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    color: inherit;
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-    padding: 12px;
-    text-decoration: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  a:hover {
-    border-color: var(--color-primary);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
-  }
-
-  span {
-    display: grid;
-    gap: 4px;
-    min-width: 0;
-  }
-
-  strong,
-  small {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  strong {
-    color: #111827;
-    font-size: 14px;
-  }
-
-  small,
-  em {
-    color: #64748b;
-    font-style: normal;
-    font-weight: 600;
-  }
-
-  em {
-    background: #eef2ff;
-    border-radius: 999px;
-    color: #1d4ed8;
-    flex: 0 0 auto;
-    font-size: 12px;
-    padding: 5px 8px;
-  }
+.date-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 @media (max-width: 1200px) {
@@ -314,14 +245,7 @@
     width: 100%;
   }
 
-  .appointment-list {
-    a {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    em {
-      align-self: flex-start;
-    }
+  .dashboard-table {
+    overflow-x: auto;
   }
 }
