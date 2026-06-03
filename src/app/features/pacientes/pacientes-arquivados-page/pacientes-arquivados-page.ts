@@ -15,6 +15,7 @@ export class PacientesArquivadosPage implements OnInit {
   pacientes = signal<PacienteModel[]>([]);
 
   erro = signal('');
+  sucesso = signal('');
   termoBusca = '';
 
   constructor(private pacienteService: PacienteService) {}
@@ -25,6 +26,7 @@ export class PacientesArquivadosPage implements OnInit {
 
   carregarPacientes() {
     this.erro.set('');
+    this.sucesso.set('');
 
     this.pacienteService.listarArquivados().subscribe({
       next: dados => {
@@ -32,6 +34,27 @@ export class PacientesArquivadosPage implements OnInit {
       },
       error: () => {
         this.erro.set('Erro ao carregar pacientes arquivados.');
+      }
+    });
+  }
+
+  reativarPaciente(paciente: PacienteModel) {
+    if (!paciente.id) return;
+
+    const confirmar = confirm(`Deseja reativar ${paciente.nome}?`);
+
+    if (!confirmar) return;
+
+    this.erro.set('');
+    this.sucesso.set('');
+
+    this.pacienteService.reativar(paciente.id).subscribe({
+      next: () => {
+        this.sucesso.set('Paciente reativado com sucesso.');
+        this.pacientes.update(pacientes => pacientes.filter(item => item.id !== paciente.id));
+      },
+      error: () => {
+        this.erro.set('Erro ao reativar paciente.');
       }
     });
   }

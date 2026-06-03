@@ -43,4 +43,8 @@ export class PacienteService {
   desativar(id: number) {
     return this.http.put<PacienteModel>(`${this.apiUrl}/${id}/desativar`, {});
   }
+
+  reativar(id: number) {
+    return this.http.put<PacienteModel>(`${this.apiUrl}/${id}/reativar`, {});
+  }
 }

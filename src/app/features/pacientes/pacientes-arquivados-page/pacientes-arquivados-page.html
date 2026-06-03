@@ -14,6 +14,10 @@
     <p class="alert error">{{ erro() }}</p>
   }
 
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
+  }
+
   <section class="filters-card">
     <div class="form-field">
       <label for="buscaPacienteArquivado">Pesquisar paciente arquivado</label>
@@ -92,6 +96,15 @@
                 >
                   <i class="fa-regular fa-address-card" aria-hidden="true"></i>
                 </a>
+
+                <button
+                  type="button"
+                  class="icon-button"
+                  title="Reativar paciente"
+                  (click)="reativarPaciente(paciente)"
+                >
+                  <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                </button>
               </div>
             </td>
           </tr>

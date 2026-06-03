@@ -16,6 +16,7 @@ export class DentistasArquivadosPage implements OnInit {
   dentistas = signal<DentistaResponseModel[]>([]);
 
   erro = signal('');
+  sucesso = signal('');
   termoBusca = '';
 
   constructor(private dentistaService: DentistaService) {}
@@ -26,6 +27,7 @@ export class DentistasArquivadosPage implements OnInit {
 
   carregarDentistas() {
     this.erro.set('');
+    this.sucesso.set('');
 
     this.dentistaService.listarArquivados().subscribe({
       next: dados => {
@@ -33,6 +35,25 @@ export class DentistasArquivadosPage implements OnInit {
       },
       error: err => {
         this.erro.set(extrairMensagemErro(err, 'Erro ao carregar dentistas arquivados.'));
+      }
+    });
+  }
+
+  reativarDentista(dentista: DentistaResponseModel) {
+    const confirmar = confirm(`Deseja reativar ${dentista.nome}?`);
+
+    if (!confirmar) return;
+
+    this.erro.set('');
+    this.sucesso.set('');
+
+    this.dentistaService.reativar(dentista.id).subscribe({
+      next: () => {
+        this.sucesso.set('Dentista reativado com sucesso.');
+        this.dentistas.update(dentistas => dentistas.filter(item => item.id !== dentista.id));
+      },
+      error: err => {
+        this.erro.set(extrairMensagemErro(err, 'Erro ao reativar dentista.'));
       }
     });
   }

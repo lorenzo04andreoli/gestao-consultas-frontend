@@ -44,6 +44,10 @@ export class DentistaService {
     return this.http.put<DentistaResponseModel>(`${this.apiUrl}/${id}/desativar`, {});
   }
 
+  reativar(id: number) {
+    return this.http.put<DentistaResponseModel>(`${this.apiUrl}/${id}/reativar`, {});
+  }
+
   deletar(id: number) {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
