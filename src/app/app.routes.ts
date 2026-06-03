@@ -78,6 +78,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'dentistas/arquivados',
+        loadComponent: () =>
+          import('./features/dentistas/dentistas-arquivados-page/dentistas-arquivados-page').then(
+            m => m.DentistasArquivadosPage
+          )
+      },
+      {
         path: 'dentistas/cadastrar',
         canActivate: [adminGuard],
         loadComponent: () =>

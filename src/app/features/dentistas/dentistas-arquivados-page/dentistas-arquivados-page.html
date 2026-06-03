@@ -1,38 +1,28 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1>Listar dentistas</h1>
-      <p>Consulte, cadastre e atualize os profissionais da clínica.</p>
+      <h1>Dentistas arquivados</h1>
+      <p>Consulte profissionais desativados sem misturar com a listagem principal.</p>
     </div>
 
-    @if (authService.isAdmin()) {
-      <a
-        class="primary-button"
-        routerLink="/dentistas/cadastrar"
-        [queryParams]="{ origem: 'listar' }"
-      >
-        Cadastrar dentista
-      </a>
-    }
+    <a class="secondary-button" routerLink="/dentistas/listar">
+      Voltar para ativos
+    </a>
   </header>
 
   @if (erro()) {
     <p class="alert error">{{ erro() }}</p>
   }
 
-  @if (sucesso()) {
-    <p class="alert success">{{ sucesso() }}</p>
-  }
-
   <section class="filters-card">
     <div class="form-field">
-      <label for="buscaDentista">Pesquisar dentista</label>
+      <label for="buscaDentistaArquivado">Pesquisar dentista arquivado</label>
       <div class="search-input">
         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         <input
-          id="buscaDentista"
+          id="buscaDentistaArquivado"
           type="search"
-          name="buscaDentista"
+          name="buscaDentistaArquivado"
           placeholder="Nome, e-mail, CPF, CRO ou especialidade"
           [(ngModel)]="termoBusca"
         />
@@ -47,10 +37,10 @@
   <div class="table-card">
     <header class="table-header">
       <div>
-        <h2>Dentistas cadastrados</h2>
+        <h2>Arquivo de dentistas</h2>
         <p>
           {{ totalDentistasFiltrados() }}
-          {{ totalDentistasFiltrados() === 1 ? 'dentista encontrado' : 'dentistas encontrados' }}
+          {{ totalDentistasFiltrados() === 1 ? 'dentista arquivado' : 'dentistas arquivados' }}
         </p>
       </div>
     </header>
@@ -62,9 +52,6 @@
           <th>E-mail</th>
           <th>CRO</th>
           <th>Especialidades</th>
-          @if (authService.isAdmin()) {
-            <th>Ações</th>
-          }
         </tr>
       </thead>
 
@@ -90,34 +77,11 @@
                 {{ dentista.especialidades.join(', ') || '-' }}
               </span>
             </td>
-            @if (authService.isAdmin()) {
-              <td>
-                <div class="row-actions">
-                  <a
-                    class="icon-button"
-                    [routerLink]="['/dentistas', dentista.id, 'editar']"
-                    [queryParams]="{ origem: 'listar' }"
-                    title="Editar dentista"
-                  >
-                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
-                  </a>
-
-                  <button
-                    type="button"
-                    class="icon-button danger-icon"
-                    title="Arquivar dentista"
-                    (click)="arquivarDentista(dentista)"
-                  >
-                    <i class="fa-regular fa-circle-xmark" aria-hidden="true"></i>
-                  </button>
-                </div>
-              </td>
-            }
           </tr>
         } @empty {
           <tr>
-            <td [attr.colspan]="authService.isAdmin() ? 5 : 4" class="empty-state">
-              Nenhum dentista encontrado.
+            <td colspan="4" class="empty-state">
+              Nenhum dentista arquivado.
             </td>
           </tr>
         }

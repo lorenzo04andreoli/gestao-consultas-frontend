@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
 import { API_URL } from '../../core/api';
 import {
   DentistaAtualizacaoRequestModel,
@@ -16,7 +17,15 @@ export class DentistaService {
   constructor(private http: HttpClient) {}
 
   listar() {
-    return this.http.get<DentistaResponseModel[]>(this.apiUrl);
+    return this.http
+      .get<DentistaResponseModel[]>(this.apiUrl)
+      .pipe(map(dentistas => dentistas.filter(dentista => dentista.ativo !== false)));
+  }
+
+  listarArquivados() {
+    return this.http
+      .get<DentistaResponseModel[]>(this.apiUrl)
+      .pipe(map(dentistas => dentistas.filter(dentista => dentista.ativo === false)));
   }
 
   criar(dentista: DentistaRequestModel) {

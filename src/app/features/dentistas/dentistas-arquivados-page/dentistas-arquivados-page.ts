@@ -1,80 +1,38 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth';
 import { DentistaResponseModel } from '../dentista.model';
 import { DentistaService } from '../dentista';
-import { EspecialidadeService } from '../../especialidades/especialidade';
-import { EspecialidadeModel } from '../../especialidades/especialidade.model';
 import { extrairMensagemErro } from '../dentista-form';
 
 @Component({
-  selector: 'app-dentistas-page',
+  selector: 'app-dentistas-arquivados-page',
   standalone: true,
   imports: [FormsModule, RouterLink],
-  templateUrl: './dentistas-page.html',
-  styleUrl: './dentistas-page.scss'
+  templateUrl: './dentistas-arquivados-page.html',
+  styleUrl: '../dentistas-page/dentistas-page.scss'
 })
-export class DentistasPage implements OnInit {
+export class DentistasArquivadosPage implements OnInit {
   dentistas = signal<DentistaResponseModel[]>([]);
-  especialidades = signal<EspecialidadeModel[]>([]);
 
   erro = signal('');
-  sucesso = signal('');
   termoBusca = '';
 
-  constructor(
-    public authService: AuthService,
-    private dentistaService: DentistaService,
-    private especialidadeService: EspecialidadeService
-  ) {}
+  constructor(private dentistaService: DentistaService) {}
 
   ngOnInit() {
     this.carregarDentistas();
-    this.carregarEspecialidades();
   }
 
   carregarDentistas() {
     this.erro.set('');
 
-    this.dentistaService.listar().subscribe({
+    this.dentistaService.listarArquivados().subscribe({
       next: dados => {
         this.dentistas.set(dados);
       },
       error: err => {
-        this.erro.set(extrairMensagemErro(err, 'Erro ao carregar dentistas.'));
-      }
-    });
-  }
-
-  carregarEspecialidades() {
-    this.especialidadeService.listar().subscribe({
-      next: dados => {
-        this.especialidades.set(dados);
-      },
-      error: err => {
-        this.erro.set(extrairMensagemErro(err, 'Erro ao carregar especialidades.'));
-      }
-    });
-  }
-
-  arquivarDentista(dentista: DentistaResponseModel) {
-    if (!dentista.ativo) return;
-
-    const confirmar = confirm(`Deseja arquivar ${dentista.nome}?`);
-
-    if (!confirmar) return;
-
-    this.erro.set('');
-    this.sucesso.set('');
-
-    this.dentistaService.desativar(dentista.id).subscribe({
-      next: () => {
-        this.sucesso.set('Dentista arquivado com sucesso.');
-        this.dentistas.update(dentistas => dentistas.filter(item => item.id !== dentista.id));
-      },
-      error: err => {
-        this.erro.set(extrairMensagemErro(err, 'Erro ao arquivar dentista.'));
+        this.erro.set(extrairMensagemErro(err, 'Erro ao carregar dentistas arquivados.'));
       }
     });
   }
