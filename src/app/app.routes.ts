@@ -40,6 +40,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'pacientes/arquivados',
+        loadComponent: () =>
+          import('./features/pacientes/pacientes-arquivados-page/pacientes-arquivados-page').then(
+            m => m.PacientesArquivadosPage
+          )
+      },
+      {
         path: 'pacientes/:id/editar',
         loadComponent: () =>
           import('./features/pacientes/paciente-edicao-page/paciente-edicao-page').then(

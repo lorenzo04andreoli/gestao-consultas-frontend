@@ -33,7 +33,7 @@
           </p>
         </div>
 
-        @if (paciente.id) {
+        @if (paciente.id && paciente.ativo !== false) {
           <a
             class="primary-button"
             [routerLink]="['/pacientes', paciente.id, 'editar']"
