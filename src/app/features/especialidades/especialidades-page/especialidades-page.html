@@ -2,12 +2,15 @@
   <header class="page-header">
     <div>
       <h1>Especialidades</h1>
-      <p>Gerencie as especialidades disponíveis para os profissionais.</p>
+      <p>Áreas de atuação disponíveis para os profissionais da clínica.</p>
     </div>
 
-    <button type="button" class="primary-button" (click)="abrirModalCadastro()">
-      Cadastrar especialidade
-    </button>
+    @if (authService.isAdmin()) {
+      <button type="button" class="primary-button" (click)="abrirModalCadastro()">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        Nova especialidade
+      </button>
+    }
   </header>
 
   @if (erro()) {
@@ -18,27 +21,35 @@
     <p class="alert success">{{ sucesso() }}</p>
   }
 
-  <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-        </tr>
-      </thead>
+  <section class="summary-card">
+    <div>
+      <span>Total cadastrado</span>
+      <strong>{{ totalEspecialidades() }}</strong>
+    </div>
 
-      <tbody>
-        @for (especialidade of especialidades(); track especialidade.id ?? especialidade.nome) {
-          <tr>
-            <td>{{ especialidade.nome }}</td>
-          </tr>
-        } @empty {
-          <tr>
-            <td class="empty-state">Nenhuma especialidade cadastrada.</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+    <p>
+      As especialidades são usadas no cadastro de dentistas e nos filtros de relatórios.
+    </p>
+  </section>
+
+  <section class="specialty-grid">
+    @for (especialidade of especialidades(); track especialidade.id ?? especialidade.nome) {
+      <article class="specialty-card">
+        <div class="specialty-main">
+          <span class="specialty-avatar">{{ inicialEspecialidade(especialidade) }}</span>
+
+          <div>
+            <h2>{{ especialidade.nome }}</h2>
+            <p>Especialidade odontológica</p>
+          </div>
+        </div>
+
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      </article>
+    } @empty {
+      <p class="empty-state">Nenhuma especialidade cadastrada.</p>
+    }
+  </section>
 
   @if (modalAberto()) {
     <div class="modal-backdrop" (click)="fecharModal()">
@@ -49,7 +60,7 @@
             <p>Informe o nome da área de atuação odontológica.</p>
           </div>
 
-          <button type="button" class="close-button" (click)="fecharModal()">
+          <button type="button" class="close-button" aria-label="Fechar" (click)="fecharModal()">
             &times;
           </button>
         </header>
@@ -57,8 +68,9 @@
         <form (ngSubmit)="salvar()">
           <div class="form-grid single-column">
             <div class="form-group">
-              <label>Nome</label>
+              <label for="nomeEspecialidade">Nome</label>
               <input
+                id="nomeEspecialidade"
                 type="text"
                 name="nome"
                 [(ngModel)]="especialidadeForm.nome"

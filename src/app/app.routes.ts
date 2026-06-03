@@ -113,11 +113,23 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'especialidades',
+        path: 'clinica/sobre',
+        loadComponent: () =>
+          import('./features/clinica/sobre-clinica-page/sobre-clinica-page').then(
+            m => m.SobreClinicaPage
+          )
+      },
+      {
+        path: 'clinica/especialidades',
         loadComponent: () =>
           import('./features/especialidades/especialidades-page/especialidades-page').then(
             m => m.EspecialidadesPage
           )
+      },
+      {
+        path: 'especialidades',
+        redirectTo: 'clinica/especialidades',
+        pathMatch: 'full'
       },
       {
         path: 'consultas/listar',

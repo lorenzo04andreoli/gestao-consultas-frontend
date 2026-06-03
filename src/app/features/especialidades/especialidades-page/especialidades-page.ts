@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/auth/auth';
 import { EspecialidadeService } from '../especialidade';
 import { EspecialidadeModel } from '../especialidade.model';
 
@@ -21,7 +22,10 @@ export class EspecialidadesPage implements OnInit {
     nome: ''
   };
 
-  constructor(private especialidadeService: EspecialidadeService) {}
+  constructor(
+    public authService: AuthService,
+    private especialidadeService: EspecialidadeService
+  ) {}
 
   ngOnInit() {
     this.carregarEspecialidades();
@@ -32,7 +36,9 @@ export class EspecialidadesPage implements OnInit {
 
     this.especialidadeService.listar().subscribe({
       next: (dados) => {
-        this.especialidades.set(dados);
+        this.especialidades.set(
+          [...dados].sort((a, b) => a.nome.localeCompare(b.nome))
+        );
       },
       error: () => {
         this.erro.set('Erro ao carregar especialidades.');
@@ -77,5 +83,13 @@ export class EspecialidadesPage implements OnInit {
     this.especialidadeForm = {
       nome: ''
     };
+  }
+
+  totalEspecialidades() {
+    return this.especialidades().length;
+  }
+
+  inicialEspecialidade(especialidade: EspecialidadeModel) {
+    return especialidade.nome.trim().charAt(0).toUpperCase() || 'E';
   }
 }
