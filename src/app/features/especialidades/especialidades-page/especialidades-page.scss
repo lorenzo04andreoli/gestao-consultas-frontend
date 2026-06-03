@@ -87,10 +87,6 @@
   box-shadow: var(--shadow-card);
   color: var(--color-primary-dark);
 
-  > i {
-    color: var(--color-muted);
-    font-size: 0.8rem;
-  }
 }
 
 .specialty-main {
@@ -131,6 +127,39 @@
   border-radius: var(--radius-md);
   color: var(--color-muted);
   text-align: center;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dbe7ef;
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--color-primary);
+  cursor: pointer;
+
+  &:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+  }
+}
+
+.danger-icon {
+  color: #dc2626;
+
+  &:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
 }
 
 .primary-button,
@@ -259,6 +288,11 @@
 
   .specialty-grid {
     grid-template-columns: 1fr;
+  }
+
+  .specialty-card {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .right-actions {

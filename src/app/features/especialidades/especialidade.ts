@@ -18,4 +18,12 @@ export class EspecialidadeService {
   criar(especialidade: EspecialidadeModel) {
     return this.http.post<EspecialidadeModel>(this.apiUrl, especialidade);
   }
+
+  atualizar(id: number, especialidade: EspecialidadeModel) {
+    return this.http.put<EspecialidadeModel>(`${this.apiUrl}/${id}`, especialidade);
+  }
+
+  excluir(id: number) {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

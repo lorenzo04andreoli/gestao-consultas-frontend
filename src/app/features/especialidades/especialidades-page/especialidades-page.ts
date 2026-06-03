@@ -17,6 +17,8 @@ export class EspecialidadesPage implements OnInit {
   erro = signal('');
   sucesso = signal('');
   modalAberto = signal(false);
+  modoModal = signal<'criar' | 'editar'>('criar');
+  especialidadeEditandoId = signal<number | null>(null);
 
   especialidadeForm: EspecialidadeModel = {
     nome: ''
@@ -48,6 +50,17 @@ export class EspecialidadesPage implements OnInit {
 
   abrirModalCadastro() {
     this.limparFormulario();
+    this.modoModal.set('criar');
+    this.especialidadeEditandoId.set(null);
+    this.modalAberto.set(true);
+  }
+
+  abrirModalEdicao(especialidade: EspecialidadeModel) {
+    if (!especialidade.id) return;
+
+    this.especialidadeForm = { ...especialidade };
+    this.modoModal.set('editar');
+    this.especialidadeEditandoId.set(especialidade.id);
     this.modalAberto.set(true);
   }
 
@@ -67,14 +80,53 @@ export class EspecialidadesPage implements OnInit {
       return;
     }
 
-    this.especialidadeService.criar({ nome }).subscribe({
+    const id = this.especialidadeEditandoId();
+    const request = this.modoModal() === 'editar' && id
+      ? this.especialidadeService.atualizar(id, { nome })
+      : this.especialidadeService.criar({ nome });
+
+    request.subscribe({
       next: () => {
-        this.sucesso.set('Especialidade cadastrada com sucesso.');
+        this.sucesso.set(
+          this.modoModal() === 'editar'
+            ? 'Especialidade atualizada com sucesso.'
+            : 'Especialidade cadastrada com sucesso.'
+        );
         this.fecharModal();
         this.carregarEspecialidades();
       },
-      error: () => {
-        this.erro.set('Erro ao cadastrar especialidade.');
+      error: err => {
+        this.erro.set(
+          this.extrairMensagemErro(
+            err,
+            this.modoModal() === 'editar'
+              ? 'Erro ao atualizar especialidade.'
+              : 'Erro ao cadastrar especialidade.'
+          )
+        );
+      }
+    });
+  }
+
+  excluirEspecialidade(especialidade: EspecialidadeModel) {
+    if (!especialidade.id) return;
+
+    const confirmar = confirm(`Deseja excluir ${especialidade.nome}?`);
+
+    if (!confirmar) return;
+
+    this.erro.set('');
+    this.sucesso.set('');
+
+    this.especialidadeService.excluir(especialidade.id).subscribe({
+      next: () => {
+        this.sucesso.set('Especialidade excluída com sucesso.');
+        this.especialidades.update(especialidades =>
+          especialidades.filter(item => item.id !== especialidade.id)
+        );
+      },
+      error: err => {
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao excluir especialidade.'));
       }
     });
   }
@@ -83,6 +135,7 @@ export class EspecialidadesPage implements OnInit {
     this.especialidadeForm = {
       nome: ''
     };
+    this.especialidadeEditandoId.set(null);
   }
 
   totalEspecialidades() {
@@ -91,5 +144,17 @@ export class EspecialidadesPage implements OnInit {
 
   inicialEspecialidade(especialidade: EspecialidadeModel) {
     return especialidade.nome.trim().charAt(0).toUpperCase() || 'E';
+  }
+
+  tituloModal() {
+    return this.modoModal() === 'editar' ? 'Editar especialidade' : 'Cadastrar especialidade';
+  }
+
+  textoBotaoSalvar() {
+    return this.modoModal() === 'editar' ? 'Salvar alterações' : 'Cadastrar';
+  }
+
+  private extrairMensagemErro(err: any, mensagemPadrao: string) {
+    return err?.error?.message || mensagemPadrao;
   }
 }
