@@ -91,9 +91,10 @@ table {
 }
 
 .primary-button {
-  background: #2563eb;
+  background: var(--color-primary);
   color: #fff;
   padding: 10px 14px;
+  font-weight: 700;
 }
 
 .secondary-button {
@@ -170,7 +171,7 @@ table {
     font: inherit;
 
     &:focus {
-      border-color: #2563eb;
+      border-color: var(--color-primary);
     }
   }
 }

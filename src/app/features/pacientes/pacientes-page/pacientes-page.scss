@@ -173,7 +173,7 @@ table {
   border: 1px solid #dbe7ef;
   border-radius: 8px;
   background: #fff;
-  color: #2563eb;
+  color: var(--color-primary);
   text-decoration: none;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
@@ -209,10 +209,11 @@ table {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #2563eb;
+  background: var(--color-primary);
   color: #fff;
   padding: 10px 14px;
   text-decoration: none;
+  font-weight: 700;
 }
 
 .secondary-button {

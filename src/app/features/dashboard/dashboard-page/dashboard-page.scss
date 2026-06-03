@@ -50,7 +50,7 @@
 }
 
 .secondary-button:hover {
-  border-color: #2563eb;
+  border-color: var(--color-primary);
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
 }
 
@@ -167,7 +167,7 @@
   }
 
   strong {
-    color: #2563eb;
+    color: var(--color-primary);
     font-size: 17px;
     line-height: 1;
   }
@@ -245,7 +245,7 @@
   }
 
   a:hover {
-    border-color: #2563eb;
+    border-color: var(--color-primary);
     box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
   }
 

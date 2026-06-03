@@ -72,7 +72,7 @@
     outline: none;
 
     &:focus {
-      border-color: #2563eb;
+      border-color: var(--color-primary);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
   }
@@ -101,8 +101,9 @@ button {
 }
 
 .primary-button {
-  background: #2563eb;
+  background: var(--color-primary);
   color: #fff;
+  font-weight: 700;
 
   &:hover {
     background: #1d4ed8;
@@ -135,7 +136,7 @@ button {
   }
 
   &.blue {
-    border-left-color: #2563eb;
+    border-left-color: var(--color-primary);
   }
 
   &.red {

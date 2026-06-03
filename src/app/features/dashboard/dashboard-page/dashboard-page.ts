@@ -195,6 +195,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     if (!canvas) return;
 
     this.statusChart?.destroy();
+    const primaryColor = this.corPrimaria();
 
     const config: ChartConfiguration<'doughnut'> = {
       type: 'doughnut',
@@ -207,7 +208,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
               this.consultasCanceladas(),
               this.consultasFinalizadas()
             ],
-            backgroundColor: ['#2563eb', '#dc2626', '#16a34a'],
+            backgroundColor: [primaryColor, '#dc2626', '#16a34a'],
             borderWidth: 0
           }
         ]
@@ -231,6 +232,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     if (!canvas) return;
 
     this.dentistasChart?.destroy();
+    const primaryColor = this.corPrimaria();
 
     const totaisPorDentista = this.rankingDentistas();
 
@@ -250,7 +252,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
           {
             label: 'Consultas',
             data: dados,
-            backgroundColor: '#2563eb',
+            backgroundColor: primaryColor,
             borderRadius: 6
           }
         ]
@@ -282,6 +284,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     if (!canvas) return;
 
     this.mensalChart?.destroy();
+    const primaryColor = this.corPrimaria();
 
     const meses = this.montarUltimosMeses(6);
 
@@ -293,7 +296,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
           {
             label: 'Agendadas',
             data: meses.map(mes => this.contarConsultasNoMes(mes.data, 'AGENDADA')),
-            backgroundColor: '#2563eb',
+            backgroundColor: primaryColor,
             borderRadius: 6
           },
           {
@@ -468,5 +471,11 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
       return consulta.status === 'CANCELADA' && inicio.toDateString() === data.toDateString();
     }).length;
+  }
+
+  private corPrimaria() {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue('--color-primary')
+      .trim() || '#0284c7';
   }
 }
