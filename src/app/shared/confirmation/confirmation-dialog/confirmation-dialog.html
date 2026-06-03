@@ -1,0 +1,40 @@
+@if (confirmation.state(); as dialog) {
+  <div class="confirm-backdrop" (click)="confirmation.cancelar()">
+    <section
+      class="confirm-dialog"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'confirmTitle'"
+      (click)="$event.stopPropagation()"
+    >
+      <header>
+        <span class="confirm-icon" [class.danger]="dialog.tone === 'danger'">
+          <i
+            [class]="dialog.tone === 'danger' ? 'fa-solid fa-triangle-exclamation' : 'fa-regular fa-circle-check'"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <div>
+          <h2 id="confirmTitle">{{ dialog.title }}</h2>
+          <p>{{ dialog.message }}</p>
+        </div>
+      </header>
+
+      <footer>
+        <button type="button" class="secondary-button" (click)="confirmation.cancelar()">
+          {{ dialog.cancelLabel }}
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          [class.danger]="dialog.tone === 'danger'"
+          (click)="confirmation.confirmarAcao()"
+        >
+          {{ dialog.confirmLabel }}
+        </button>
+      </footer>
+    </section>
+  </div>
+}

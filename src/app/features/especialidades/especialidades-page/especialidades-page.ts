@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { EspecialidadeService } from '../especialidade';
 import { EspecialidadeModel } from '../especialidade.model';
 
@@ -26,7 +27,8 @@ export class EspecialidadesPage implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private especialidadeService: EspecialidadeService
+    private especialidadeService: EspecialidadeService,
+    private confirmation: ConfirmationService
   ) {}
 
   ngOnInit() {
@@ -108,10 +110,16 @@ export class EspecialidadesPage implements OnInit {
     });
   }
 
-  excluirEspecialidade(especialidade: EspecialidadeModel) {
+  async excluirEspecialidade(especialidade: EspecialidadeModel) {
     if (!especialidade.id) return;
 
-    const confirmar = confirm(`Deseja excluir ${especialidade.nome}?`);
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Excluir especialidade',
+      message: `${especialidade.nome} será removida se não estiver vinculada a nenhum dentista.`,
+      confirmLabel: 'Excluir',
+      cancelLabel: 'Cancelar',
+      tone: 'danger'
+    });
 
     if (!confirmar) return;
 

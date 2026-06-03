@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { DentistaResponseModel } from '../dentista.model';
 import { DentistaService } from '../dentista';
 import { extrairMensagemErro } from '../dentista-form';
@@ -19,7 +20,10 @@ export class DentistasArquivadosPage implements OnInit {
   sucesso = signal('');
   termoBusca = '';
 
-  constructor(private dentistaService: DentistaService) {}
+  constructor(
+    private dentistaService: DentistaService,
+    private confirmation: ConfirmationService
+  ) {}
 
   ngOnInit() {
     this.carregarDentistas();
@@ -39,8 +43,14 @@ export class DentistasArquivadosPage implements OnInit {
     });
   }
 
-  reativarDentista(dentista: DentistaResponseModel) {
-    const confirmar = confirm(`Deseja reativar ${dentista.nome}?`);
+  async reativarDentista(dentista: DentistaResponseModel) {
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Reativar dentista',
+      message: `${dentista.nome} voltará para a lista de profissionais ativos.`,
+      confirmLabel: 'Reativar',
+      cancelLabel: 'Manter arquivado',
+      tone: 'primary'
+    });
 
     if (!confirmar) return;
 

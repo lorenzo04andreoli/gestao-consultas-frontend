@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { ConsultaModel, StatusConsulta } from '../consulta.model';
 import { ConsultaService } from '../consulta';
 
@@ -13,6 +14,7 @@ import { ConsultaService } from '../consulta';
 })
 export class ConsultasListarPage implements OnInit {
   private consultaService = inject(ConsultaService);
+  private confirmation = inject(ConfirmationService);
 
   consultas = signal<ConsultaModel[]>([]);
   erro = signal('');
@@ -38,8 +40,18 @@ export class ConsultasListarPage implements OnInit {
     });
   }
 
-  finalizarConsulta(consulta: ConsultaModel) {
-    if (!consulta.id || !confirm('Deseja finalizar esta consulta?')) return;
+  async finalizarConsulta(consulta: ConsultaModel) {
+    if (!consulta.id) return;
+
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Finalizar consulta',
+      message: 'A consulta será marcada como finalizada e sairá do fluxo de atendimentos pendentes.',
+      confirmLabel: 'Finalizar',
+      cancelLabel: 'Cancelar',
+      tone: 'primary'
+    });
+
+    if (!confirmar) return;
 
     this.erro.set('');
     this.sucesso.set('');

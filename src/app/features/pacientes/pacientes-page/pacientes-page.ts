@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
 
@@ -18,7 +19,10 @@ export class PacientesPage implements OnInit {
   sucesso = signal('');
   termoBusca = '';
 
-  constructor(private pacienteService: PacienteService) {}
+  constructor(
+    private pacienteService: PacienteService,
+    private confirmation: ConfirmationService
+  ) {}
 
   ngOnInit() {
     this.carregarPacientes();
@@ -37,10 +41,16 @@ export class PacientesPage implements OnInit {
     });
   }
 
-  arquivarPaciente(paciente: PacienteModel) {
+  async arquivarPaciente(paciente: PacienteModel) {
     if (!paciente.id) return;
 
-    const confirmar = confirm(`Deseja realmente arquivar ${paciente.nome}?`);
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Arquivar paciente',
+      message: `${paciente.nome} sairá da listagem principal, mas continuará disponível em Arquivados.`,
+      confirmLabel: 'Arquivar',
+      cancelLabel: 'Manter ativo',
+      tone: 'danger'
+    });
 
     if (!confirmar) return;
 

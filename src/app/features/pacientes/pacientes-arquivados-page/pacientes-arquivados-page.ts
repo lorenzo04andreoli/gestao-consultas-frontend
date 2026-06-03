@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
 
@@ -18,7 +19,10 @@ export class PacientesArquivadosPage implements OnInit {
   sucesso = signal('');
   termoBusca = '';
 
-  constructor(private pacienteService: PacienteService) {}
+  constructor(
+    private pacienteService: PacienteService,
+    private confirmation: ConfirmationService
+  ) {}
 
   ngOnInit() {
     this.carregarPacientes();
@@ -38,10 +42,16 @@ export class PacientesArquivadosPage implements OnInit {
     });
   }
 
-  reativarPaciente(paciente: PacienteModel) {
+  async reativarPaciente(paciente: PacienteModel) {
     if (!paciente.id) return;
 
-    const confirmar = confirm(`Deseja reativar ${paciente.nome}?`);
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Reativar paciente',
+      message: `${paciente.nome} voltará para a listagem principal de pacientes ativos.`,
+      confirmLabel: 'Reativar',
+      cancelLabel: 'Manter arquivado',
+      tone: 'primary'
+    });
 
     if (!confirmar) return;
 

@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { DentistaResponseModel } from '../dentista.model';
 import { DentistaService } from '../dentista';
 import { EspecialidadeService } from '../../especialidades/especialidade';
@@ -26,7 +27,8 @@ export class DentistasPage implements OnInit {
   constructor(
     public authService: AuthService,
     private dentistaService: DentistaService,
-    private especialidadeService: EspecialidadeService
+    private especialidadeService: EspecialidadeService,
+    private confirmation: ConfirmationService
   ) {}
 
   ngOnInit() {
@@ -58,10 +60,16 @@ export class DentistasPage implements OnInit {
     });
   }
 
-  arquivarDentista(dentista: DentistaResponseModel) {
+  async arquivarDentista(dentista: DentistaResponseModel) {
     if (!dentista.ativo) return;
 
-    const confirmar = confirm(`Deseja arquivar ${dentista.nome}?`);
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Arquivar dentista',
+      message: `${dentista.nome} sairá da agenda de profissionais ativos, mas continuará disponível em Arquivados.`,
+      confirmLabel: 'Arquivar',
+      cancelLabel: 'Manter ativo',
+      tone: 'danger'
+    });
 
     if (!confirmar) return;
 
