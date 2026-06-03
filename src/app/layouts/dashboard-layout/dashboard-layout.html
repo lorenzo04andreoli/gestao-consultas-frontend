@@ -20,7 +20,11 @@
         </summary>
 
         <div class="nav-submenu">
-          <a routerLink="/consultas" routerLinkActive="active">
+          <a
+            routerLink="/consultas"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
             Agenda
           </a>
           <a routerLink="/consultas/listar" routerLinkActive="active">
