@@ -4,71 +4,209 @@
       <h1>Sobre a clínica</h1>
       <p>Dados gerais da operação e identidade do Dentix.</p>
     </div>
+
+    @if (authService.isAdmin() && dados()) {
+      <button type="button" class="primary-button" (click)="abrirModalEdicao()">
+        <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+        Editar dados
+      </button>
+    }
   </header>
 
-  <section class="clinic-hero">
-    <div class="brand-mark">
-      <img src="/dentix-logo.svg" alt="Dentix" />
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
+  }
+
+  @if (carregando()) {
+    <section class="details-card">
+      <p class="muted">Carregando dados da clínica...</p>
+    </section>
+  }
+
+  @if (dados(); as dados) {
+    <section class="clinic-hero">
+      <div class="brand-mark">
+        <img src="/dentix-logo.svg" alt="Dentix" />
+      </div>
+
+      <div>
+        <span class="eyebrow">Sistema de gestão odontológica</span>
+        <h2>{{ dados.nomeFantasia }}</h2>
+        <p>
+          {{ dados.razaoSocial || 'Ambiente para centralizar pacientes, profissionais, especialidades e consultas em uma rotina simples de atendimento.' }}
+        </p>
+      </div>
+    </section>
+
+    <section class="info-grid">
+      <article class="info-card">
+        <span>Nome fantasia</span>
+        <strong>{{ dados.nomeFantasia }}</strong>
+      </article>
+
+      <article class="info-card">
+        <span>Atendimento</span>
+        <strong>{{ dados.horarioFuncionamento || '-' }}</strong>
+      </article>
+
+      <article class="info-card">
+        <span>Contato</span>
+        <strong>{{ dados.email || '-' }}</strong>
+      </article>
+
+      <article class="info-card">
+        <span>Última atualização</span>
+        <strong>{{ formatarData(dados.dataAtualizacao) }}</strong>
+      </article>
+    </section>
+
+    <section class="details-card">
+      <header>
+        <h2>Dados da clínica</h2>
+        <p>Informações administrativas usadas como referência no sistema.</p>
+      </header>
+
+      <div class="details-grid">
+        <div>
+          <span>Razão social</span>
+          <strong>{{ dados.razaoSocial || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>CNPJ</span>
+          <strong>{{ dados.cnpj || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>Responsável técnico</span>
+          <strong>{{ dados.responsavelTecnico || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>CRO responsável</span>
+          <strong>{{ dados.croResponsavel || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>Telefone</span>
+          <strong>{{ dados.telefone || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>E-mail</span>
+          <strong>{{ dados.email || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>Endereço</span>
+          <strong>{{ dados.endereco || '-' }}</strong>
+        </div>
+
+        <div>
+          <span>Cidade</span>
+          <strong>{{ cidadeEstado(dados) }}</strong>
+        </div>
+
+        <div>
+          <span>CEP</span>
+          <strong>{{ dados.cep || '-' }}</strong>
+        </div>
+      </div>
+    </section>
+  }
+
+  @if (modalAberto()) {
+    <div class="modal-backdrop" (click)="fecharModal()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>Editar dados da clínica</h2>
+            <p>Atualize as informações administrativas exibidas no sistema.</p>
+          </div>
+
+          <button type="button" class="close-button" aria-label="Fechar" (click)="fecharModal()">
+            &times;
+          </button>
+        </header>
+
+        <form (ngSubmit)="salvar()">
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label for="nomeFantasia">Nome fantasia</label>
+              <input id="nomeFantasia" type="text" name="nomeFantasia" [(ngModel)]="form.nomeFantasia" required />
+            </div>
+
+            <div class="form-group span-2">
+              <label for="razaoSocial">Razão social</label>
+              <input id="razaoSocial" type="text" name="razaoSocial" [(ngModel)]="form.razaoSocial" />
+            </div>
+
+            <div class="form-group">
+              <label for="cnpj">CNPJ</label>
+              <input id="cnpj" type="text" name="cnpj" [(ngModel)]="form.cnpj" />
+            </div>
+
+            <div class="form-group">
+              <label for="email">E-mail</label>
+              <input id="email" type="email" name="email" [(ngModel)]="form.email" />
+            </div>
+
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <input id="telefone" type="text" name="telefone" [(ngModel)]="form.telefone" />
+            </div>
+
+            <div class="form-group">
+              <label for="horarioFuncionamento">Horário de funcionamento</label>
+              <input id="horarioFuncionamento" type="text" name="horarioFuncionamento" [(ngModel)]="form.horarioFuncionamento" />
+            </div>
+
+            <div class="form-group span-2">
+              <label for="endereco">Endereço</label>
+              <input id="endereco" type="text" name="endereco" [(ngModel)]="form.endereco" />
+            </div>
+
+            <div class="form-group">
+              <label for="cidade">Cidade</label>
+              <input id="cidade" type="text" name="cidade" [(ngModel)]="form.cidade" />
+            </div>
+
+            <div class="form-group">
+              <label for="estado">Estado</label>
+              <input id="estado" type="text" name="estado" maxlength="2" [(ngModel)]="form.estado" />
+            </div>
+
+            <div class="form-group">
+              <label for="cep">CEP</label>
+              <input id="cep" type="text" name="cep" [(ngModel)]="form.cep" />
+            </div>
+
+            <div class="form-group">
+              <label for="responsavelTecnico">Responsável técnico</label>
+              <input id="responsavelTecnico" type="text" name="responsavelTecnico" [(ngModel)]="form.responsavelTecnico" />
+            </div>
+
+            <div class="form-group">
+              <label for="croResponsavel">CRO responsável</label>
+              <input id="croResponsavel" type="text" name="croResponsavel" [(ngModel)]="form.croResponsavel" />
+            </div>
+          </div>
+
+          <footer class="modal-actions">
+            <button type="button" class="secondary-button" (click)="fecharModal()">
+              Cancelar
+            </button>
+
+            <button type="submit" class="primary-button" [disabled]="salvando()">
+              {{ salvando() ? 'Salvando...' : 'Salvar alterações' }}
+            </button>
+          </footer>
+        </form>
+      </section>
     </div>
-
-    <div>
-      <span class="eyebrow">Sistema de gestão odontológica</span>
-      <h2>Dentix Clínica Odontológica</h2>
-      <p>
-        Ambiente para centralizar pacientes, profissionais, especialidades e consultas em uma rotina
-        simples de atendimento.
-      </p>
-    </div>
-  </section>
-
-  <section class="info-grid">
-    <article class="info-card">
-      <span>Nome fantasia</span>
-      <strong>Dentix</strong>
-    </article>
-
-    <article class="info-card">
-      <span>Atendimento</span>
-      <strong>Segunda a sexta</strong>
-    </article>
-
-    <article class="info-card">
-      <span>Horário</span>
-      <strong>08:00 - 18:00</strong>
-    </article>
-
-    <article class="info-card">
-      <span>Contato</span>
-      <strong>contato@dentix.com</strong>
-    </article>
-  </section>
-
-  <section class="details-card">
-    <header>
-      <h2>Dados da clínica</h2>
-      <p>Informações administrativas usadas como referência no sistema.</p>
-    </header>
-
-    <div class="details-grid">
-      <div>
-        <span>Responsável técnico</span>
-        <strong>Administrador da clínica</strong>
-      </div>
-
-      <div>
-        <span>Telefone</span>
-        <strong>(11) 4002-8922</strong>
-      </div>
-
-      <div>
-        <span>Endereço</span>
-        <strong>Av. Principal, 1000</strong>
-      </div>
-
-      <div>
-        <span>Cidade</span>
-        <strong>São Paulo - SP</strong>
-      </div>
-    </div>
-  </section>
+  }
 </section>
