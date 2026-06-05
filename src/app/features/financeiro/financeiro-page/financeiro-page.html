@@ -5,14 +5,25 @@
       <p>Acompanhe cobrancas vinculadas as consultas da clinica.</p>
     </div>
 
-    <button type="button" class="secondary-button" (click)="carregarDados()">
-      <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
-      Atualizar
-    </button>
+    <div class="header-actions">
+      <button type="button" class="secondary-button" (click)="carregarDados()">
+        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+        Atualizar
+      </button>
+
+      <button type="button" class="primary-button" (click)="abrirModalCobranca()">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        Nova cobranca
+      </button>
+    </div>
   </header>
 
   @if (erro()) {
     <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
   }
 
   @if (carregando()) {
@@ -103,4 +114,83 @@
       <p class="empty-state">Nenhum lancamento financeiro cadastrado.</p>
     }
   </section>
+
+  @if (modalAberto()) {
+    <div class="modal-backdrop" (click)="fecharModalCobranca()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>Nova cobranca</h2>
+            <p>Vincule uma cobranca a uma consulta ainda sem lancamento.</p>
+          </div>
+
+          <button type="button" class="close-button" aria-label="Fechar" (click)="fecharModalCobranca()">
+            &times;
+          </button>
+        </header>
+
+        <form (ngSubmit)="criarCobranca()">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="consultaId">Consulta</label>
+              <select id="consultaId" name="consultaId" [(ngModel)]="form.consultaId" required>
+                <option [ngValue]="null">Selecione uma consulta</option>
+                @for (consulta of consultasDisponiveis(); track consulta.id) {
+                  <option [ngValue]="consulta.id">{{ descricaoConsulta(consulta) }}</option>
+                }
+              </select>
+              @if (!carregando() && consultasDisponiveis().length === 0) {
+                <small>Nao ha consultas disponiveis para cobranca.</small>
+              }
+            </div>
+
+            <div class="form-group full-width">
+              <label for="descricao">Descricao</label>
+              <input
+                id="descricao"
+                type="text"
+                name="descricao"
+                [(ngModel)]="form.descricao"
+                placeholder="Ex.: Consulta odontologica"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="valor">Valor</label>
+              <input
+                id="valor"
+                type="number"
+                name="valor"
+                min="0.01"
+                step="0.01"
+                [(ngModel)]="form.valor"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="dataVencimento">Vencimento</label>
+              <input
+                id="dataVencimento"
+                type="date"
+                name="dataVencimento"
+                [(ngModel)]="form.dataVencimento"
+              />
+            </div>
+          </div>
+
+          <footer class="modal-actions">
+            <button type="button" class="secondary-button" (click)="fecharModalCobranca()">
+              Cancelar
+            </button>
+
+            <button type="submit" class="primary-button" [disabled]="salvando()">
+              {{ salvando() ? 'Salvando...' : 'Salvar cobranca' }}
+            </button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
 </section>
