@@ -144,7 +144,7 @@
 
             <div class="form-group">
               <label>Dentista</label>
-              <select name="dentistaId" [(ngModel)]="consultaForm.dentistaId" required>
+              <select name="dentistaId" [(ngModel)]="consultaForm.dentistaId" (ngModelChange)="aoSelecionarDentista()" required>
                 <option [ngValue]="null">Selecione</option>
                 @for (dentista of dentistas(); track dentista.id) {
                   <option [ngValue]="dentista.id">{{ dentista.nome }} - {{ dentista.cro }}</option>
@@ -152,6 +152,19 @@
               </select>
               @if (dentistas().length === 0) {
                 <small>Nenhum dentista ativo disponível.</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Especialidade</label>
+              <select name="especialidadeId" [(ngModel)]="consultaForm.especialidadeId" required>
+                <option [ngValue]="null">Selecione</option>
+                @for (especialidade of especialidadesDoDentistaSelecionado(); track especialidade.id) {
+                  <option [ngValue]="especialidade.id">{{ especialidade.nome }}</option>
+                }
+              </select>
+              @if (consultaForm.dentistaId && especialidadesDoDentistaSelecionado().length === 0) {
+                <small>Nenhuma especialidade vinculada a este dentista.</small>
               }
             </div>
 

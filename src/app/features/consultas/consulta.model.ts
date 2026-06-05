@@ -6,6 +6,8 @@ export interface ConsultaModel {
   pacienteNome: string;
   dentistaId: number;
   dentistaNome: string;
+  especialidadeId?: number | null;
+  especialidadeNome?: string | null;
   usuarioNome: string;
   descricao: string;
   dataInicio: string;
@@ -28,6 +30,7 @@ export interface ConsultaModel {
 export interface ConsultaRequestModel {
   pacienteId: number;
   dentistaId: number;
+  especialidadeId: number;
   descricao: string;
   dataInicio: string;
   dataFim: string;

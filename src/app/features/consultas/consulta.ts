@@ -64,6 +64,8 @@ export class ConsultaService {
       pacienteNome: consulta.pacienteNome ?? consulta.paciente?.nome ?? '-',
       dentistaId: consulta.dentistaId ?? consulta.dentista?.id ?? 0,
       dentistaNome: consulta.dentistaNome ?? consulta.dentista?.nome ?? '-',
+      especialidadeId: consulta.especialidadeId ?? null,
+      especialidadeNome: consulta.especialidadeNome ?? null,
       usuarioNome: consulta.usuarioNome ?? consulta.usuario?.nome ?? '-'
     };
   }

@@ -4,6 +4,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/auth/auth';
 import { DentistaService } from '../../dentistas/dentista';
 import { DentistaResponseModel } from '../../dentistas/dentista.model';
+import { EspecialidadeService } from '../../especialidades/especialidade';
+import { EspecialidadeModel } from '../../especialidades/especialidade.model';
 import { PacienteService } from '../../pacientes/paciente';
 import { PacienteModel } from '../../pacientes/paciente.model';
 import { ConsultaService } from '../consulta';
@@ -20,11 +22,13 @@ export class ConsultasPage implements OnInit {
   private consultaService = inject(ConsultaService);
   private pacienteService = inject(PacienteService);
   private dentistaService = inject(DentistaService);
+  private especialidadeService = inject(EspecialidadeService);
   private authService = inject(AuthService);
 
   consultas = signal<ConsultaModel[]>([]);
   pacientes = signal<PacienteModel[]>([]);
   dentistas = signal<DentistaResponseModel[]>([]);
+  especialidades = signal<EspecialidadeModel[]>([]);
 
   erro = signal('');
   sucesso = signal('');
@@ -43,6 +47,7 @@ export class ConsultasPage implements OnInit {
   consultaForm = {
     pacienteId: null as number | null,
     dentistaId: null as number | null,
+    especialidadeId: null as number | null,
     descricao: '',
     dataConsulta: '',
     horarioInicio: '',
@@ -57,6 +62,7 @@ export class ConsultasPage implements OnInit {
     this.carregarConsultas();
     this.carregarPacientes();
     this.carregarDentistas();
+    this.carregarEspecialidades();
   }
 
   carregarConsultas() {
@@ -95,6 +101,17 @@ export class ConsultasPage implements OnInit {
     });
   }
 
+  carregarEspecialidades() {
+    this.especialidadeService.listar().subscribe({
+      next: (dados) => {
+        this.especialidades.set(dados);
+      },
+      error: (err) => {
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar especialidades.'));
+      }
+    });
+  }
+
   abrirModalCadastro() {
     this.modoModal = 'cadastro';
     this.confirmandoReagendamento = false;
@@ -129,6 +146,7 @@ export class ConsultasPage implements OnInit {
     this.consultaForm = {
       pacienteId: consulta.pacienteId,
       dentistaId: consulta.dentistaId,
+      especialidadeId: consulta.especialidadeId ?? null,
       descricao: consulta.descricao,
       dataConsulta: this.formatarDataParaInput(consulta.dataInicio).slice(0, 10),
       horarioInicio: this.formatarDataParaInput(consulta.dataInicio).slice(11, 16),
@@ -218,6 +236,7 @@ export class ConsultasPage implements OnInit {
     this.consultaForm = {
       pacienteId: consulta.pacienteId,
       dentistaId: consulta.dentistaId,
+      especialidadeId: consulta.especialidadeId ?? null,
       descricao: consulta.descricao,
       dataConsulta: this.formatarDataParaInputLocal(novoInicio).slice(0, 10),
       horarioInicio: this.formatarDataParaInputLocal(novoInicio).slice(11, 16),
@@ -273,8 +292,8 @@ export class ConsultasPage implements OnInit {
     this.erro.set('');
     this.sucesso.set('');
 
-    if (!this.consultaForm.pacienteId || !this.consultaForm.dentistaId) {
-      this.erro.set('Selecione paciente e dentista.');
+    if (!this.consultaForm.pacienteId || !this.consultaForm.dentistaId || !this.consultaForm.especialidadeId) {
+      this.erro.set('Selecione paciente, dentista e especialidade.');
       return;
     }
 
@@ -299,6 +318,7 @@ export class ConsultasPage implements OnInit {
     const payload: ConsultaRequestModel = {
       pacienteId: this.consultaForm.pacienteId,
       dentistaId: this.consultaForm.dentistaId,
+      especialidadeId: this.consultaForm.especialidadeId,
       descricao: this.consultaForm.descricao.trim(),
       dataInicio,
       dataFim
@@ -449,6 +469,32 @@ export class ConsultasPage implements OnInit {
     return !!this.consultaEmEdicao() && this.modoModal === 'edicao';
   }
 
+  aoSelecionarDentista() {
+    const especialidadesPermitidas = this.especialidadesDoDentistaSelecionado();
+    const especialidadeSelecionada = this.consultaForm.especialidadeId;
+
+    if (
+      especialidadeSelecionada &&
+      !especialidadesPermitidas.some(especialidade => especialidade.id === especialidadeSelecionada)
+    ) {
+      this.consultaForm.especialidadeId = null;
+    }
+  }
+
+  especialidadesDoDentistaSelecionado() {
+    const dentista = this.dentistas().find(item => item.id === this.consultaForm.dentistaId);
+
+    if (!dentista) return [];
+
+    const nomesDentista = new Set(
+      dentista.especialidades.map(nome => this.normalizarTexto(nome))
+    );
+
+    return this.especialidades()
+      .filter(especialidade => nomesDentista.has(this.normalizarTexto(especialidade.nome)))
+      .sort((a, b) => a.nome.localeCompare(b.nome));
+  }
+
   consultaEmEdicao() {
     if (!this.consultaSelecionadaId) return null;
 
@@ -484,6 +530,7 @@ export class ConsultasPage implements OnInit {
     this.consultaForm = {
       pacienteId: null,
       dentistaId: null,
+      especialidadeId: null,
       descricao: '',
       dataConsulta: '',
       horarioInicio: '',
@@ -533,6 +580,14 @@ export class ConsultasPage implements OnInit {
 
     const emailUsuario = this.authService.email();
     return dentistas.filter(dentista => dentista.email === emailUsuario);
+  }
+
+  private normalizarTexto(valor: string) {
+    return valor
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
   private montarSemana(referencia: Date) {
