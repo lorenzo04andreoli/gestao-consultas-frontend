@@ -134,27 +134,31 @@
                   </span>
                 </td>
                 <td>
-                  <div class="header-actions">
-                    <button
-                      type="button"
-                      class="secondary-button"
-                      title="Marcar como pago"
-                      [disabled]="!podeMarcarComoPago(lancamento) || acaoEmAndamento() === lancamento.id"
-                      (click)="marcarComoPago(lancamento)"
-                    >
-                      <i class="fa-solid fa-check" aria-hidden="true"></i>
-                    </button>
+                  @if (lancamento.status === 'PENDENTE') {
+                    <div class="header-actions">
+                      <button
+                        type="button"
+                        class="secondary-button"
+                        title="Marcar como pago"
+                        [disabled]="acaoEmAndamento() === lancamento.id"
+                        (click)="marcarComoPago(lancamento)"
+                      >
+                        <i class="fa-solid fa-check" aria-hidden="true"></i>
+                      </button>
 
-                    <button
-                      type="button"
-                      class="secondary-button"
-                      title="Cancelar cobranca"
-                      [disabled]="!podeCancelar(lancamento) || acaoEmAndamento() === lancamento.id"
-                      (click)="cancelarLancamento(lancamento)"
-                    >
-                      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        class="secondary-button"
+                        title="Cancelar cobranca"
+                        [disabled]="acaoEmAndamento() === lancamento.id"
+                        (click)="cancelarLancamento(lancamento)"
+                      >
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  } @else {
+                    <span>-</span>
+                  }
                 </td>
               </tr>
             }
