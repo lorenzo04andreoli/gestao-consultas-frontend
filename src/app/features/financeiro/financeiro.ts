@@ -5,7 +5,12 @@ import { API_URL } from '../../core/api';
 import {
   FinanceiroLancamentoModel,
   FinanceiroLancamentoRequestModel,
-  FinanceiroResumoModel
+  FinanceiroPrecoModel,
+  FinanceiroPrecoRequestModel,
+  FinanceiroPrecoSugestaoModel,
+  FinanceiroResumoModel,
+  FinanceiroTabelaPrecoModel,
+  FinanceiroTabelaPrecoRequestModel
 } from './financeiro.model';
 
 @Injectable({
@@ -46,6 +51,50 @@ export class FinanceiroService {
     );
   }
 
+  listarTabelasPreco() {
+    return this.http.get<FinanceiroTabelaPrecoModel[]>(`${this.apiUrl}/tabelas-preco`);
+  }
+
+  criarTabelaPreco(tabela: FinanceiroTabelaPrecoRequestModel) {
+    return this.http.post<FinanceiroTabelaPrecoModel>(`${this.apiUrl}/tabelas-preco`, tabela);
+  }
+
+  desativarTabelaPreco(id: number) {
+    return this.http.put<FinanceiroTabelaPrecoModel>(`${this.apiUrl}/tabelas-preco/${id}/desativar`, null);
+  }
+
+  listarPrecos(tabelaPrecoId: number) {
+    return this.http.get<FinanceiroPrecoModel[]>(`${this.apiUrl}/tabelas-preco/${tabelaPrecoId}/precos`).pipe(
+      map(precos => precos.map(preco => this.normalizarPreco(preco)))
+    );
+  }
+
+  criarPreco(preco: FinanceiroPrecoRequestModel) {
+    return this.http.post<FinanceiroPrecoModel>(`${this.apiUrl}/precos`, preco).pipe(
+      map(dados => this.normalizarPreco(dados))
+    );
+  }
+
+  desativarPreco(id: number) {
+    return this.http.put<FinanceiroPrecoModel>(`${this.apiUrl}/precos/${id}/desativar`, null).pipe(
+      map(dados => this.normalizarPreco(dados))
+    );
+  }
+
+  sugerirPreco(dentistaId: number, especialidadeId: number) {
+    return this.http.get<FinanceiroPrecoSugestaoModel>(`${this.apiUrl}/precos/sugestao`, {
+      params: {
+        dentistaId,
+        especialidadeId
+      }
+    }).pipe(
+      map(sugestao => ({
+        ...sugestao,
+        valor: sugestao.valor == null ? null : Number(sugestao.valor)
+      }))
+    );
+  }
+
   resumo() {
     return this.http.get<FinanceiroResumoModel>(`${this.apiUrl}/resumo`).pipe(
       map(resumo => ({
@@ -62,6 +111,13 @@ export class FinanceiroService {
     return {
       ...lancamento,
       valor: Number(lancamento.valor ?? 0)
+    };
+  }
+
+  private normalizarPreco(preco: FinanceiroPrecoModel): FinanceiroPrecoModel {
+    return {
+      ...preco,
+      valor: Number(preco.valor ?? 0)
     };
   }
 }

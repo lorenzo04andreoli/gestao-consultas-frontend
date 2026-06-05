@@ -31,3 +31,46 @@ export interface FinanceiroResumoModel {
   pagas: number;
   canceladas: number;
 }
+
+export interface FinanceiroTabelaPrecoRequestModel {
+  nome: string;
+  ativo?: boolean;
+}
+
+export interface FinanceiroTabelaPrecoModel {
+  id: number;
+  nome: string;
+  ativo: boolean;
+  dataCriacao: string;
+}
+
+export interface FinanceiroPrecoRequestModel {
+  tabelaPrecoId: number;
+  especialidadeId: number;
+  dentistaId?: number | null;
+  descricao: string;
+  valor: number;
+  ativo?: boolean;
+}
+
+export interface FinanceiroPrecoModel {
+  id: number;
+  tabelaPrecoId: number;
+  tabelaPrecoNome: string;
+  especialidadeId: number;
+  especialidadeNome: string;
+  dentistaId?: number | null;
+  dentistaNome?: string | null;
+  descricao: string;
+  valor: number;
+  ativo: boolean;
+  dataCriacao: string;
+}
+
+export interface FinanceiroPrecoSugestaoModel {
+  encontrado: boolean;
+  precoId?: number | null;
+  valor?: number | null;
+  descricao?: string | null;
+  origem?: 'DENTISTA' | 'ESPECIALIDADE' | null;
+}
