@@ -27,6 +27,7 @@ export class FinanceiroPage implements OnInit {
   sucesso = signal('');
   termoBusca = '';
   statusFiltro: FinanceiroLancamentoModel['status'] | '' = '';
+  incluirConsultasAntigas = false;
 
   form = this.criarFormVazio();
 
@@ -64,6 +65,7 @@ export class FinanceiroPage implements OnInit {
 
   abrirModalCobranca() {
     this.form = this.criarFormVazio();
+    this.incluirConsultasAntigas = false;
     this.erro.set('');
     this.sucesso.set('');
     this.modalAberto.set(true);
@@ -72,6 +74,7 @@ export class FinanceiroPage implements OnInit {
   fecharModalCobranca() {
     this.modalAberto.set(false);
     this.form = this.criarFormVazio();
+    this.incluirConsultasAntigas = false;
   }
 
   criarCobranca() {
@@ -173,11 +176,14 @@ export class FinanceiroPage implements OnInit {
 
   consultasDisponiveis() {
     const consultasComLancamento = new Set(this.lancamentos().map(lancamento => lancamento.consultaId));
+    const inicioHoje = new Date();
+    inicioHoje.setHours(0, 0, 0, 0);
 
     return this.consultas()
       .filter(consulta => !!consulta.id)
       .filter(consulta => consulta.status !== 'CANCELADA')
       .filter(consulta => !consultasComLancamento.has(consulta.id!))
+      .filter(consulta => this.incluirConsultasAntigas || new Date(consulta.dataInicio) >= inicioHoje)
       .sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
   }
 
