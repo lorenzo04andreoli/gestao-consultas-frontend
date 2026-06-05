@@ -13,7 +13,7 @@
         <span>Painel</span>
       </a>
 
-      <details class="nav-group">
+      <details class="nav-group" data-menu-group="consultas">
         <summary>
           <i class="fa-regular fa-calendar" aria-hidden="true"></i>
           <span>Consultas</span>
@@ -25,16 +25,17 @@
             routerLink="/consultas"
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
+            (click)="manterSubmenuAberto('consultas')"
           >
             Agenda
           </a>
-          <a routerLink="/consultas/listar" routerLinkActive="active">
+          <a routerLink="/consultas/listar" routerLinkActive="active" (click)="manterSubmenuAberto('consultas')">
             Listar
           </a>
         </div>
       </details>
 
-      <details class="nav-group">
+      <details class="nav-group" data-menu-group="pacientes">
         <summary>
           <i class="fa-regular fa-user" aria-hidden="true"></i>
           <span>Pacientes</span>
@@ -42,19 +43,19 @@
         </summary>
 
         <div class="nav-submenu">
-          <a routerLink="/pacientes/pesquisar" routerLinkActive="active">
+          <a routerLink="/pacientes/pesquisar" routerLinkActive="active" (click)="manterSubmenuAberto('pacientes')">
             Pesquisar
           </a>
-          <a routerLink="/pacientes/listar" routerLinkActive="active">
+          <a routerLink="/pacientes/listar" routerLinkActive="active" (click)="manterSubmenuAberto('pacientes')">
             Listar
           </a>
-          <a routerLink="/pacientes/arquivados" routerLinkActive="active">
+          <a routerLink="/pacientes/arquivados" routerLinkActive="active" (click)="manterSubmenuAberto('pacientes')">
             Arquivados
           </a>
         </div>
       </details>
 
-      <details class="nav-group">
+      <details class="nav-group" data-menu-group="equipe">
         <summary>
           <i class="fa-regular fa-user" aria-hidden="true"></i>
           <span>Equipe</span>
@@ -62,19 +63,19 @@
         </summary>
 
         <div class="nav-submenu">
-          <a routerLink="/dentistas/pesquisar" routerLinkActive="active">
+          <a routerLink="/dentistas/pesquisar" routerLinkActive="active" (click)="manterSubmenuAberto('equipe')">
             Pesquisar
           </a>
-          <a routerLink="/dentistas/listar" routerLinkActive="active">
+          <a routerLink="/dentistas/listar" routerLinkActive="active" (click)="manterSubmenuAberto('equipe')">
             Listar
           </a>
-          <a routerLink="/dentistas/arquivados" routerLinkActive="active">
+          <a routerLink="/dentistas/arquivados" routerLinkActive="active" (click)="manterSubmenuAberto('equipe')">
             Arquivados
           </a>
         </div>
       </details>
 
-      <details class="nav-group">
+      <details class="nav-group" data-menu-group="clinica">
         <summary>
           <i class="fa-regular fa-building" aria-hidden="true"></i>
           <span>Clínica</span>
@@ -82,10 +83,10 @@
         </summary>
 
         <div class="nav-submenu">
-          <a routerLink="/clinica/sobre" routerLinkActive="active">
+          <a routerLink="/clinica/sobre" routerLinkActive="active" (click)="manterSubmenuAberto('clinica')">
             Sobre a clínica
           </a>
-          <a routerLink="/clinica/especialidades" routerLinkActive="active">
+          <a routerLink="/clinica/especialidades" routerLinkActive="active" (click)="manterSubmenuAberto('clinica')">
             Especialidades
           </a>
         </div>
@@ -97,7 +98,7 @@
       </a>
 
       @if (authService.isAdmin()) {
-        <details class="nav-group">
+        <details class="nav-group" data-menu-group="financeiro">
           <summary>
             <i class="fa-solid fa-dollar-sign" aria-hidden="true"></i>
             <span>Financeiro</span>
@@ -109,10 +110,15 @@
               routerLink="/financeiro"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: true }"
+              (click)="manterSubmenuAberto('financeiro')"
             >
               Lançamentos
             </a>
-            <a routerLink="/financeiro/tabelas-preco" routerLinkActive="active">
+            <a
+              routerLink="/financeiro/tabelas-preco"
+              routerLinkActive="active"
+              (click)="manterSubmenuAberto('financeiro')"
+            >
               Tabela de preços
             </a>
           </div>
