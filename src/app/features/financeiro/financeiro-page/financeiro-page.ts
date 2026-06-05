@@ -25,6 +25,8 @@ export class FinanceiroPage implements OnInit {
   modalAberto = signal(false);
   erro = signal('');
   sucesso = signal('');
+  termoBusca = '';
+  statusFiltro: FinanceiroLancamentoModel['status'] | '' = '';
 
   form = this.criarFormVazio();
 
@@ -156,6 +158,19 @@ export class FinanceiroPage implements OnInit {
     return lancamento.status === 'PENDENTE';
   }
 
+  lancamentosFiltrados() {
+    const termo = this.normalizarTexto(this.termoBusca);
+
+    return this.lancamentos()
+      .filter(lancamento => !this.statusFiltro || lancamento.status === this.statusFiltro)
+      .filter(lancamento => !termo || this.lancamentoContemTermo(lancamento, termo));
+  }
+
+  limparFiltros() {
+    this.termoBusca = '';
+    this.statusFiltro = '';
+  }
+
   consultasDisponiveis() {
     const consultasComLancamento = new Set(this.lancamentos().map(lancamento => lancamento.consultaId));
 
@@ -243,5 +258,22 @@ export class FinanceiroPage implements OnInit {
     }
 
     return mensagemPadrao;
+  }
+
+  private normalizarTexto(valor: string) {
+    return valor
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
+
+  private lancamentoContemTermo(lancamento: FinanceiroLancamentoModel, termo: string) {
+    return [
+      lancamento.pacienteNome,
+      lancamento.dentistaNome,
+      lancamento.descricao,
+      lancamento.status,
+      this.formatarMoeda(lancamento.valor)
+    ].some(valor => this.normalizarTexto(valor).includes(termo));
   }
 }
