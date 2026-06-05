@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 import { FinanceiroService } from '../financeiro';
-import { FinanceiroResumoModel } from '../financeiro.model';
+import { FinanceiroLancamentoModel, FinanceiroResumoModel } from '../financeiro.model';
 
 @Component({
   selector: 'app-financeiro-page',
@@ -11,26 +12,31 @@ import { FinanceiroResumoModel } from '../financeiro.model';
 })
 export class FinanceiroPage implements OnInit {
   resumo = signal<FinanceiroResumoModel | null>(null);
+  lancamentos = signal<FinanceiroLancamentoModel[]>([]);
   carregando = signal(true);
   erro = signal('');
 
   constructor(private financeiroService: FinanceiroService) {}
 
   ngOnInit() {
-    this.carregarResumo();
+    this.carregarDados();
   }
 
-  carregarResumo() {
+  carregarDados() {
     this.carregando.set(true);
     this.erro.set('');
 
-    this.financeiroService.resumo().subscribe({
-      next: resumo => {
+    forkJoin({
+      resumo: this.financeiroService.resumo(),
+      lancamentos: this.financeiroService.listarLancamentos()
+    }).subscribe({
+      next: ({ resumo, lancamentos }) => {
         this.resumo.set(resumo);
+        this.lancamentos.set(lancamentos);
         this.carregando.set(false);
       },
       error: err => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar resumo financeiro.'));
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar financeiro.'));
         this.carregando.set(false);
       }
     });
@@ -41,6 +47,26 @@ export class FinanceiroPage implements OnInit {
       style: 'currency',
       currency: 'BRL'
     }).format(valor ?? 0);
+  }
+
+  formatarData(data?: string | null) {
+    if (!data) return '-';
+
+    return new Intl.DateTimeFormat('pt-BR').format(new Date(`${data}T00:00:00`));
+  }
+
+  statusLabel(status: FinanceiroLancamentoModel['status']) {
+    const labels = {
+      PENDENTE: 'Pendente',
+      PAGO: 'Pago',
+      CANCELADO: 'Cancelado'
+    };
+
+    return labels[status] ?? status;
+  }
+
+  statusClass(status: FinanceiroLancamentoModel['status']) {
+    return status.toLowerCase();
   }
 
   private extrairMensagemErro(err: unknown, mensagemPadrao: string) {

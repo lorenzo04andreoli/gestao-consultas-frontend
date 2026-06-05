@@ -5,7 +5,7 @@
       <p>Acompanhe cobrancas vinculadas as consultas da clinica.</p>
     </div>
 
-    <button type="button" class="secondary-button" (click)="carregarResumo()">
+    <button type="button" class="secondary-button" (click)="carregarDados()">
       <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
       Atualizar
     </button>
@@ -54,4 +54,53 @@
       </article>
     </section>
   }
+
+  <section class="list-panel">
+    <header>
+      <div>
+        <h2>Lancamentos</h2>
+        <p>Cobrancas criadas a partir das consultas.</p>
+      </div>
+    </header>
+
+    @if (carregando()) {
+      <p class="empty-state">Carregando lancamentos...</p>
+    } @else if (lancamentos().length > 0) {
+      <div class="finance-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Dentista</th>
+              <th>Descricao</th>
+              <th>Vencimento</th>
+              <th>Valor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (lancamento of lancamentos(); track lancamento.id) {
+              <tr>
+                <td>
+                  <strong>{{ lancamento.pacienteNome }}</strong>
+                </td>
+                <td>{{ lancamento.dentistaNome }}</td>
+                <td>{{ lancamento.descricao }}</td>
+                <td>{{ formatarData(lancamento.dataVencimento) }}</td>
+                <td class="money-cell">{{ formatarMoeda(lancamento.valor) }}</td>
+                <td>
+                  <span class="status-pill {{ statusClass(lancamento.status) }}">
+                    {{ statusLabel(lancamento.status) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="empty-state">Nenhum lancamento financeiro cadastrado.</p>
+    }
+  </section>
 </section>
