@@ -87,6 +87,7 @@
               <th>Vencimento</th>
               <th>Valor</th>
               <th>Status</th>
+              <th>Acoes</th>
             </tr>
           </thead>
 
@@ -104,6 +105,29 @@
                   <span class="status-pill {{ statusClass(lancamento.status) }}">
                     {{ statusLabel(lancamento.status) }}
                   </span>
+                </td>
+                <td>
+                  <div class="header-actions">
+                    <button
+                      type="button"
+                      class="secondary-button"
+                      title="Marcar como pago"
+                      [disabled]="!podeMarcarComoPago(lancamento) || acaoEmAndamento() === lancamento.id"
+                      (click)="marcarComoPago(lancamento)"
+                    >
+                      <i class="fa-solid fa-check" aria-hidden="true"></i>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="secondary-button"
+                      title="Cancelar cobranca"
+                      [disabled]="!podeCancelar(lancamento) || acaoEmAndamento() === lancamento.id"
+                      (click)="cancelarLancamento(lancamento)"
+                    >
+                      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
             }

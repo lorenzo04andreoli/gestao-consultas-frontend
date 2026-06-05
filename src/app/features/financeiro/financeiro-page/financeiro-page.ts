@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { ConsultaService } from '../../consultas/consulta';
 import { ConsultaModel } from '../../consultas/consulta.model';
 import { FinanceiroService } from '../financeiro';
@@ -20,6 +21,7 @@ export class FinanceiroPage implements OnInit {
   consultas = signal<ConsultaModel[]>([]);
   carregando = signal(true);
   salvando = signal(false);
+  acaoEmAndamento = signal<number | null>(null);
   modalAberto = signal(false);
   erro = signal('');
   sucesso = signal('');
@@ -28,7 +30,8 @@ export class FinanceiroPage implements OnInit {
 
   constructor(
     private financeiroService: FinanceiroService,
-    private consultaService: ConsultaService
+    private consultaService: ConsultaService,
+    private confirmation: ConfirmationService
   ) {}
 
   ngOnInit() {
@@ -109,6 +112,50 @@ export class FinanceiroPage implements OnInit {
     });
   }
 
+  async marcarComoPago(lancamento: FinanceiroLancamentoModel) {
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Marcar como pago',
+      message: `Confirmar pagamento de ${this.formatarMoeda(lancamento.valor)} para ${lancamento.pacienteNome}?`,
+      confirmLabel: 'Marcar como pago',
+      cancelLabel: 'Cancelar',
+      tone: 'primary'
+    });
+
+    if (!confirmar) return;
+
+    this.executarAcaoLancamento(
+      lancamento.id,
+      () => this.financeiroService.marcarComoPago(lancamento.id),
+      'Cobranca marcada como paga.'
+    );
+  }
+
+  async cancelarLancamento(lancamento: FinanceiroLancamentoModel) {
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Cancelar cobranca',
+      message: `Cancelar a cobranca de ${lancamento.pacienteNome}? Ela deixara de contar nos valores a receber.`,
+      confirmLabel: 'Cancelar cobranca',
+      cancelLabel: 'Voltar',
+      tone: 'danger'
+    });
+
+    if (!confirmar) return;
+
+    this.executarAcaoLancamento(
+      lancamento.id,
+      () => this.financeiroService.cancelar(lancamento.id),
+      'Cobranca cancelada com sucesso.'
+    );
+  }
+
+  podeMarcarComoPago(lancamento: FinanceiroLancamentoModel) {
+    return lancamento.status === 'PENDENTE';
+  }
+
+  podeCancelar(lancamento: FinanceiroLancamentoModel) {
+    return lancamento.status === 'PENDENTE';
+  }
+
   consultasDisponiveis() {
     const consultasComLancamento = new Set(this.lancamentos().map(lancamento => lancamento.consultaId));
 
@@ -166,6 +213,28 @@ export class FinanceiroPage implements OnInit {
       valor: null as number | null,
       dataVencimento: ''
     };
+  }
+
+  private executarAcaoLancamento(
+    id: number,
+    acao: () => ReturnType<FinanceiroService['marcarComoPago']>,
+    mensagemSucesso: string
+  ) {
+    this.erro.set('');
+    this.sucesso.set('');
+    this.acaoEmAndamento.set(id);
+
+    acao().subscribe({
+      next: () => {
+        this.sucesso.set(mensagemSucesso);
+        this.acaoEmAndamento.set(null);
+        this.carregarDados();
+      },
+      error: err => {
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao atualizar cobranca.'));
+        this.acaoEmAndamento.set(null);
+      }
+    });
   }
 
   private extrairMensagemErro(err: unknown, mensagemPadrao: string) {
