@@ -190,7 +190,13 @@
           <div class="form-grid">
             <div class="form-group full-width">
               <label for="consultaId">Consulta</label>
-              <select id="consultaId" name="consultaId" [(ngModel)]="form.consultaId" required>
+              <select
+                id="consultaId"
+                name="consultaId"
+                [(ngModel)]="form.consultaId"
+                (ngModelChange)="aoSelecionarConsulta()"
+                required
+              >
                 <option [ngValue]="null">Selecione uma consulta</option>
                 @for (consulta of consultasDisponiveis(); track consulta.id) {
                   <option [ngValue]="consulta.id">{{ descricaoConsulta(consulta) }}</option>
@@ -198,6 +204,12 @@
               </select>
               @if (!carregando() && consultasDisponiveis().length === 0) {
                 <small>Nao ha consultas disponiveis para cobranca.</small>
+              }
+
+              @if (buscandoPreco()) {
+                <small>Buscando valor sugerido...</small>
+              } @else if (avisoPreco()) {
+                <small>{{ avisoPreco() }}</small>
               }
             </div>
 

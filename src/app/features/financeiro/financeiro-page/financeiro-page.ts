@@ -23,6 +23,8 @@ export class FinanceiroPage implements OnInit {
   salvando = signal(false);
   acaoEmAndamento = signal<number | null>(null);
   modalAberto = signal(false);
+  buscandoPreco = signal(false);
+  avisoPreco = signal('');
   erro = signal('');
   sucesso = signal('');
   termoBusca = '';
@@ -66,6 +68,7 @@ export class FinanceiroPage implements OnInit {
   abrirModalCobranca() {
     this.form = this.criarFormVazio();
     this.incluirConsultasAntigas = false;
+    this.avisoPreco.set('');
     this.erro.set('');
     this.sucesso.set('');
     this.modalAberto.set(true);
@@ -75,6 +78,7 @@ export class FinanceiroPage implements OnInit {
     this.modalAberto.set(false);
     this.form = this.criarFormVazio();
     this.incluirConsultasAntigas = false;
+    this.avisoPreco.set('');
   }
 
   criarCobranca() {
@@ -174,6 +178,48 @@ export class FinanceiroPage implements OnInit {
     this.statusFiltro = '';
   }
 
+  aoSelecionarConsulta() {
+    this.avisoPreco.set('');
+
+    if (!this.form.consultaId) {
+      this.form.descricao = '';
+      this.form.valor = null;
+      return;
+    }
+
+    const consulta = this.consultas().find(item => item.id === this.form.consultaId);
+
+    if (!consulta?.dentistaId || !consulta.especialidadeId) {
+      this.avisoPreco.set('Consulta sem especialidade vinculada. Informe o valor manualmente.');
+      return;
+    }
+
+    this.buscandoPreco.set(true);
+
+    this.financeiroService.sugerirPreco(consulta.dentistaId, consulta.especialidadeId).subscribe({
+      next: sugestao => {
+        this.buscandoPreco.set(false);
+
+        if (!sugestao.encontrado || sugestao.valor == null) {
+          this.avisoPreco.set('Nenhum preco cadastrado para esta especialidade. Informe o valor manualmente.');
+          return;
+        }
+
+        this.form.valor = sugestao.valor;
+        this.form.descricao = sugestao.descricao || consulta.descricao || 'Consulta odontologica';
+        this.avisoPreco.set(
+          sugestao.origem === 'DENTISTA'
+            ? 'Valor sugerido pela regra especifica do dentista.'
+            : 'Valor sugerido pela regra geral da especialidade.'
+        );
+      },
+      error: err => {
+        this.buscandoPreco.set(false);
+        this.avisoPreco.set(this.extrairMensagemErro(err, 'Nao foi possivel sugerir o preco.'));
+      }
+    });
+  }
+
   consultasDisponiveis() {
     const consultasComLancamento = new Set(this.lancamentos().map(lancamento => lancamento.consultaId));
     const inicioHoje = new Date();
@@ -224,7 +270,8 @@ export class FinanceiroPage implements OnInit {
   }
 
   descricaoConsulta(consulta: ConsultaModel) {
-    return `${consulta.pacienteNome} - ${consulta.dentistaNome} - ${this.formatarDataHora(consulta.dataInicio)}`;
+    const especialidade = consulta.especialidadeNome ? ` - ${consulta.especialidadeNome}` : '';
+    return `${consulta.pacienteNome} - ${consulta.dentistaNome}${especialidade} - ${this.formatarDataHora(consulta.dataInicio)}`;
   }
 
   private criarFormVazio() {
