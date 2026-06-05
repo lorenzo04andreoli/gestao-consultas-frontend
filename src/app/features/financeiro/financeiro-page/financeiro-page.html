@@ -2,7 +2,7 @@
   <header class="page-header">
     <div>
       <h1>Financeiro</h1>
-      <p>Acompanhe cobrancas vinculadas as consultas da clinica.</p>
+      <p>Acompanhe cobranças vinculadas as consultas da clinica.</p>
     </div>
 
     <div class="header-actions">
@@ -13,7 +13,7 @@
 
       <button type="button" class="primary-button" (click)="abrirModalCobranca()">
         <i class="fa-solid fa-plus" aria-hidden="true"></i>
-        Nova cobranca
+        Nova cobrança
       </button>
     </div>
   </header>
@@ -35,9 +35,9 @@
   } @else if (resumo(); as resumo) {
     <section class="summary-grid">
       <article class="summary-card">
-        <span>Recebido no mes</span>
+        <span>Recebido no mês</span>
         <strong>{{ formatarMoeda(resumo.recebidoMes) }}</strong>
-        <small>Pagamentos registrados no mes atual</small>
+        <small>Pagamentos registrados no mês atual</small>
       </article>
 
       <article class="summary-card">
@@ -61,7 +61,7 @@
       <article class="summary-card">
         <span>Canceladas</span>
         <strong>{{ resumo.canceladas }}</strong>
-        <small>Lancamentos descartados</small>
+        <small>Lançamentos descartados</small>
       </article>
     </section>
   }
@@ -69,8 +69,8 @@
   <section class="list-panel">
     <header>
       <div>
-        <h2>Lancamentos</h2>
-        <p>Cobrancas criadas a partir das consultas.</p>
+        <h2>Lançamentos</h2>
+        <p>Cobranças criadas a partir das consultas.</p>
       </div>
     </header>
 
@@ -110,11 +110,11 @@
             <tr>
               <th>Paciente</th>
               <th>Dentista</th>
-              <th>Descricao</th>
+              <th>Descrição</th>
               <th>Vencimento</th>
               <th>Valor</th>
               <th>Status</th>
-              <th>Acoes</th>
+              <th>Ações</th>
             </tr>
           </thead>
 
@@ -149,7 +149,7 @@
                       <button
                         type="button"
                         class="secondary-button"
-                        title="Cancelar cobranca"
+                        title="Cancelar cobrança"
                         [disabled]="acaoEmAndamento() === lancamento.id"
                         (click)="cancelarLancamento(lancamento)"
                       >
@@ -167,7 +167,7 @@
       </div>
     } @else {
       <p class="empty-state">
-        {{ lancamentos().length ? 'Nenhum lancamento encontrado para os filtros.' : 'Nenhum lancamento financeiro cadastrado.' }}
+        {{ lancamentos().length ? 'Nenhum lançamento encontrado para os filtros.' : 'Nenhum lançamento financeiro cadastrado.' }}
       </p>
     }
   </section>
@@ -177,8 +177,8 @@
       <section class="modal" (click)="$event.stopPropagation()">
         <header class="modal-header">
           <div>
-            <h2>Nova cobranca</h2>
-            <p>Vincule uma cobranca a uma consulta ainda sem lancamento.</p>
+            <h2>Nova cobrança</h2>
+            <p>Vincule uma cobrança a uma consulta ainda sem lançamento.</p>
           </div>
 
           <button type="button" class="close-button" aria-label="Fechar" (click)="fecharModalCobranca()">
@@ -211,7 +211,7 @@
             </label>
 
             <div class="form-group full-width">
-              <label for="descricao">Descricao</label>
+              <label for="descricao">Descrição</label>
               <input
                 id="descricao"
                 type="text"
@@ -252,7 +252,7 @@
             </button>
 
             <button type="submit" class="primary-button" [disabled]="salvando()">
-              {{ salvando() ? 'Salvando...' : 'Salvar cobranca' }}
+              {{ salvando() ? 'Salvando...' : 'Salvar cobrança' }}
             </button>
           </footer>
         </form>
