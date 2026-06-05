@@ -97,6 +97,11 @@
       </a>
 
       @if (authService.isAdmin()) {
+        <a routerLink="/financeiro" routerLinkActive="active">
+          <i class="fa-solid fa-coins" aria-hidden="true"></i>
+          <span>Financeiro</span>
+        </a>
+
         <a routerLink="/usuarios" routerLinkActive="active">
           <i class="fa-regular fa-address-card" aria-hidden="true"></i>
           <span>Usuários</span>
