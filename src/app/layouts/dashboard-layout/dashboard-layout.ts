@@ -1,4 +1,4 @@
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
 import { ThemeService } from '../../core/theme/theme';
@@ -32,6 +32,24 @@ export class DashboardLayout {
       : '/dentix-logo.svg';
   }
 
+  @HostListener('document:click', ['$event'])
+  fecharMenuPerfilAoClicarFora(event: MouseEvent) {
+    const alvo = event.target as Node | null;
+    const menuPerfil = this.elementRef.nativeElement.querySelector<HTMLElement>('.profile-menu');
+
+    if (alvo && menuPerfil?.contains(alvo)) return;
+
+    this.fecharMenuPerfil();
+  }
+
+  fecharMenuPerfil() {
+    const menuPerfil = this.elementRef.nativeElement.querySelector<HTMLDetailsElement>('.profile-menu');
+
+    if (menuPerfil) {
+      menuPerfil.open = false;
+    }
+  }
+
   manterSubmenuAberto(grupoAtual: string) {
     this.elementRef.nativeElement
       .querySelectorAll<HTMLDetailsElement>('.nav-group[data-menu-group]')
@@ -41,6 +59,7 @@ export class DashboardLayout {
   }
 
   sair() {
+    this.fecharMenuPerfil();
     this.authService.logout();
   }
 }
