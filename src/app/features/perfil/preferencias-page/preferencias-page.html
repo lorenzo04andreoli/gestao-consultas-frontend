@@ -1,0 +1,36 @@
+<section class="preferences-section">
+  <div class="section-heading">
+    <h2>Tema</h2>
+    <p>Personalize o tema da sua interface.</p>
+  </div>
+
+  <div class="theme-options" aria-label="Opções de tema">
+    <button
+      type="button"
+      class="theme-option"
+      [class.active]="temaAtual('claro')"
+      [attr.aria-pressed]="temaAtual('claro')"
+      (click)="selecionarTema('claro')"
+    >
+      <span class="theme-preview light">
+        <span></span>
+        <span></span>
+      </span>
+      <strong>Claro</strong>
+    </button>
+
+    <button
+      type="button"
+      class="theme-option"
+      [class.active]="temaAtual('escuro')"
+      [attr.aria-pressed]="temaAtual('escuro')"
+      (click)="selecionarTema('escuro')"
+    >
+      <span class="theme-preview dark">
+        <span></span>
+        <span></span>
+      </span>
+      <strong>Escuro</strong>
+    </button>
+  </div>
+</section>

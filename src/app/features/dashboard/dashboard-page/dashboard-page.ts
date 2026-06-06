@@ -196,6 +196,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.statusChart?.destroy();
     const primaryColor = this.corPrimaria();
+    const textColor = this.corTextoGrafico();
 
     const config: ChartConfiguration<'doughnut'> = {
       type: 'doughnut',
@@ -218,7 +219,10 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            position: 'bottom'
+            position: 'bottom',
+            labels: {
+              color: textColor
+            }
           }
         }
       }
@@ -233,6 +237,8 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.dentistasChart?.destroy();
     const primaryColor = this.corPrimaria();
+    const textColor = this.corTextoGrafico();
+    const gridColor = this.corGradeGrafico();
 
     const totaisPorDentista = this.rankingDentistas();
 
@@ -261,9 +267,21 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
+          x: {
+            grid: {
+              color: gridColor
+            },
+            ticks: {
+              color: textColor
+            }
+          },
           y: {
             beginAtZero: true,
+            grid: {
+              color: gridColor
+            },
             ticks: {
+              color: textColor,
               precision: 0
             }
           }
@@ -285,6 +303,8 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.mensalChart?.destroy();
     const primaryColor = this.corPrimaria();
+    const textColor = this.corTextoGrafico();
+    const gridColor = this.corGradeGrafico();
 
     const meses = this.montarUltimosMeses(6);
 
@@ -318,19 +338,32 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
         maintainAspectRatio: false,
         scales: {
           x: {
-            stacked: true
+            stacked: true,
+            grid: {
+              color: gridColor
+            },
+            ticks: {
+              color: textColor
+            }
           },
           y: {
             beginAtZero: true,
             stacked: true,
+            grid: {
+              color: gridColor
+            },
             ticks: {
+              color: textColor,
               precision: 0
             }
           }
         },
         plugins: {
           legend: {
-            position: 'bottom'
+            position: 'bottom',
+            labels: {
+              color: textColor
+            }
           }
         }
       }
@@ -344,6 +377,8 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     if (!canvas) return;
 
     this.cancelamentosChart?.destroy();
+    const textColor = this.corTextoGrafico();
+    const gridColor = this.corGradeGrafico();
 
     const dias = this.montarUltimosDias(7);
 
@@ -368,9 +403,21 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
+          x: {
+            grid: {
+              color: gridColor
+            },
+            ticks: {
+              color: textColor
+            }
+          },
           y: {
             beginAtZero: true,
+            grid: {
+              color: gridColor
+            },
             ticks: {
+              color: textColor,
               precision: 0
             }
           }
@@ -474,8 +521,20 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private corPrimaria() {
-    return getComputedStyle(document.documentElement)
+    return getComputedStyle(document.body)
       .getPropertyValue('--color-primary')
       .trim() || '#0284c7';
+  }
+
+  private corTextoGrafico() {
+    return getComputedStyle(document.body)
+      .getPropertyValue('--color-muted')
+      .trim() || '#64748b';
+  }
+
+  private corGradeGrafico() {
+    return getComputedStyle(document.body)
+      .getPropertyValue('--color-border')
+      .trim() || '#dce7ec';
   }
 }

@@ -1,6 +1,7 @@
 import { Component, ElementRef } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
+import { ThemeService } from '../../core/theme/theme';
 import { ConfirmationDialog } from '../../shared/confirmation/confirmation-dialog/confirmation-dialog';
 
 @Component({
@@ -13,6 +14,7 @@ import { ConfirmationDialog } from '../../shared/confirmation/confirmation-dialo
 export class DashboardLayout {
   constructor(
     public authService: AuthService,
+    private themeService: ThemeService,
     private elementRef: ElementRef<HTMLElement>
   ) {}
 
@@ -22,6 +24,12 @@ export class DashboardLayout {
 
   perfilLabel() {
     return this.authService.perfil() === 'ADMIN' ? 'Administrador' : 'Dentista';
+  }
+
+  logoSrc() {
+    return this.themeService.tema() === 'escuro'
+      ? '/dentix-logo copy.svg'
+      : '/dentix-logo.svg';
   }
 
   manterSubmenuAberto(grupoAtual: string) {

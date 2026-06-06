@@ -68,7 +68,7 @@ export class TabelasPrecoPage implements OnInit {
         this.carregando.set(false);
       },
       error: err => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar tabelas de preco.'));
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar tabelas de preço.'));
         this.carregando.set(false);
       }
     });
@@ -91,7 +91,7 @@ export class TabelasPrecoPage implements OnInit {
     this.limparMensagens();
 
     if (!nome) {
-      this.erro.set('Informe o nome da tabela de precos.');
+      this.erro.set('Informe o nome da tabela de preços.');
       return;
     }
 
@@ -99,14 +99,14 @@ export class TabelasPrecoPage implements OnInit {
 
     this.financeiroService.criarTabelaPreco({ nome, ativo: true }).subscribe({
       next: tabela => {
-        this.sucesso.set('Tabela de precos criada com sucesso.');
+        this.sucesso.set('Tabela de preços criada com sucesso.');
         this.tabelaForm.nome = '';
         this.salvandoTabela.set(false);
         this.tabelas.update(tabelas => [...tabelas, tabela].sort((a, b) => a.nome.localeCompare(b.nome)));
         this.selecionarTabela(tabela.id);
       },
       error: err => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao criar tabela de preco.'));
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao criar tabela de preço.'));
         this.salvandoTabela.set(false);
       }
     });
@@ -116,7 +116,7 @@ export class TabelasPrecoPage implements OnInit {
     this.limparMensagens();
 
     if (!this.precoForm.tabelaPrecoId) {
-      this.erro.set('Selecione uma tabela de precos.');
+      this.erro.set('Selecione uma tabela de preços.');
       return;
     }
 
@@ -126,7 +126,7 @@ export class TabelasPrecoPage implements OnInit {
     }
 
     if (!this.precoForm.descricao.trim()) {
-      this.erro.set('Informe uma descricao para o preco.');
+      this.erro.set('Informe uma descrição para o preço.');
       return;
     }
 
@@ -146,13 +146,13 @@ export class TabelasPrecoPage implements OnInit {
       ativo: true
     }).subscribe({
       next: () => {
-        this.sucesso.set('Preco cadastrado com sucesso.');
+        this.sucesso.set('Preço cadastrado com sucesso.');
         this.salvandoPreco.set(false);
         this.precoForm = this.criarPrecoFormVazio(this.tabelaSelecionadaId());
         this.carregarPrecos(this.tabelaSelecionadaId());
       },
       error: err => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao cadastrar preco.'));
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao cadastrar preço.'));
         this.salvandoPreco.set(false);
       }
     });
@@ -161,7 +161,7 @@ export class TabelasPrecoPage implements OnInit {
   async desativarTabela(tabela: FinanceiroTabelaPrecoModel) {
     const confirmar = await this.confirmation.confirmar({
       title: 'Desativar tabela',
-      message: `Desativar a tabela ${tabela.nome}? Ela deixara de ser usada para novas sugestoes.`,
+      message: `Desativar a tabela ${tabela.nome}? Ela deixará de ser usada para novas sugestões.`,
       confirmLabel: 'Desativar',
       cancelLabel: 'Voltar',
       tone: 'danger'
@@ -177,8 +177,8 @@ export class TabelasPrecoPage implements OnInit {
 
   async desativarPreco(preco: FinanceiroPrecoModel) {
     const confirmar = await this.confirmation.confirmar({
-      title: 'Desativar preco',
-      message: `Desativar o preco de ${preco.especialidadeNome}?`,
+      title: 'Desativar preço',
+      message: `Desativar o preço de ${preco.especialidadeNome}?`,
       confirmLabel: 'Desativar',
       cancelLabel: 'Voltar',
       tone: 'danger'
@@ -187,7 +187,7 @@ export class TabelasPrecoPage implements OnInit {
     if (!confirmar) return;
 
     this.executarAcao(preco.id, () => this.financeiroService.desativarPreco(preco.id), () => {
-      this.sucesso.set('Preco desativado com sucesso.');
+      this.sucesso.set('Preço desativado com sucesso.');
       this.carregarPrecos(this.tabelaSelecionadaId());
     });
   }
@@ -222,7 +222,7 @@ export class TabelasPrecoPage implements OnInit {
         this.carregandoPrecos.set(false);
       },
       error: err => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar precos.'));
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar preços.'));
         this.carregandoPrecos.set(false);
       }
     });

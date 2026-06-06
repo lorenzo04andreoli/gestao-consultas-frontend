@@ -23,7 +23,24 @@ export const routes: Routes = [
       {
         path: 'perfil',
         loadComponent: () =>
-          import('./features/perfil/perfil-page/perfil-page').then(m => m.PerfilPage)
+          import('./features/perfil/perfil-layout/perfil-layout').then(m => m.PerfilLayout),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/perfil/perfil-page/perfil-page').then(m => m.PerfilPage)
+          },
+          {
+            path: 'seguranca',
+            loadComponent: () =>
+              import('./features/perfil/seguranca-page/seguranca-page').then(m => m.SegurancaPage)
+          },
+          {
+            path: 'preferencias',
+            loadComponent: () =>
+              import('./features/perfil/preferencias-page/preferencias-page').then(m => m.PreferenciasPage)
+          }
+        ]
       },
       {
         path: 'pacientes/listar',

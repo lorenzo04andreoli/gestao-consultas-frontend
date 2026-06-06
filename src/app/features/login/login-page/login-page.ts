@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth/auth';
+import { ThemeService } from '../../../core/theme/theme';
 
 @Component({
   selector: 'app-login-page',
@@ -10,7 +11,7 @@ import { AuthService } from '../../../core/auth/auth';
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss'
 })
-export class LoginPage {
+export class LoginPage implements OnInit, OnDestroy {
   email = '';
   senha = '';
   erro = '';
@@ -19,8 +20,17 @@ export class LoginPage {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private themeService: ThemeService
   ) {}
+
+  ngOnInit() {
+    this.themeService.suspenderTema();
+  }
+
+  ngOnDestroy() {
+    this.themeService.aplicarTemaAtual();
+  }
 
   entrar() {
     this.erro = '';

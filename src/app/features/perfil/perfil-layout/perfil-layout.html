@@ -1,0 +1,23 @@
+<section class="account-page">
+  <section class="account-panel">
+    <header class="account-header">
+      <h1>Sua conta</h1>
+
+      <nav class="account-tabs" aria-label="Seções da conta">
+        <a routerLink="/perfil" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          Perfil
+        </a>
+        <a routerLink="/perfil/seguranca" routerLinkActive="active">
+          Segurança
+        </a>
+        <a routerLink="/perfil/preferencias" routerLinkActive="active">
+          Preferências
+        </a>
+      </nav>
+    </header>
+
+    <div class="account-content">
+      <router-outlet />
+    </div>
+  </section>
+</section>

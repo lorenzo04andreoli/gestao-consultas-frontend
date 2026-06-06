@@ -58,6 +58,31 @@ body {
   --radius-lg: 14px;
 }
 
+body.theme-dark {
+  color-scheme: dark;
+  --color-primary: #38bdf8;
+  --color-primary-dark: #e5f3ff;
+  --color-primary-soft: #0f3a4f;
+  --color-accent: #67e8f9;
+  --color-accent-soft: #164e63;
+  --color-background: #111827;
+  --color-surface: #1f2937;
+  --color-text: #e5e7eb;
+  --color-muted: #9ca3af;
+  --color-border: #374151;
+  --color-danger: #f87171;
+  --color-warning: #fbbf24;
+  --color-success: #4ade80;
+  --shadow-card: 0 16px 32px rgba(0, 0, 0, 0.28);
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+body.theme-light {
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -83,7 +108,7 @@ textarea {
   justify-content: flex-end;
   padding: 0 24px;
   border-bottom: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.96);
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
@@ -175,6 +200,244 @@ textarea {
 .profile-dropdown a:hover,
 .profile-dropdown button:hover {
   background: #f8fafc;
+}
+
+body.theme-dark .layout,
+body.theme-dark .content,
+body.theme-dark .page,
+body.theme-dark .account-page {
+  background: var(--color-background) !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .sidebar,
+body.theme-dark .summary-card,
+body.theme-dark .chart-panel,
+body.theme-dark .list-panel,
+body.theme-dark .panel,
+body.theme-dark .modal,
+body.theme-dark .profile-panel,
+body.theme-dark .account-panel,
+body.theme-dark .dashboard-table,
+body.theme-dark .finance-table,
+body.theme-dark .prices-table,
+body.theme-dark .filters-card,
+body.theme-dark .filter-card,
+body.theme-dark .table-card,
+body.theme-dark .search-card,
+body.theme-dark .results-panel,
+body.theme-dark .schedule-card,
+body.theme-dark .profile-hero,
+body.theme-dark .details-grid article,
+body.theme-dark .security-list article {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .table-item,
+body.theme-dark .form-group input,
+body.theme-dark .form-group select,
+body.theme-dark input,
+body.theme-dark select,
+body.theme-dark textarea,
+body.theme-dark .secondary-button,
+body.theme-dark .icon-button,
+body.theme-dark .profile-dropdown,
+body.theme-dark .search-control,
+body.theme-dark .clear-button,
+body.theme-dark .time-column,
+body.theme-dark .day-header,
+body.theme-dark .schedule-slot,
+body.theme-dark .patient-result {
+  background: #111827 !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .profile-dropdown a:hover,
+body.theme-dark .profile-dropdown button:hover,
+body.theme-dark .nav a:hover,
+body.theme-dark .nav-group summary:hover,
+body.theme-dark .menu-button:hover,
+body.theme-dark .logout-button:hover,
+body.theme-dark tbody tr:hover,
+body.theme-dark .patient-result:hover {
+  background: #182131 !important;
+}
+
+body.theme-dark .nav a.active,
+body.theme-dark .table-item.active {
+  background: #0f2d3d !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .sidebar .nav a,
+body.theme-dark .sidebar .nav-group summary,
+body.theme-dark .sidebar .logout-button,
+body.theme-dark .sidebar .menu-button {
+  color: var(--color-muted) !important;
+}
+
+body.theme-dark .sidebar .nav a.active,
+body.theme-dark .sidebar .nav a:hover,
+body.theme-dark .sidebar .nav-group summary:hover,
+body.theme-dark .sidebar .logout-button:hover,
+body.theme-dark .sidebar .menu-button:hover {
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .content h1,
+body.theme-dark .content h2,
+body.theme-dark .content h3,
+body.theme-dark .content h4,
+body.theme-dark .content label,
+body.theme-dark .content th,
+body.theme-dark .content td,
+body.theme-dark .content strong,
+body.theme-dark .content .table-header h2,
+body.theme-dark .content .patient-link,
+body.theme-dark .content .week-controls,
+body.theme-dark .content .modal-summary,
+body.theme-dark .content .summary-card strong,
+body.theme-dark .content .results-header strong,
+body.theme-dark .content .patient-info strong {
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .content p,
+body.theme-dark .content small,
+body.theme-dark .content .empty-state,
+body.theme-dark .content .loading,
+body.theme-dark .content .muted-cell,
+body.theme-dark .content .reason,
+body.theme-dark .content .patient-meta,
+body.theme-dark .content .summary-card span,
+body.theme-dark .content .table-header p,
+body.theme-dark .content .section-heading p,
+body.theme-dark .content .results-header span,
+body.theme-dark .content .patient-info small {
+  color: var(--color-muted) !important;
+}
+
+body.theme-dark .content table th {
+  background: #111827 !important;
+}
+
+body.theme-dark table th,
+body.theme-dark table td {
+  border-color: var(--color-border) !important;
+}
+
+body.theme-dark .content .schedule-slot.drop-target {
+  background: #0f2d3d !important;
+}
+
+body.theme-dark .content .appointment,
+body.theme-dark .content .primary-button,
+body.theme-dark .content .danger-button {
+  color: #fff !important;
+}
+
+body.theme-dark .content .appointment {
+  background: #0284c7 !important;
+  box-shadow: 0 10px 24px rgba(2, 132, 199, 0.28) !important;
+}
+
+body.theme-dark .content .appointment strong,
+body.theme-dark .content .appointment span,
+body.theme-dark .content .appointment small {
+  color: #f0f9ff !important;
+  opacity: 1 !important;
+}
+
+body.theme-dark .content .appointment.cancelled,
+body.theme-dark .content .danger-button,
+body.theme-dark .content .action-button.danger {
+  background: #dc2626 !important;
+  border-color: #ef4444 !important;
+  color: #fff !important;
+}
+
+body.theme-dark .content .appointment.done {
+  background: #16a34a !important;
+  color: #fff !important;
+}
+
+body.theme-dark .content .secondary-button,
+body.theme-dark .content .action-button,
+body.theme-dark .content button:not(.primary-button):not(.danger-button) {
+  background: #111827 !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .content .status,
+body.theme-dark .content .profile,
+body.theme-dark .content .status-pill {
+  background: #dbeafe !important;
+  color: #075985 !important;
+}
+
+body.theme-dark .content .status.cancelled,
+body.theme-dark .content .status-pill.cancelado,
+body.theme-dark .content .status-badge.cancelada {
+  background: #fecaca !important;
+  color: #7f1d1d !important;
+}
+
+body.theme-dark .content .status.done,
+body.theme-dark .content .status-pill.pago,
+body.theme-dark .content .status-badge.finalizada {
+  background: #bbf7d0 !important;
+  color: #14532d !important;
+}
+
+body.theme-dark .content .status-pill.pendente,
+body.theme-dark .content .profile.admin,
+body.theme-dark .content .status-badge.agendada {
+  background: #fde68a !important;
+  color: #78350f !important;
+}
+
+body.theme-dark .content .status.inactive,
+body.theme-dark .security-list article > span {
+  background: #e5e7eb !important;
+  color: #374151 !important;
+}
+
+body.theme-dark .content .dashboard-table th,
+body.theme-dark .content .dashboard-table td,
+body.theme-dark .content .dashboard-table .person-link,
+body.theme-dark .content .dashboard-table .person-link span,
+body.theme-dark .content .dentist-link,
+body.theme-dark .content .dentist-link span {
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .content .count-cell {
+  color: var(--color-primary) !important;
+}
+
+body.theme-dark .content .person-avatar,
+body.theme-dark .content .patient-avatar,
+body.theme-dark .content .dentist-avatar {
+  background: #164e63 !important;
+  color: #bae6fd !important;
+}
+
+body.theme-dark .account-tabs a {
+  color: var(--color-muted) !important;
+}
+
+body.theme-dark .account-tabs a.active {
+  background: transparent !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .account-tabs a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
 }
 
 @media (max-width: 860px) {

@@ -1,55 +1,51 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1>Meu perfil</h1>
+@if (erro()) {
+  <p class="alert error">{{ erro() }}</p>
+}
+
+@if (carregando()) {
+  <p class="alert info">Carregando perfil...</p>
+} @else {
+  <section class="profile-section">
+    <div class="section-heading">
+      <h2>Perfil</h2>
       <p>Consulte os dados vinculados ao seu acesso no sistema.</p>
     </div>
-  </header>
 
-  @if (erro()) {
-    <p class="alert error">{{ erro() }}</p>
-  }
-
-  @if (carregando()) {
-    <p class="alert info">Carregando perfil...</p>
-  } @else {
-    <section class="profile-panel">
-      <div class="profile-hero">
-        <span class="avatar">{{ inicialPerfil() }}</span>
-        <div>
-          <h2>{{ nomePrincipal() }}</h2>
-          <p>{{ emailPrincipal() }}</p>
-        </div>
+    <div class="profile-hero">
+      <span class="avatar">{{ inicialPerfil() }}</span>
+      <div>
+        <h3>{{ nomePrincipal() }}</h3>
+        <p>{{ emailPrincipal() }}</p>
       </div>
+    </div>
 
-      <div class="details-grid">
+    <div class="details-grid">
+      <article>
+        <span>Perfil</span>
+        <strong>{{ perfilLabel() }}</strong>
+      </article>
+
+      <article>
+        <span>Status</span>
+        <strong>{{ statusLabel(usuario()?.ativo ?? dentista()?.ativo) }}</strong>
+      </article>
+
+      <article>
+        <span>CPF</span>
+        <strong>{{ usuario()?.cpf ?? dentista()?.cpf ?? '-' }}</strong>
+      </article>
+
+      @if (dentista(); as dentista) {
         <article>
-          <span>Perfil</span>
-          <strong>{{ perfilLabel() }}</strong>
+          <span>CRO</span>
+          <strong>{{ dentista.cro }}</strong>
         </article>
 
-        <article>
-          <span>Status</span>
-          <strong>{{ statusLabel(usuario()?.ativo ?? dentista()?.ativo) }}</strong>
+        <article class="wide">
+          <span>Especialidades</span>
+          <strong>{{ especialidadesFormatadas() }}</strong>
         </article>
-
-        <article>
-          <span>CPF</span>
-          <strong>{{ usuario()?.cpf ?? dentista()?.cpf ?? '-' }}</strong>
-        </article>
-
-        @if (dentista(); as dentista) {
-          <article>
-            <span>CRO</span>
-            <strong>{{ dentista.cro }}</strong>
-          </article>
-
-          <article class="wide">
-            <span>Especialidades</span>
-            <strong>{{ especialidadesFormatadas() }}</strong>
-          </article>
-        }
-      </div>
-    </section>
-  }
-</section>
+      }
+    </div>
+  </section>
+}
