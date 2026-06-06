@@ -16,6 +16,14 @@ export class DashboardLayout {
     private elementRef: ElementRef<HTMLElement>
   ) {}
 
+  inicialPerfil() {
+    return this.authService.email()?.charAt(0).toUpperCase() ?? 'U';
+  }
+
+  perfilLabel() {
+    return this.authService.perfil() === 'ADMIN' ? 'Administrador' : 'Dentista';
+  }
+
   manterSubmenuAberto(grupoAtual: string) {
     this.elementRef.nativeElement
       .querySelectorAll<HTMLDetailsElement>('.nav-group[data-menu-group]')

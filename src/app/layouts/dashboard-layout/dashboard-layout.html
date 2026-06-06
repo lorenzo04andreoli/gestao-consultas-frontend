@@ -138,6 +138,28 @@
   </aside>
 
   <main class="content">
+    <header class="topbar">
+      <div class="topbar-actions">
+        <details class="profile-menu">
+          <summary aria-label="Abrir menu do perfil">
+            <span class="profile-avatar">{{ inicialPerfil() }}</span>
+          </summary>
+
+          <div class="profile-dropdown">
+            <a routerLink="/perfil">
+              <i class="fa-regular fa-user" aria-hidden="true"></i>
+              <span>Ver perfil</span>
+            </a>
+
+            <button type="button" (click)="sair()">
+              <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+              <span>Sair</span>
+            </button>
+          </div>
+        </details>
+      </div>
+    </header>
+
     <router-outlet />
   </main>
 

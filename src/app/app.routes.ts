@@ -21,6 +21,11 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard-page/dashboard-page').then(m => m.DashboardPage)
       },
       {
+        path: 'perfil',
+        loadComponent: () =>
+          import('./features/perfil/perfil-page/perfil-page').then(m => m.PerfilPage)
+      },
+      {
         path: 'pacientes/listar',
         loadComponent: () =>
           import('./features/pacientes/pacientes-page/pacientes-page').then(m => m.PacientesPage)
