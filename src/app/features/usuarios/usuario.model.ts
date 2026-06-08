@@ -20,4 +20,5 @@ export interface UsuarioResponseModel {
   perfil: PerfilUsuario;
   ativo: boolean;
   fotoPerfil?: string | null;
+  twoFactorAtivo?: boolean | null;
 }

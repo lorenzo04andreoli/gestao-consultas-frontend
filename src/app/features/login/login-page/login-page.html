@@ -5,63 +5,102 @@
     </div>
 
     <header class="login-header">
-      <h1>Login</h1>
-      <p>Entre com suas credenciais para acessar sua conta.</p>
+      <h1>{{ aguardando2fa ? 'Verificação' : 'Login' }}</h1>
+      <p>{{ aguardando2fa ? 'Digite o código do aplicativo autenticador para continuar.' : 'Entre com suas credenciais para acessar sua conta.' }}</p>
     </header>
 
     <form (ngSubmit)="entrar()">
-      <div class="form-group">
-        <label for="email">E-mail</label>
-        <div class="input-wrapper">
-          <i class="fa-regular fa-envelope field-icon" aria-hidden="true"></i>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            placeholder="seu@email.com"
-            autocomplete="email"
-            [(ngModel)]="email"
-            required
-          />
+      @if (!aguardando2fa) {
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <div class="input-wrapper">
+            <i class="fa-regular fa-envelope field-icon" aria-hidden="true"></i>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              [(ngModel)]="email"
+              required
+            />
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="senha">Senha</label>
-        <div class="input-wrapper">
-          <i class="fa-solid fa-lock field-icon" aria-hidden="true"></i>
-          <input
-            id="senha"
-            [type]="mostrarSenha ? 'text' : 'password'"
-            name="senha"
-            placeholder="Digite sua senha"
-            autocomplete="current-password"
-            [(ngModel)]="senha"
-            required
-          />
-          <button
-            class="toggle-password"
-            type="button"
-            [attr.aria-label]="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
-            (click)="alternarVisibilidadeSenha()"
-          >
-            <i
-              class="fa-regular"
-              [class.fa-eye]="!mostrarSenha"
-              [class.fa-eye-slash]="mostrarSenha"
-              aria-hidden="true"
-            ></i>
-          </button>
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock field-icon" aria-hidden="true"></i>
+            <input
+              id="senha"
+              [type]="mostrarSenha ? 'text' : 'password'"
+              name="senha"
+              placeholder="Digite sua senha"
+              autocomplete="current-password"
+              [(ngModel)]="senha"
+              required
+            />
+            <button
+              class="toggle-password"
+              type="button"
+              [attr.aria-label]="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
+              (click)="alternarVisibilidadeSenha()"
+            >
+              <i
+                class="fa-regular"
+                [class.fa-eye]="!mostrarSenha"
+                [class.fa-eye-slash]="mostrarSenha"
+                aria-hidden="true"
+              ></i>
+            </button>
+          </div>
         </div>
-      </div>
+      } @else {
+        <div class="form-group code-group">
+          <label>Código de autenticação</label>
+          <div class="code-boxes" aria-label="Código de autenticação de 6 dígitos">
+            @for (index of codigo2faIndexes; track index) {
+              <input
+                #codigo2faCampo
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                autocomplete="one-time-code"
+                [value]="codigo2faDigits[index]"
+                (input)="atualizarDigito($event, index)"
+                (keydown)="voltarDigito($event, index)"
+                (paste)="colarCodigo($event)"
+                [attr.aria-label]="'Dígito ' + (index + 1)"
+                required
+              />
+            }
+          </div>
+          <input
+            class="sr-only"
+            type="text"
+            name="codigo2fa"
+            [ngModel]="codigo2fa"
+            required
+            pattern="[0-9]{6}"
+            tabindex="-1"
+            aria-hidden="true"
+          />
+        </div>
+      }
 
       @if (erro) {
         <p class="erro">{{ erro }}</p>
       }
 
       <button class="submit-button" type="submit" [disabled]="carregando">
-        {{ carregando ? 'Entrando...' : 'Entrar' }}
+        {{ carregando ? 'Entrando...' : aguardando2fa ? 'Verificar código' : 'Entrar' }}
       </button>
+
+      @if (aguardando2fa) {
+        <button class="link-button" type="button" (click)="trocarCredenciais()">
+          Usar outro e-mail
+        </button>
+      }
     </form>
   </section>
 </main>

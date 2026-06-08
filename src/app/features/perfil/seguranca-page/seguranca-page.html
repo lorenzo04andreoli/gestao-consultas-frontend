@@ -4,6 +4,14 @@
     <p>Gerencie opções de acesso e proteção da sua conta.</p>
   </div>
 
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (feedback()) {
+    <p class="alert success">{{ feedback() }}</p>
+  }
+
   <div class="security-list">
     <article>
       <div>
@@ -20,5 +28,57 @@
       </div>
       <span>Ativo</span>
     </article>
+
+    <article class="two-factor-card">
+      <div>
+        <h3>Autenticação em duas etapas</h3>
+        <p>Use um aplicativo autenticador para gerar o código de 6 dígitos no login.</p>
+      </div>
+
+      @if (twoFactorAtivo()) {
+        <button type="button" class="danger-button" [disabled]="carregando()" (click)="desativarTwoFactor()">
+          Desativar
+        </button>
+      } @else {
+        <button type="button" class="primary-button" [disabled]="carregando()" (click)="iniciarTwoFactor()">
+          Ativar 2FA
+        </button>
+      }
+    </article>
   </div>
+
+  @if (setup(); as setup) {
+    <section class="setup-card">
+      <div>
+        <h3>Escaneie o QR Code</h3>
+        <p>Abra Google Authenticator, Microsoft Authenticator ou outro app compatível e leia o código abaixo.</p>
+      </div>
+
+      <div class="qr-area">
+        <img [src]="setup.qrCode" alt="QR Code para configurar autenticação em duas etapas" />
+        <code>{{ setup.secret }}</code>
+      </div>
+
+      <form class="confirm-form" (ngSubmit)="confirmarTwoFactor()">
+        <label for="codigo2fa">Código gerado pelo aplicativo</label>
+        <div>
+          <input
+            id="codigo2fa"
+            type="text"
+            name="codigo2fa"
+            inputmode="numeric"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            placeholder="000000"
+            [(ngModel)]="codigo"
+            required
+          />
+          <button type="submit" class="primary-button" [disabled]="carregando()">Confirmar</button>
+          <button type="button" class="ghost-button" [disabled]="carregando()" (click)="cancelarConfiguracao()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+  }
 </section>

@@ -23,6 +23,10 @@ export class UsuarioService {
     return this.http.get<UsuarioResponseModel>(`${this.apiUrl}/${id}`);
   }
 
+  perfilAutenticado() {
+    return this.http.get<UsuarioResponseModel>(`${this.apiUrl}/me`);
+  }
+
   deletar(id: number) {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }

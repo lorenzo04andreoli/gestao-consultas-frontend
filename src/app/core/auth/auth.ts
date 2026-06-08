@@ -6,10 +6,12 @@ import { API_URL } from '../api';
 interface LoginRequest {
   email: string;
   senha: string;
+  codigo2fa?: string;
 }
 
 interface LoginResponse {
-  token: string;
+  token?: string | null;
+  requer2fa?: boolean;
 }
 
 interface JwtPayload {
@@ -39,11 +41,14 @@ export class AuthService {
     private router: Router
   ) {}
 
-  login(email: string, senha: string) {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, {
-      email,
-      senha
-    });
+  login(email: string, senha: string, codigo2fa?: string) {
+    const payload: LoginRequest = { email, senha };
+
+    if (codigo2fa) {
+      payload.codigo2fa = codigo2fa;
+    }
+
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, payload);
   }
 
   salvarToken(token: string) {

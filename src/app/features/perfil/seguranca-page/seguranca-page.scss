@@ -57,9 +57,127 @@
   }
 }
 
+.two-factor-card {
+  align-items: flex-start;
+}
+
+.primary-button,
+.danger-button,
+.ghost-button {
+  min-height: 40px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.64;
+  }
+}
+
+.primary-button {
+  border: 0;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.danger-button {
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.ghost-button {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.setup-card {
+  display: grid;
+  gap: 18px;
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+
+  h3 {
+    margin: 0;
+    color: var(--color-primary-dark);
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+}
+
+.qr-area {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+
+  img {
+    width: 180px;
+    height: 180px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  code {
+    max-width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+}
+
+.confirm-form {
+  display: grid;
+  gap: 8px;
+
+  label {
+    color: var(--color-primary-dark);
+    font-weight: 800;
+  }
+
+  div {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  input {
+    width: 140px;
+    min-height: 40px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+}
+
 @media (max-width: 640px) {
   .security-list article {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .confirm-form input,
+  .confirm-form button {
+    width: 100%;
   }
 }
