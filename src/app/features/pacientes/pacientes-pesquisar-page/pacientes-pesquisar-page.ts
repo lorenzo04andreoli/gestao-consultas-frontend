@@ -1,13 +1,15 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, ElementRef, HostListener, OnInit, computed, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
 
 @Component({
   selector: 'app-pacientes-pesquisar-page',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './pacientes-pesquisar-page.html',
   styleUrl: './pacientes-pesquisar-page.scss'
 })
@@ -15,11 +17,20 @@ export class PacientesPesquisarPage implements OnInit {
   pacientes = signal<PacienteModel[]>([]);
   carregando = signal(false);
   erro = signal('');
-  termoBusca = signal('');
   resultadosAbertos = signal(false);
+  buscaControl = new FormControl('', { nonNullable: true });
+  termoBusca = toSignal(
+    this.buscaControl.valueChanges.pipe(
+      startWith(this.buscaControl.value),
+      debounceTime(250),
+      map(valor => this.normalizarTexto(valor)),
+      distinctUntilChanged()
+    ),
+    { initialValue: '' }
+  );
 
   pacientesFiltrados = computed(() => {
-    const termo = this.normalizarTexto(this.termoBusca());
+    const termo = this.termoBusca();
 
     if (!termo) return this.pacientes().slice(0, 8);
 
@@ -28,7 +39,10 @@ export class PacientesPesquisarPage implements OnInit {
       .slice(0, 12);
   });
 
-  constructor(private pacienteService: PacienteService) {}
+  constructor(
+    private pacienteService: PacienteService,
+    private elementRef: ElementRef<HTMLElement>
+  ) {}
 
   ngOnInit() {
     this.carregarPacientes();
@@ -50,13 +64,8 @@ export class PacientesPesquisarPage implements OnInit {
     });
   }
 
-  atualizarBusca(valor: string) {
-    this.termoBusca.set(valor);
-    this.resultadosAbertos.set(true);
-  }
-
   limparBusca() {
-    this.termoBusca.set('');
+    this.buscaControl.setValue('');
     this.resultadosAbertos.set(true);
   }
 
@@ -64,8 +73,19 @@ export class PacientesPesquisarPage implements OnInit {
     this.resultadosAbertos.set(true);
   }
 
+  @HostListener('document:click', ['$event'])
+  fecharResultadosAoClicarFora(event: MouseEvent) {
+    const alvo = event.target as Node | null;
+    const pesquisa = this.elementRef.nativeElement.querySelector('.search-card');
+
+    if (alvo && pesquisa?.contains(alvo)) return;
+
+    this.resultadosAbertos.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
   fecharResultados() {
-    window.setTimeout(() => this.resultadosAbertos.set(false), 150);
+    this.resultadosAbertos.set(false);
   }
 
   private pacienteContemTermo(paciente: PacienteModel, termo: string) {

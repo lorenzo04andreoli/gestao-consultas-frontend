@@ -1,6 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth';
+import { ProfilePhotoService } from '../../../core/profile/profile-photo';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { DentistaResponseModel } from '../../dentistas/dentista.model';
 import { DentistaService } from '../../dentistas/dentista';
 import { UsuarioResponseModel } from '../../usuarios/usuario.model';
@@ -9,6 +13,7 @@ import { UsuarioService } from '../../usuarios/usuario';
 @Component({
   selector: 'app-perfil-page',
   standalone: true,
+  imports: [FormsModule, RouterLink],
   templateUrl: './perfil-page.html',
   styleUrl: './perfil-page.scss'
 })
@@ -17,14 +22,22 @@ export class PerfilPage implements OnInit {
   dentista = signal<DentistaResponseModel | null>(null);
   carregando = signal(true);
   erro = signal('');
+  solicitacaoAberta = signal(false);
+  modalFotoAberto = signal(false);
+  fotoPendente = signal('');
+  solicitacaoDados = '';
+  feedback = signal('');
 
   constructor(
     public authService: AuthService,
+    private profilePhotoService: ProfilePhotoService,
+    private confirmation: ConfirmationService,
     private usuarioService: UsuarioService,
     private dentistaService: DentistaService
   ) {}
 
   ngOnInit() {
+    this.profilePhotoService.carregar(this.authService.email());
     this.carregarPerfil();
   }
 
@@ -65,6 +78,85 @@ export class PerfilPage implements OnInit {
     return this.dentista()?.especialidades.join(', ') || '-';
   }
 
+  fotoPerfil() {
+    return this.profilePhotoService.foto();
+  }
+
+  abrirModalFoto() {
+    this.fotoPendente.set('');
+    this.modalFotoAberto.set(true);
+  }
+
+  fecharModalFoto() {
+    this.fotoPendente.set('');
+    this.modalFotoAberto.set(false);
+  }
+
+  fotoModal() {
+    return this.fotoPendente() || this.fotoPerfil();
+  }
+
+  alterarFoto(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const arquivo = input.files?.[0];
+
+    if (!arquivo) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const foto = String(reader.result || '');
+      this.fotoPendente.set(foto);
+    };
+
+    reader.readAsDataURL(arquivo);
+    input.value = '';
+  }
+
+  salvarFoto() {
+    const foto = this.fotoPendente();
+
+    if (!foto) return;
+
+    this.profilePhotoService.definir(this.authService.email(), foto);
+    this.fecharModalFoto();
+    this.feedback.set('Foto de perfil atualizada.');
+  }
+
+  async confirmarRemocaoFoto() {
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Remover foto',
+      message: 'A foto atual sera removida do seu perfil neste navegador.',
+      confirmLabel: 'Remover',
+      cancelLabel: 'Cancelar',
+      tone: 'danger'
+    });
+
+    if (!confirmar) return;
+
+    this.profilePhotoService.remover(this.authService.email());
+    this.fecharModalFoto();
+    this.feedback.set('Foto de perfil removida.');
+  }
+
+  alternarSolicitacao() {
+    this.solicitacaoAberta.update(aberta => !aberta);
+    this.feedback.set('');
+  }
+
+  enviarSolicitacao() {
+    const texto = this.solicitacaoDados.trim();
+
+    if (!texto) {
+      this.feedback.set('Descreva quais dados precisam ser alterados.');
+      return;
+    }
+
+    this.solicitacaoDados = '';
+    this.solicitacaoAberta.set(false);
+    this.feedback.set('Solicitacao de alteracao registrada.');
+  }
+
   private carregarPerfilAdmin() {
     this.usuarioService.listar().subscribe({
       next: usuarios => {
@@ -100,4 +192,5 @@ export class PerfilPage implements OnInit {
 
     return mensagemPadrao;
   }
+
 }

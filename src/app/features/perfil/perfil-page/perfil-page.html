@@ -6,46 +6,187 @@
   <p class="alert info">Carregando perfil...</p>
 } @else {
   <section class="profile-section">
-    <div class="section-heading">
-      <h2>Perfil</h2>
-      <p>Consulte os dados vinculados ao seu acesso no sistema.</p>
-    </div>
-
     <div class="profile-hero">
-      <span class="avatar">{{ inicialPerfil() }}</span>
-      <div>
-        <h3>{{ nomePrincipal() }}</h3>
-        <p>{{ emailPrincipal() }}</p>
+      <div class="profile-identity">
+        <div class="avatar-wrap">
+          <span class="avatar">
+            @if (fotoPerfil()) {
+              <img [src]="fotoPerfil()" alt="" />
+            } @else {
+              {{ inicialPerfil() }}
+            }
+          </span>
+
+          <button type="button" class="photo-edit-button" aria-label="Editar foto de perfil" (click)="abrirModalFoto()">
+            <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div>
+          <span class="eyebrow">Sua conta</span>
+          <h2>{{ nomePrincipal() }}</h2>
+          <p>{{ emailPrincipal() }}</p>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button type="button" class="primary-button" (click)="alternarSolicitacao()">
+          <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+          <span>Solicitar alteração</span>
+        </button>
       </div>
     </div>
 
-    <div class="details-grid">
-      <article>
-        <span>Perfil</span>
-        <strong>{{ perfilLabel() }}</strong>
-      </article>
+    @if (modalFotoAberto()) {
+      <div class="photo-modal-backdrop" (click)="fecharModalFoto()">
+        <section class="photo-modal" aria-label="Foto de perfil" (click)="$event.stopPropagation()">
+          <header>
+            <h3>Foto de perfil</h3>
+            <button type="button" class="close-button" aria-label="Fechar" (click)="fecharModalFoto()">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </header>
 
-      <article>
-        <span>Status</span>
-        <strong>{{ statusLabel(usuario()?.ativo ?? dentista()?.ativo) }}</strong>
-      </article>
+          <div class="photo-preview">
+            @if (fotoModal()) {
+              <img [src]="fotoModal()" alt="" />
+            } @else {
+              <span>{{ inicialPerfil() }}</span>
+            }
+          </div>
 
-      <article>
-        <span>CPF</span>
-        <strong>{{ usuario()?.cpf ?? dentista()?.cpf ?? '-' }}</strong>
-      </article>
+          <div class="photo-modal-actions">
+            <label class="secondary-button" for="fotoPerfil">
+              <i class="fa-regular fa-image" aria-hidden="true"></i>
+              <span>Alterar foto</span>
+            </label>
+            <input id="fotoPerfil" type="file" accept="image/*" hidden (change)="alterarFoto($event)" />
+
+            @if (fotoPerfil()) {
+              <button type="button" class="ghost-button danger" (click)="confirmarRemocaoFoto()">
+                <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                <span>Excluir</span>
+              </button>
+            }
+
+            @if (fotoPendente()) {
+              <button type="button" class="primary-button" (click)="salvarFoto()">
+                <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+                <span>Salvar</span>
+              </button>
+            }
+          </div>
+        </section>
+      </div>
+    }
+
+    @if (feedback()) {
+      <p class="alert success">{{ feedback() }}</p>
+    }
+
+    @if (solicitacaoAberta()) {
+      <form class="request-card" (ngSubmit)="enviarSolicitacao()">
+        <div>
+          <h3>Solicitacao de alteração</h3>
+          <p>Informe os dados que precisam de revisão.</p>
+        </div>
+
+        <textarea
+          name="solicitacaoDados"
+          rows="4"
+          placeholder="Ex.: corrigir telefone, atualizar nome social, revisar CPF..."
+          [(ngModel)]="solicitacaoDados"
+        ></textarea>
+
+        <div class="request-actions">
+          <button type="button" class="ghost-button" (click)="alternarSolicitacao()">Cancelar</button>
+          <button type="submit" class="primary-button">Enviar solicitação</button>
+        </div>
+      </form>
+    }
+
+    <div class="profile-grid">
+      <section class="profile-card">
+        <header>
+          <h3>Dados de acesso</h3>
+          <span class="status-pill">{{ statusLabel(usuario()?.ativo ?? dentista()?.ativo) }}</span>
+        </header>
+
+        <dl class="info-list">
+          <div>
+            <dt>Perfil</dt>
+            <dd>{{ perfilLabel() }}</dd>
+          </div>
+
+          <div>
+            <dt>E-mail</dt>
+            <dd>{{ emailPrincipal() }}</dd>
+          </div>
+
+          <div>
+            <dt>CPF</dt>
+            <dd>{{ usuario()?.cpf ?? dentista()?.cpf ?? '-' }}</dd>
+          </div>
+        </dl>
+      </section>
 
       @if (dentista(); as dentista) {
-        <article>
-          <span>CRO</span>
-          <strong>{{ dentista.cro }}</strong>
-        </article>
+        <section class="profile-card">
+          <header>
+            <h3>Dados profissionais</h3>
+            <span class="status-pill">Equipe</span>
+          </header>
 
-        <article class="wide">
-          <span>Especialidades</span>
-          <strong>{{ especialidadesFormatadas() }}</strong>
-        </article>
+          <dl class="info-list">
+            <div>
+              <dt>CRO</dt>
+              <dd>{{ dentista.cro }}</dd>
+            </div>
+
+            <div>
+              <dt>Especialidades</dt>
+              <dd>{{ especialidadesFormatadas() }}</dd>
+            </div>
+          </dl>
+        </section>
       }
+
+      <section class="profile-card">
+        <header>
+          <h3>Preferências da conta</h3>
+          <a routerLink="/perfil/preferencias">Ajustar</a>
+        </header>
+
+        <ul class="quick-list">
+          <li>
+            <i class="fa-regular fa-moon" aria-hidden="true"></i>
+            <span>Tema da interface</span>
+          </li>
+          <li>
+            <i class="fa-regular fa-user" aria-hidden="true"></i>
+            <span>Avatar do perfil</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="profile-card">
+        <header>
+          <h3>Segurança</h3>
+          <a routerLink="/perfil/seguranca">Ver opções</a>
+        </header>
+
+        <ul class="quick-list">
+          <li>
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            <span>Acesso protegido por token</span>
+          </li>
+          <li>
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            <span>Sessão atual ativa</span>
+          </li>
+        </ul>
+      </section>
     </div>
+
   </section>
 }

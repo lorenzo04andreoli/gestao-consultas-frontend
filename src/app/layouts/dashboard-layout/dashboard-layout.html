@@ -142,7 +142,13 @@
       <div class="topbar-actions">
         <details class="profile-menu">
           <summary aria-label="Abrir menu do perfil">
-            <span class="profile-avatar">{{ inicialPerfil() }}</span>
+            <span class="profile-avatar">
+              @if (fotoPerfil()) {
+                <img [src]="fotoPerfil()" alt="" />
+              } @else {
+                {{ inicialPerfil() }}
+              }
+            </span>
           </summary>
 
           <div class="profile-dropdown">

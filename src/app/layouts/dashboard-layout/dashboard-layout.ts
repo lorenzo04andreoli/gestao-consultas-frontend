@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
+import { ProfilePhotoService } from '../../core/profile/profile-photo';
 import { ThemeService } from '../../core/theme/theme';
 import { ConfirmationDialog } from '../../shared/confirmation/confirmation-dialog/confirmation-dialog';
 
@@ -14,12 +15,19 @@ import { ConfirmationDialog } from '../../shared/confirmation/confirmation-dialo
 export class DashboardLayout {
   constructor(
     public authService: AuthService,
+    private profilePhotoService: ProfilePhotoService,
     private themeService: ThemeService,
     private elementRef: ElementRef<HTMLElement>
-  ) {}
+  ) {
+    this.profilePhotoService.carregar(this.authService.email());
+  }
 
   inicialPerfil() {
     return this.authService.email()?.charAt(0).toUpperCase() ?? 'U';
+  }
+
+  fotoPerfil() {
+    return this.profilePhotoService.foto();
   }
 
   perfilLabel() {

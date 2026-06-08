@@ -1,6 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, computed, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth';
 import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { DentistaResponseModel } from '../dentista.model';
@@ -12,7 +14,7 @@ import { extrairMensagemErro } from '../dentista-form';
 @Component({
   selector: 'app-dentistas-page',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './dentistas-page.html',
   styleUrl: './dentistas-page.scss'
 })
@@ -22,7 +24,26 @@ export class DentistasPage implements OnInit {
 
   erro = signal('');
   sucesso = signal('');
-  termoBusca = '';
+  buscaControl = new FormControl('', { nonNullable: true });
+  termoBusca = toSignal(
+    this.buscaControl.valueChanges.pipe(
+      startWith(this.buscaControl.value),
+      debounceTime(250),
+      map(valor => this.normalizarTexto(valor)),
+      distinctUntilChanged()
+    ),
+    { initialValue: '' }
+  );
+
+  dentistasFiltrados = computed(() => {
+    const termo = this.termoBusca();
+
+    if (!termo) return this.dentistas();
+
+    return this.dentistas().filter(dentista => this.dentistaContemTermo(dentista, termo));
+  });
+
+  totalDentistasFiltrados = computed(() => this.dentistasFiltrados().length);
 
   constructor(
     public authService: AuthService,
@@ -87,24 +108,12 @@ export class DentistasPage implements OnInit {
     });
   }
 
-  dentistasFiltrados() {
-    const termo = this.normalizarTexto(this.termoBusca);
-
-    if (!termo) return this.dentistas();
-
-    return this.dentistas().filter(dentista => this.dentistaContemTermo(dentista, termo));
-  }
-
-  totalDentistasFiltrados() {
-    return this.dentistasFiltrados().length;
-  }
-
   inicialDentista(dentista: DentistaResponseModel) {
     return dentista.nome.trim().charAt(0).toUpperCase() || 'D';
   }
 
   limparBusca() {
-    this.termoBusca = '';
+    this.buscaControl.setValue('');
   }
 
   private dentistaContemTermo(dentista: DentistaResponseModel, termo: string) {

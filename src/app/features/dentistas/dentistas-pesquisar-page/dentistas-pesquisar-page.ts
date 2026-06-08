@@ -1,7 +1,9 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, computed, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { NgTemplateOutlet } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth';
 import { DentistaResponseModel } from '../dentista.model';
 import { DentistaService } from '../dentista';
@@ -9,7 +11,7 @@ import { DentistaService } from '../dentista';
 @Component({
   selector: 'app-dentistas-pesquisar-page',
   standalone: true,
-  imports: [FormsModule, RouterLink, NgTemplateOutlet],
+  imports: [ReactiveFormsModule, RouterLink, NgTemplateOutlet],
   templateUrl: './dentistas-pesquisar-page.html',
   styleUrl: './dentistas-pesquisar-page.scss'
 })
@@ -17,11 +19,20 @@ export class DentistasPesquisarPage implements OnInit {
   dentistas = signal<DentistaResponseModel[]>([]);
   carregando = signal(false);
   erro = signal('');
-  termoBusca = signal('');
   resultadosAbertos = signal(false);
+  buscaControl = new FormControl('', { nonNullable: true });
+  termoBusca = toSignal(
+    this.buscaControl.valueChanges.pipe(
+      startWith(this.buscaControl.value),
+      debounceTime(250),
+      map(valor => this.normalizarTexto(valor)),
+      distinctUntilChanged()
+    ),
+    { initialValue: '' }
+  );
 
   dentistasFiltrados = computed(() => {
-    const termo = this.normalizarTexto(this.termoBusca());
+    const termo = this.termoBusca();
 
     if (!termo) return this.dentistas().slice(0, 8);
 
@@ -32,7 +43,8 @@ export class DentistasPesquisarPage implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private dentistaService: DentistaService
+    private dentistaService: DentistaService,
+    private elementRef: ElementRef<HTMLElement>
   ) {}
 
   ngOnInit() {
@@ -55,13 +67,8 @@ export class DentistasPesquisarPage implements OnInit {
     });
   }
 
-  atualizarBusca(valor: string) {
-    this.termoBusca.set(valor);
-    this.resultadosAbertos.set(true);
-  }
-
   limparBusca() {
-    this.termoBusca.set('');
+    this.buscaControl.setValue('');
     this.resultadosAbertos.set(true);
   }
 
@@ -69,8 +76,19 @@ export class DentistasPesquisarPage implements OnInit {
     this.resultadosAbertos.set(true);
   }
 
+  @HostListener('document:click', ['$event'])
+  fecharResultadosAoClicarFora(event: MouseEvent) {
+    const alvo = event.target as Node | null;
+    const pesquisa = this.elementRef.nativeElement.querySelector('.search-card');
+
+    if (alvo && pesquisa?.contains(alvo)) return;
+
+    this.resultadosAbertos.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
   fecharResultados() {
-    window.setTimeout(() => this.resultadosAbertos.set(false), 150);
+    this.resultadosAbertos.set(false);
   }
 
   inicialDentista(dentista: DentistaResponseModel) {

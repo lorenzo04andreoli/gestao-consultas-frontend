@@ -1,6 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, computed, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
@@ -8,7 +10,7 @@ import { PacienteModel } from '../paciente.model';
 @Component({
   selector: 'app-pacientes-page',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './pacientes-page.html',
   styleUrl: './pacientes-page.scss'
 })
@@ -17,7 +19,26 @@ export class PacientesPage implements OnInit {
 
   erro = signal('');
   sucesso = signal('');
-  termoBusca = '';
+  buscaControl = new FormControl('', { nonNullable: true });
+  termoBusca = toSignal(
+    this.buscaControl.valueChanges.pipe(
+      startWith(this.buscaControl.value),
+      debounceTime(250),
+      map(valor => this.normalizarTexto(valor)),
+      distinctUntilChanged()
+    ),
+    { initialValue: '' }
+  );
+
+  pacientesFiltrados = computed(() => {
+    const termo = this.termoBusca();
+
+    if (!termo) return this.pacientes();
+
+    return this.pacientes().filter(paciente => this.pacienteContemTermo(paciente, termo));
+  });
+
+  totalPacientesFiltrados = computed(() => this.pacientesFiltrados().length);
 
   constructor(
     private pacienteService: PacienteService,
@@ -68,24 +89,12 @@ export class PacientesPage implements OnInit {
     });
   }
 
-  pacientesFiltrados() {
-    const termo = this.normalizarTexto(this.termoBusca);
-
-    if (!termo) return this.pacientes();
-
-    return this.pacientes().filter(paciente => this.pacienteContemTermo(paciente, termo));
-  }
-
-  totalPacientesFiltrados() {
-    return this.pacientesFiltrados().length;
-  }
-
   inicialPaciente(paciente: PacienteModel) {
     return paciente.nome.trim().charAt(0).toUpperCase() || 'P';
   }
 
   limparBusca() {
-    this.termoBusca = '';
+    this.buscaControl.setValue('');
   }
 
   private pacienteContemTermo(paciente: PacienteModel, termo: string) {

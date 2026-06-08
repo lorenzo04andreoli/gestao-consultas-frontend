@@ -21,20 +21,19 @@
   <section class="search-card" [class.results-open]="resultadosAbertos()">
     <div class="search-field">
       <label for="buscaPaciente">Buscar paciente</label>
-      <div class="search-control" (focusout)="fecharResultados()">
+      <div class="search-control">
         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         <input
           id="buscaPaciente"
           type="search"
           name="buscaPaciente"
           placeholder="Digite nome, telefone, e-mail ou CPF"
-          [ngModel]="termoBusca()"
-          (ngModelChange)="atualizarBusca($event)"
+          [formControl]="buscaControl"
           (focus)="abrirResultados()"
           (click)="abrirResultados()"
           autocomplete="off"
         />
-        @if (termoBusca()) {
+        @if (buscaControl.value) {
           <button type="button" class="clear-button" aria-label="Limpar busca" (click)="limparBusca()">
             <i class="fa-solid fa-xmark" aria-hidden="true"></i>
           </button>
