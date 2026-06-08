@@ -19,4 +19,5 @@ export interface UsuarioResponseModel {
   email: string;
   perfil: PerfilUsuario;
   ativo: boolean;
+  fotoPerfil?: string | null;
 }

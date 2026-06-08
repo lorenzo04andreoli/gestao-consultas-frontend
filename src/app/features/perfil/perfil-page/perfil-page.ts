@@ -37,7 +37,7 @@ export class PerfilPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.profilePhotoService.carregar(this.authService.email());
+    this.profilePhotoService.carregar();
     this.carregarPerfil();
   }
 
@@ -102,11 +102,24 @@ export class PerfilPage implements OnInit {
 
     if (!arquivo) return;
 
+    if (!arquivo.type.startsWith('image/')) {
+      this.feedback.set('Selecione um arquivo de imagem.');
+      input.value = '';
+      return;
+    }
+
+    if (arquivo.size > 2_000_000) {
+      this.feedback.set('A foto deve ter no maximo 2 MB.');
+      input.value = '';
+      return;
+    }
+
     const reader = new FileReader();
 
     reader.onload = () => {
       const foto = String(reader.result || '');
       this.fotoPendente.set(foto);
+      this.feedback.set('');
     };
 
     reader.readAsDataURL(arquivo);
@@ -118,15 +131,21 @@ export class PerfilPage implements OnInit {
 
     if (!foto) return;
 
-    this.profilePhotoService.definir(this.authService.email(), foto);
-    this.fecharModalFoto();
-    this.feedback.set('Foto de perfil atualizada.');
+    this.profilePhotoService.definir(foto).subscribe({
+      next: () => {
+        this.fecharModalFoto();
+        this.feedback.set('Foto de perfil atualizada.');
+      },
+      error: err => {
+        this.feedback.set(this.extrairMensagemErro(err, 'Erro ao atualizar foto de perfil.'));
+      }
+    });
   }
 
   async confirmarRemocaoFoto() {
     const confirmar = await this.confirmation.confirmar({
       title: 'Remover foto',
-      message: 'A foto atual sera removida do seu perfil neste navegador.',
+      message: 'A foto atual sera removida do seu perfil.',
       confirmLabel: 'Remover',
       cancelLabel: 'Cancelar',
       tone: 'danger'
@@ -134,9 +153,15 @@ export class PerfilPage implements OnInit {
 
     if (!confirmar) return;
 
-    this.profilePhotoService.remover(this.authService.email());
-    this.fecharModalFoto();
-    this.feedback.set('Foto de perfil removida.');
+    this.profilePhotoService.remover().subscribe({
+      next: () => {
+        this.fecharModalFoto();
+        this.feedback.set('Foto de perfil removida.');
+      },
+      error: err => {
+        this.feedback.set(this.extrairMensagemErro(err, 'Erro ao remover foto de perfil.'));
+      }
+    });
   }
 
   alternarSolicitacao() {

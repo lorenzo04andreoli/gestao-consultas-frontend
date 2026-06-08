@@ -19,7 +19,7 @@ export class DashboardLayout {
     private themeService: ThemeService,
     private elementRef: ElementRef<HTMLElement>
   ) {
-    this.profilePhotoService.carregar(this.authService.email());
+    this.profilePhotoService.carregar();
   }
 
   inicialPerfil() {
