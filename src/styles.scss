@@ -116,12 +116,15 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 10px;
 }
 
+.notification-menu,
 .profile-menu {
   position: relative;
 }
 
+.notification-menu summary,
 .profile-menu summary {
   width: 42px;
   height: 42px;
@@ -139,13 +142,43 @@ textarea {
     box-shadow 0.2s ease;
 }
 
+.notification-menu summary::-webkit-details-marker,
 .profile-menu summary::-webkit-details-marker {
   display: none;
 }
 
+.notification-menu summary:hover,
 .profile-menu summary:hover {
   border-color: var(--color-primary);
   box-shadow: 0 8px 18px rgba(13, 178, 247, 0.16);
+}
+
+.notification-button {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+  font-size: 1rem;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  border: 2px solid var(--color-surface);
+  border-radius: 999px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .profile-avatar {
@@ -250,11 +283,11 @@ textarea {
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
 }
 
+.notification-dropdown,
 .profile-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 210px;
   display: grid;
   gap: 4px;
   padding: 8px;
@@ -262,6 +295,141 @@ textarea {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
+}
+
+.profile-dropdown {
+  width: 210px;
+}
+
+.notification-dropdown {
+  width: min(380px, calc(100vw - 32px));
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.notification-header div {
+  display: grid;
+  gap: 2px;
+}
+
+.notification-header strong {
+  color: var(--color-primary-dark);
+  font-size: 0.95rem;
+}
+
+.notification-header span {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+}
+
+.notification-header button {
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.notification-list {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.notification-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.notification-item:hover {
+  background: #f8fafc;
+}
+
+.notification-item.unread {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.notification-item.unread .notification-dot {
+  background: var(--color-primary);
+}
+
+.notification-content {
+  display: grid;
+  gap: 4px;
+}
+
+.notification-content strong {
+  color: var(--color-primary-dark);
+  font-size: 0.88rem;
+}
+
+.notification-content span {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.notification-content small {
+  color: var(--color-muted);
+  font-size: 0.72rem;
+}
+
+.notification-empty {
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 22px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.notification-empty i {
+  color: var(--color-primary);
+  font-size: 1.4rem;
+}
+
+.notification-view-all {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0 14px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: 0.84rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.notification-view-all:hover {
+  background: #f8fafc;
 }
 
 .profile-dropdown a,
@@ -348,6 +516,8 @@ body.theme-dark .patient-result {
 
 body.theme-dark .profile-dropdown a:hover,
 body.theme-dark .profile-dropdown button:hover,
+body.theme-dark .notification-item:hover,
+body.theme-dark .notification-view-all:hover,
 body.theme-dark .nav a:hover,
 body.theme-dark .nav-group summary:hover,
 body.theme-dark .menu-button:hover,
@@ -515,6 +685,47 @@ body.theme-dark .content .patient-avatar,
 body.theme-dark .content .dentist-avatar {
   background: #164e63 !important;
   color: #bae6fd !important;
+}
+
+body.theme-dark .notification-menu summary,
+body.theme-dark .profile-menu summary {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .notification-dropdown,
+body.theme-dark .profile-dropdown {
+  background: #111827 !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .notification-header,
+body.theme-dark .notification-item,
+body.theme-dark .notification-view-all {
+  border-color: var(--color-border) !important;
+}
+
+body.theme-dark .notification-header strong,
+body.theme-dark .notification-content strong {
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .notification-button,
+body.theme-dark .notification-header span,
+body.theme-dark .notification-content span,
+body.theme-dark .notification-content small,
+body.theme-dark .notification-empty {
+  color: var(--color-muted) !important;
+}
+
+body.theme-dark .notification-item.unread {
+  background: #0f2d3d !important;
+}
+
+body.theme-dark .notification-badge {
+  border-color: #111827 !important;
 }
 
 body.theme-dark .account-tabs a {

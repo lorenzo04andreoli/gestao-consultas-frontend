@@ -128,6 +128,7 @@
           <i class="fa-regular fa-address-card" aria-hidden="true"></i>
           <span>Usuários</span>
         </a>
+
       }
     </nav>
 
@@ -140,6 +141,64 @@
   <main class="content">
     <header class="topbar">
       <div class="topbar-actions">
+        <details class="notification-menu">
+          <summary aria-label="Abrir notificações" (click)="abrirMenuNotificacoes()">
+            <span class="notification-button">
+              <i class="fa-regular fa-bell" aria-hidden="true"></i>
+              @if (totalNaoLidas() > 0) {
+                <span class="notification-badge">{{ totalNaoLidas() }}</span>
+              }
+            </span>
+          </summary>
+
+          <div class="notification-dropdown">
+            <header class="notification-header">
+              <div>
+                <strong>Notificações</strong>
+                <span>{{ totalNaoLidas() }} não lida(s)</span>
+              </div>
+
+              @if (notificacoes().length) {
+                <button type="button" (click)="marcarTodasNotificacoesComoLidas()">
+                  Marcar lidas
+                </button>
+              }
+            </header>
+
+            @if (notificacoes().length) {
+              <div class="notification-list">
+                @for (notificacao of notificacoes(); track notificacao.id) {
+                  <button
+                    type="button"
+                    class="notification-item"
+                    [class.unread]="!notificacao.lida"
+                    (click)="abrirNotificacao(notificacao)"
+                  >
+                    <span class="notification-dot" aria-hidden="true"></span>
+
+                    <span class="notification-content">
+                      <strong>{{ notificacao.titulo }}</strong>
+                      <span>{{ notificacao.mensagem }}</span>
+                      <small>{{ dataNotificacao(notificacao.dataCriacao) }}</small>
+                    </span>
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="notification-empty">
+                <i class="fa-regular fa-bell-slash" aria-hidden="true"></i>
+                <span>Nenhuma notificação por enquanto.</span>
+              </div>
+            }
+
+            @if (authService.isAdmin()) {
+              <a class="notification-view-all" routerLink="/solicitacoes-alteracao" (click)="fecharMenuNotificacoes()">
+                Ver todas as notificações
+              </a>
+            }
+          </div>
+        </details>
+
         <details class="profile-menu">
           <summary aria-label="Abrir menu do perfil">
             <span class="profile-avatar">
