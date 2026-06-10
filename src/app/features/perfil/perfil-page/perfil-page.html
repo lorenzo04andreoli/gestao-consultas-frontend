@@ -30,10 +30,17 @@
       </div>
 
       <div class="profile-actions">
-        <button type="button" class="primary-button" (click)="alternarSolicitacao()">
-          <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
-          <span>Solicitar alteração</span>
-        </button>
+        @if (authService.isAdmin()) {
+          <a class="primary-button" routerLink="/usuarios">
+            <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+            <span>Editar dados</span>
+          </a>
+        } @else {
+          <button type="button" class="primary-button" (click)="alternarSolicitacao()">
+            <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+            <span>Solicitar alteração</span>
+          </button>
+        }
       </div>
     </div>
 
@@ -84,23 +91,35 @@
       <p class="alert success">{{ feedback() }}</p>
     }
 
-    @if (solicitacaoAberta()) {
+    @if (!authService.isAdmin() && solicitacaoAberta()) {
       <form class="request-card" (ngSubmit)="enviarSolicitacao()">
         <div>
-          <h3>Solicitacao de alteração</h3>
+          <h3>Solicitação de alteração</h3>
           <p>Informe os dados que precisam de revisão.</p>
         </div>
+
+        <input
+          name="solicitacaoAssunto"
+          type="text"
+          maxlength="120"
+          placeholder="Assunto. Ex.: atualização de telefone"
+          [(ngModel)]="solicitacaoAssunto"
+        />
 
         <textarea
           name="solicitacaoDados"
           rows="4"
-          placeholder="Ex.: corrigir telefone, atualizar nome social, revisar CPF..."
+          placeholder="Mensagem. Ex.: meu telefone atual é (41) 99999-9999..."
           [(ngModel)]="solicitacaoDados"
         ></textarea>
 
         <div class="request-actions">
-          <button type="button" class="ghost-button" (click)="alternarSolicitacao()">Cancelar</button>
-          <button type="submit" class="primary-button">Enviar solicitação</button>
+          <button type="button" class="ghost-button" [disabled]="enviandoSolicitacao()" (click)="alternarSolicitacao()">
+            Cancelar
+          </button>
+          <button type="submit" class="primary-button" [disabled]="enviandoSolicitacao()">
+            {{ enviandoSolicitacao() ? 'Enviando...' : 'Enviar solicitação' }}
+          </button>
         </div>
       </form>
     }
@@ -162,10 +181,6 @@
             <i class="fa-regular fa-moon" aria-hidden="true"></i>
             <span>Tema da interface</span>
           </li>
-          <li>
-            <i class="fa-regular fa-user" aria-hidden="true"></i>
-            <span>Avatar do perfil</span>
-          </li>
         </ul>
       </section>
 
@@ -188,5 +203,43 @@
       </section>
     </div>
 
+    @if (!authService.isAdmin()) {
+      <section class="requests-history">
+        <header>
+          <div>
+            <h3>Minhas solicitações</h3>
+            <p>Acompanhe os pedidos enviados ao administrador.</p>
+          </div>
+        </header>
+
+        <div class="requests-list">
+          @for (solicitacao of solicitacoes(); track solicitacao.id) {
+            <article>
+              <div class="request-row">
+                <div>
+                  <span class="request-date">{{ dataFormatada(solicitacao.dataCriacao) }}</span>
+                  <strong>{{ solicitacao.assunto || 'Solicitação de alteração' }}</strong>
+                  <p>{{ solicitacao.descricao }}</p>
+                </div>
+
+                <span class="request-status" [class.answered]="solicitacao.status === 'RESPONDIDA'">
+                  {{ statusSolicitacaoLabel(solicitacao.status) }}
+                </span>
+              </div>
+
+              @if (solicitacao.resposta) {
+                <div class="answer-box">
+                  <span>Resposta do admin</span>
+                  <p>{{ solicitacao.resposta }}</p>
+                  <small>{{ dataFormatada(solicitacao.dataResposta) }}</small>
+                </div>
+              }
+            </article>
+          } @empty {
+            <p class="empty-state">Nenhuma solicitação enviada.</p>
+          }
+        </div>
+      </section>
+    }
   </section>
 }
