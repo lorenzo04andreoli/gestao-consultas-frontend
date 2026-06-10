@@ -195,6 +195,14 @@ export const routes: Routes = [
           import('./features/usuarios/usuarios-page/usuarios-page').then(m => m.UsuariosPage)
       },
       {
+        path: 'solicitacoes-alteracao',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/solicitacoes-alteracao/solicitacoes-alteracao-admin-page/solicitacoes-alteracao-admin-page').then(
+            m => m.SolicitacoesAlteracaoAdminPage
+          )
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

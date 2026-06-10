@@ -1,0 +1,131 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Solicitações</h1>
+      <p>Responda pedidos de alteração enviados pelos usuários.</p>
+    </div>
+
+    <button type="button" class="secondary-button" [disabled]="carregando()" (click)="carregarSolicitacoes()">
+      <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+      Atualizar
+    </button>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
+  }
+
+  <div class="summary-grid">
+    <button type="button" class="summary-card" [class.active]="filtroStatus() === 'TODAS'" (click)="alterarFiltro('TODAS')">
+      <span>Total</span>
+      <strong>{{ solicitacoes().length }}</strong>
+    </button>
+
+    <button type="button" class="summary-card pending" [class.active]="filtroStatus() === 'PENDENTE'" (click)="alterarFiltro('PENDENTE')">
+      <span>Pendentes</span>
+      <strong>{{ totalPendentes() }}</strong>
+    </button>
+
+    <button type="button" class="summary-card answered" [class.active]="filtroStatus() === 'RESPONDIDA'" (click)="alterarFiltro('RESPONDIDA')">
+      <span>Respondidas</span>
+      <strong>{{ totalRespondidas() }}</strong>
+    </button>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Solicitante</th>
+          <th>Assunto</th>
+          <th>Enviado em</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (solicitacao of solicitacoesFiltradas(); track solicitacao.id) {
+          <tr
+            class="clickable-row"
+            tabindex="0"
+            (click)="abrirResposta(solicitacao)"
+            (keydown.enter)="abrirResposta(solicitacao)"
+          >
+            <td>
+              <strong>{{ solicitacao.solicitanteNome }}</strong>
+              <small>{{ solicitacao.solicitanteEmail }}</small>
+            </td>
+            <td class="subject-cell">
+              <strong>{{ assuntoSolicitacao(solicitacao) }}</strong>
+              <small>Clique para abrir a mensagem</small>
+            </td>
+            <td>{{ dataFormatada(solicitacao.dataCriacao) }}</td>
+            <td>
+              <span class="status" [class.answered]="solicitacao.status === 'RESPONDIDA'">
+                {{ statusLabel(solicitacao.status) }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="empty-state">Nenhuma solicitação encontrada.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (solicitacaoSelecionada(); as solicitacao) {
+    <div class="modal-backdrop" (click)="fecharResposta()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>{{ solicitacao.status === 'PENDENTE' ? 'Responder solicitação' : 'Resposta enviada' }}</h2>
+            <p>{{ solicitacao.solicitanteNome }} • {{ dataFormatada(solicitacao.dataCriacao) }}</p>
+          </div>
+
+          <button type="button" class="close-button" aria-label="Fechar" (click)="fecharResposta()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </header>
+
+        <div class="request-detail">
+          <span>Assunto</span>
+          <strong>{{ assuntoSolicitacao(solicitacao) }}</strong>
+        </div>
+
+        <div class="request-detail">
+          <span>Mensagem do usuário</span>
+          <p>{{ solicitacao.descricao }}</p>
+        </div>
+
+        <form (ngSubmit)="responder()">
+          <div class="form-group">
+            <label for="resposta">Resposta do admin</label>
+            <textarea
+              id="resposta"
+              name="resposta"
+              rows="5"
+              placeholder="Descreva o retorno que será enviado ao usuário..."
+              [(ngModel)]="resposta"
+              [disabled]="solicitacao.status === 'RESPONDIDA'"
+              required
+            ></textarea>
+          </div>
+
+          <footer class="modal-actions">
+            <button type="button" class="secondary-button" (click)="fecharResposta()">Fechar</button>
+
+            @if (solicitacao.status === 'PENDENTE') {
+              <button type="submit" class="primary-button" [disabled]="carregando()">Enviar resposta</button>
+            }
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
+</section>
