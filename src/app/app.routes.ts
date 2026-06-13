@@ -173,22 +173,6 @@ export const routes: Routes = [
           )
       },
       {
-        path: 'financeiro/tabelas-preco',
-        canActivate: [adminGuard],
-        loadComponent: () =>
-          import('./features/financeiro/tabelas-preco-page/tabelas-preco-page').then(
-            m => m.TabelasPrecoPage
-          )
-      },
-      {
-        path: 'financeiro',
-        canActivate: [adminGuard],
-        loadComponent: () =>
-          import('./features/financeiro/financeiro-page/financeiro-page').then(
-            m => m.FinanceiroPage
-          )
-      },
-      {
         path: 'usuarios',
         canActivate: [adminGuard],
         loadComponent: () =>
