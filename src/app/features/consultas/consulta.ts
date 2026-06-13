@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map } from 'rxjs';
 import { API_URL } from '../../core/api';
+import { PageResponseModel } from '../../core/pagination/page-response.model';
 import { ConsultaFiltros, ConsultaModel, ConsultaRequestModel } from './consulta.model';
 
 @Injectable({
@@ -15,6 +16,30 @@ export class ConsultaService {
   listar() {
     return this.http.get<ConsultaModel[]>(this.apiUrl).pipe(
       map(consultas => consultas.map(consulta => this.normalizarConsulta(consulta)))
+    );
+  }
+
+  listarPaginado(page: number, size: number, filtros: {
+    termo?: string;
+    status?: string;
+    dataInicio?: string;
+    dataFim?: string;
+  } = {}) {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+
+    Object.entries(filtros).forEach(([chave, valor]) => {
+      if (valor !== null && valor !== undefined && valor !== '') {
+        params = params.set(chave, String(valor));
+      }
+    });
+
+    return this.http.get<PageResponseModel<ConsultaModel>>(`${this.apiUrl}/paginado`, { params }).pipe(
+      map(pagina => ({
+        ...pagina,
+        content: pagina.content.map(consulta => this.normalizarConsulta(consulta))
+      }))
     );
   }
 

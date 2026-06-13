@@ -1,8 +1,7 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth';
 import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { DentistaResponseModel } from '../dentista.model';
@@ -25,25 +24,10 @@ export class DentistasPage implements OnInit {
   erro = signal('');
   sucesso = signal('');
   buscaControl = new FormControl('', { nonNullable: true });
-  termoBusca = toSignal(
-    this.buscaControl.valueChanges.pipe(
-      startWith(this.buscaControl.value),
-      debounceTime(250),
-      map(valor => this.normalizarTexto(valor)),
-      distinctUntilChanged()
-    ),
-    { initialValue: '' }
-  );
-
-  dentistasFiltrados = computed(() => {
-    const termo = this.termoBusca();
-
-    if (!termo) return this.dentistas();
-
-    return this.dentistas().filter(dentista => this.dentistaContemTermo(dentista, termo));
-  });
-
-  totalDentistasFiltrados = computed(() => this.dentistasFiltrados().length);
+  paginaAtual = signal(0);
+  itensPorPagina = signal(10);
+  totalDentistas = signal(0);
+  totalPaginas = signal(0);
 
   constructor(
     public authService: AuthService,
@@ -55,14 +39,25 @@ export class DentistasPage implements OnInit {
   ngOnInit() {
     this.carregarDentistas();
     this.carregarEspecialidades();
+
+    this.buscaControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        this.paginaAtual.set(0);
+        this.carregarDentistas();
+      });
   }
 
   carregarDentistas() {
     this.erro.set('');
 
-    this.dentistaService.listar().subscribe({
-      next: dados => {
-        this.dentistas.set(dados);
+    this.dentistaService
+      .listarPaginado(this.paginaAtual(), this.itensPorPagina(), this.buscaControl.value)
+      .subscribe({
+      next: pagina => {
+        this.dentistas.set(pagina.content);
+        this.totalDentistas.set(pagina.totalElements);
+        this.totalPaginas.set(pagina.totalPages);
       },
       error: err => {
         this.erro.set(extrairMensagemErro(err, 'Erro ao carregar dentistas.'));
@@ -100,7 +95,7 @@ export class DentistasPage implements OnInit {
     this.dentistaService.desativar(dentista.id).subscribe({
       next: () => {
         this.sucesso.set('Dentista arquivado com sucesso.');
-        this.dentistas.update(dentistas => dentistas.filter(item => item.id !== dentista.id));
+        this.carregarDentistas();
       },
       error: err => {
         this.erro.set(extrairMensagemErro(err, 'Erro ao arquivar dentista.'));
@@ -116,22 +111,18 @@ export class DentistasPage implements OnInit {
     this.buscaControl.setValue('');
   }
 
-  private dentistaContemTermo(dentista: DentistaResponseModel, termo: string) {
-    return [
-      dentista.nome,
-      dentista.email,
-      dentista.cpf,
-      dentista.cro,
-      dentista.especialidades.join(' ')
-    ]
-      .filter((valor): valor is string => Boolean(valor))
-      .some(valor => this.normalizarTexto(valor).includes(termo));
+  totalDentistasFiltrados() {
+    return this.totalDentistas();
   }
 
-  private normalizarTexto(valor: string) {
-    return valor
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
+  paginas() {
+    return Array.from({ length: this.totalPaginas() }, (_, index) => index);
+  }
+
+  irParaPagina(pagina: number) {
+    if (pagina < 0 || pagina >= this.totalPaginas() || pagina === this.paginaAtual()) return;
+
+    this.paginaAtual.set(pagina);
+    this.carregarDentistas();
   }
 }

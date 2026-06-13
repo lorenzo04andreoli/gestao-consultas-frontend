@@ -26,6 +26,10 @@ export class ConsultasListarPage implements OnInit {
   dataFimFiltro = '';
   consultaCancelamentoId: number | null = null;
   motivoCancelamento = '';
+  paginaAtual = signal(0);
+  itensPorPagina = signal(10);
+  totalConsultas = signal(0);
+  totalPaginas = signal(0);
 
   ngOnInit() {
     this.carregarConsultas();
@@ -34,8 +38,16 @@ export class ConsultasListarPage implements OnInit {
   carregarConsultas() {
     this.erro.set('');
 
-    this.consultaService.listar().subscribe({
-      next: dados => this.consultas.set(dados),
+    this.consultaService.listarPaginado(
+      this.paginaAtual(),
+      this.itensPorPagina(),
+      this.filtrosPaginacao()
+    ).subscribe({
+      next: pagina => {
+        this.consultas.set(pagina.content);
+        this.totalConsultas.set(pagina.totalElements);
+        this.totalPaginas.set(pagina.totalPages);
+      },
       error: err => this.erro.set(this.extrairMensagemErro(err))
     });
   }
@@ -112,12 +124,7 @@ export class ConsultasListarPage implements OnInit {
   }
 
   consultasFiltradas() {
-    const termo = this.normalizarTexto(this.termoBusca);
-
-    return this.consultas()
-      .filter(consulta => !termo || this.consultaContemTermo(consulta, termo))
-      .filter(consulta => !this.statusFiltro || consulta.status === this.statusFiltro)
-      .filter(consulta => this.consultaDentroDoPeriodo(consulta));
+    return this.consultas();
   }
 
   limparFiltros() {
@@ -125,6 +132,24 @@ export class ConsultasListarPage implements OnInit {
     this.statusFiltro = '';
     this.dataInicioFiltro = '';
     this.dataFimFiltro = '';
+    this.paginaAtual.set(0);
+    this.carregarConsultas();
+  }
+
+  aoAlterarFiltros() {
+    this.paginaAtual.set(0);
+    this.carregarConsultas();
+  }
+
+  paginas() {
+    return Array.from({ length: this.totalPaginas() }, (_, index) => index);
+  }
+
+  irParaPagina(pagina: number) {
+    if (pagina < 0 || pagina >= this.totalPaginas() || pagina === this.paginaAtual()) return;
+
+    this.paginaAtual.set(pagina);
+    this.carregarConsultas();
   }
 
   private extrairMensagemErro(err: unknown) {
@@ -135,34 +160,12 @@ export class ConsultasListarPage implements OnInit {
     return 'Erro ao carregar consultas.';
   }
 
-  private normalizarTexto(valor: string) {
-    return valor
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-  }
-
-  private consultaContemTermo(consulta: ConsultaModel, termo: string) {
-    return [
-      consulta.pacienteNome,
-      consulta.dentistaNome,
-      consulta.descricao,
-      consulta.status
-    ].some(valor => this.normalizarTexto(valor).includes(termo));
-  }
-
-  private consultaDentroDoPeriodo(consulta: ConsultaModel) {
-    const inicioConsulta = new Date(consulta.dataInicio).getTime();
-    const inicioFiltro = this.dataInicioFiltro
-      ? new Date(`${this.dataInicioFiltro}T00:00:00`).getTime()
-      : null;
-    const fimFiltro = this.dataFimFiltro
-      ? new Date(`${this.dataFimFiltro}T23:59:59`).getTime()
-      : null;
-
-    if (inicioFiltro && inicioConsulta < inicioFiltro) return false;
-    if (fimFiltro && inicioConsulta > fimFiltro) return false;
-
-    return true;
+  private filtrosPaginacao() {
+    return {
+      termo: this.termoBusca.trim(),
+      status: this.statusFiltro,
+      dataInicio: this.dataInicioFiltro ? `${this.dataInicioFiltro}T00:00:00` : '',
+      dataFim: this.dataFimFiltro ? `${this.dataFimFiltro}T23:59:59` : ''
+    };
   }
 }

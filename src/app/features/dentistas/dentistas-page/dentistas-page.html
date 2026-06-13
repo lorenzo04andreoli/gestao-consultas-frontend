@@ -69,7 +69,7 @@
       </thead>
 
       <tbody>
-        @for (dentista of dentistasFiltrados(); track dentista.id) {
+        @for (dentista of dentistas(); track dentista.id) {
           <tr>
             <td>
               <a
@@ -136,5 +136,30 @@
         }
       </tbody>
     </table>
+
+    @if (totalPaginas() > 1) {
+      <nav class="pagination" aria-label="Paginação de dentistas">
+        <button type="button" class="pagination-arrow" aria-label="Página anterior" [disabled]="paginaAtual() === 0" (click)="irParaPagina(paginaAtual() - 1)">
+          <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+        </button>
+
+        <div class="pagination-pages">
+          @for (pagina of paginas(); track pagina) {
+            <button
+              type="button"
+              class="page-button"
+              [class.active]="pagina === paginaAtual()"
+              (click)="irParaPagina(pagina)"
+            >
+              {{ pagina + 1 }}
+            </button>
+          }
+        </div>
+
+        <button type="button" class="pagination-arrow" aria-label="Próxima página" [disabled]="paginaAtual() + 1 >= totalPaginas()" (click)="irParaPagina(paginaAtual() + 1)">
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </button>
+      </nav>
+    }
   </div>
 </section>

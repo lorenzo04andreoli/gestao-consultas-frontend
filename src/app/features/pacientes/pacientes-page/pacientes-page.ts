@@ -1,8 +1,7 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { PacienteService } from '../paciente';
 import { PacienteModel } from '../paciente.model';
@@ -20,25 +19,10 @@ export class PacientesPage implements OnInit {
   erro = signal('');
   sucesso = signal('');
   buscaControl = new FormControl('', { nonNullable: true });
-  termoBusca = toSignal(
-    this.buscaControl.valueChanges.pipe(
-      startWith(this.buscaControl.value),
-      debounceTime(250),
-      map(valor => this.normalizarTexto(valor)),
-      distinctUntilChanged()
-    ),
-    { initialValue: '' }
-  );
-
-  pacientesFiltrados = computed(() => {
-    const termo = this.termoBusca();
-
-    if (!termo) return this.pacientes();
-
-    return this.pacientes().filter(paciente => this.pacienteContemTermo(paciente, termo));
-  });
-
-  totalPacientesFiltrados = computed(() => this.pacientesFiltrados().length);
+  paginaAtual = signal(0);
+  itensPorPagina = signal(10);
+  totalPacientes = signal(0);
+  totalPaginas = signal(0);
 
   constructor(
     private pacienteService: PacienteService,
@@ -47,14 +31,25 @@ export class PacientesPage implements OnInit {
 
   ngOnInit() {
     this.carregarPacientes();
+
+    this.buscaControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        this.paginaAtual.set(0);
+        this.carregarPacientes();
+      });
   }
 
   carregarPacientes() {
     this.erro.set('');
 
-    this.pacienteService.listar().subscribe({
-      next: (dados) => {
-        this.pacientes.set(dados);
+    this.pacienteService
+      .listarPaginado(this.paginaAtual(), this.itensPorPagina(), this.buscaControl.value)
+      .subscribe({
+      next: pagina => {
+        this.pacientes.set(pagina.content);
+        this.totalPacientes.set(pagina.totalElements);
+        this.totalPaginas.set(pagina.totalPages);
       },
       error: () => {
         this.erro.set('Erro ao carregar pacientes.');
@@ -81,7 +76,7 @@ export class PacientesPage implements OnInit {
     this.pacienteService.desativar(paciente.id).subscribe({
       next: () => {
         this.sucesso.set('Paciente arquivado com sucesso.');
-        this.pacientes.update(pacientes => pacientes.filter(item => item.id !== paciente.id));
+        this.carregarPacientes();
       },
       error: () => {
         this.erro.set('Erro ao arquivar paciente.');
@@ -97,17 +92,19 @@ export class PacientesPage implements OnInit {
     this.buscaControl.setValue('');
   }
 
-  private pacienteContemTermo(paciente: PacienteModel, termo: string) {
-    return [paciente.nome, paciente.email, paciente.cpf, paciente.telefone]
-      .filter(Boolean)
-      .some(valor => this.normalizarTexto(valor).includes(termo));
+  totalPacientesFiltrados() {
+    return this.totalPacientes();
   }
 
-  private normalizarTexto(valor: string) {
-    return valor
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
+  paginas() {
+    return Array.from({ length: this.totalPaginas() }, (_, index) => index);
+  }
+
+  irParaPagina(pagina: number) {
+    if (pagina < 0 || pagina >= this.totalPaginas() || pagina === this.paginaAtual()) return;
+
+    this.paginaAtual.set(pagina);
+    this.carregarPacientes();
   }
 }
 

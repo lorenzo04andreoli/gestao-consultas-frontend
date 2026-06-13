@@ -416,6 +416,48 @@ textarea {
   font-size: 1.4rem;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page-button,
+.pagination-arrow {
+  min-width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.page-button:hover,
+.page-button.active,
+.pagination-arrow:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .notification-view-all {
   min-height: 44px;
   display: grid;
@@ -728,6 +770,21 @@ body.theme-dark .notification-badge {
   border-color: #111827 !important;
 }
 
+body.theme-dark .page-button,
+body.theme-dark .pagination-arrow {
+  background: #111827 !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .page-button:hover,
+body.theme-dark .page-button.active,
+body.theme-dark .pagination-arrow:hover {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #082f49 !important;
+}
+
 body.theme-dark .account-tabs a {
   color: var(--color-muted) !important;
 }
@@ -759,6 +816,16 @@ body.theme-dark .account-tabs a:focus-visible {
     left: auto;
     right: 0;
     width: 210px;
+  }
+
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination-pages {
+    justify-content: center;
+    flex-wrap: wrap;
   }
 }
 /* You can add global styles to this file, and also import other style files */
