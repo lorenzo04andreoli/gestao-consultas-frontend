@@ -84,7 +84,13 @@
 </section>
 
 <ng-template #dentistaResultado let-dentista="dentista">
-  <span class="avatar">{{ inicialDentista(dentista) }}</span>
+  <span class="avatar">
+    @if (dentista.fotoPerfil) {
+      <img [src]="dentista.fotoPerfil" alt="" />
+    } @else {
+      {{ inicialDentista(dentista) }}
+    }
+  </span>
 
   <span class="dentist-info">
     <strong>{{ dentista.nome }}</strong>

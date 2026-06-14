@@ -21,6 +21,7 @@ export interface DentistaResponseModel {
   cro: string;
   ativo: boolean;
   usuarioId?: number;
+  fotoPerfil?: string | null;
   especialidades: string[];
 }
 

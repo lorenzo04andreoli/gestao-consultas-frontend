@@ -77,7 +77,13 @@
                 [routerLink]="['/dentistas', dentista.id]"
                 [queryParams]="{ origem: 'listar' }"
               >
-                <span class="dentist-avatar">{{ inicialDentista(dentista) }}</span>
+                <span class="dentist-avatar">
+                  @if (dentista.fotoPerfil) {
+                    <img [src]="dentista.fotoPerfil" alt="" />
+                  } @else {
+                    {{ inicialDentista(dentista) }}
+                  }
+                </span>
                 <span>{{ dentista.nome }}</span>
               </a>
             </td>

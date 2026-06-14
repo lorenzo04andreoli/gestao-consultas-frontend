@@ -23,7 +23,13 @@
   @if (dentista(); as dentista) {
     <section class="profile-card">
       <header class="profile-header">
-        <span class="avatar">{{ dentista.nome.charAt(0) }}</span>
+        <span class="avatar">
+          @if (dentista.fotoPerfil) {
+            <img [src]="dentista.fotoPerfil" alt="" />
+          } @else {
+            {{ dentista.nome.charAt(0) }}
+          }
+        </span>
 
         <div>
           <h2>{{ dentista.nome }}</h2>
