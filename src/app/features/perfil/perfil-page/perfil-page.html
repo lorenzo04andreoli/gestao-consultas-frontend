@@ -31,10 +31,10 @@
 
       <div class="profile-actions">
         @if (authService.isAdmin()) {
-          <a class="primary-button" routerLink="/usuarios">
+          <button type="button" class="primary-button" (click)="abrirModalDadosAdmin()">
             <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
             <span>Editar dados</span>
-          </a>
+          </button>
         } @else {
           <button type="button" class="primary-button" (click)="alternarSolicitacao()">
             <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
@@ -44,9 +44,62 @@
       </div>
     </div>
 
+    @if (modalDadosAdminAberto()) {
+      <div class="profile-modal-backdrop" (click)="fecharModalDadosAdmin()">
+        <form class="profile-modal" aria-label="Editar dados do administrador" (ngSubmit)="salvarDadosAdmin()" (click)="$event.stopPropagation()">
+          <header>
+            <div>
+              <h3>Editar dados</h3>
+              <p>Atualize os dados vinculados ao seu acesso administrativo.</p>
+            </div>
+
+            <button type="button" class="close-button" aria-label="Fechar" (click)="fecharModalDadosAdmin()">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </header>
+
+          <div class="modal-form-grid">
+            <label>
+              <span>Nome completo</span>
+              <input type="text" name="adminNome" [(ngModel)]="adminForm.nome" autocomplete="name" required />
+            </label>
+
+            <label>
+              <span>E-mail</span>
+              <input type="email" name="adminEmail" [(ngModel)]="adminForm.email" autocomplete="email" required />
+            </label>
+
+            <label>
+              <span>CPF</span>
+              <input type="text" name="adminCpf" [(ngModel)]="adminForm.cpf" inputmode="numeric" required />
+            </label>
+
+            <label>
+              <span>Status</span>
+              <select name="adminAtivo" [(ngModel)]="adminForm.ativo">
+                <option [ngValue]="true">Ativo</option>
+                <option [ngValue]="false">Inativo</option>
+              </select>
+            </label>
+          </div>
+
+          <footer class="modal-actions">
+            <button type="button" class="ghost-button" [disabled]="salvandoDadosAdmin()" (click)="fecharModalDadosAdmin()">
+              Cancelar
+            </button>
+
+            <button type="submit" class="primary-button" [disabled]="salvandoDadosAdmin()">
+              <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+              <span>{{ salvandoDadosAdmin() ? 'Salvando...' : 'Salvar alterações' }}</span>
+            </button>
+          </footer>
+        </form>
+      </div>
+    }
+
     @if (modalFotoAberto()) {
-      <div class="photo-modal-backdrop" (click)="fecharModalFoto()">
-        <section class="photo-modal" aria-label="Foto de perfil" (click)="$event.stopPropagation()">
+      <div class="profile-modal-backdrop" (click)="fecharModalFoto()">
+        <section class="profile-modal photo-modal" aria-label="Foto de perfil" (click)="$event.stopPropagation()">
           <header>
             <h3>Foto de perfil</h3>
             <button type="button" class="close-button" aria-label="Fechar" (click)="fecharModalFoto()">

@@ -88,6 +88,25 @@
   }
 }
 
+.avatar-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.photo-edit-button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  background: var(--color-primary-dark);
+  color: #fff;
+}
+
 .profile-actions,
 .request-actions {
   display: flex;
@@ -131,6 +150,123 @@
 
 .ghost-button.danger {
   color: var(--color-danger);
+}
+
+.profile-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.52);
+}
+
+.profile-modal {
+  width: min(560px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+
+  header,
+  .modal-actions {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: var(--color-primary-dark);
+  }
+
+  p {
+    margin-top: 4px;
+    color: var(--color-muted);
+    font-weight: 700;
+  }
+}
+
+.close-button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-muted);
+}
+
+.modal-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+
+  label {
+    display: grid;
+    gap: 8px;
+  }
+
+  span {
+    color: var(--color-primary-dark);
+    font-weight: 800;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    outline: none;
+
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
+    }
+  }
+}
+
+.photo-preview {
+  width: 180px;
+  height: 180px;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 3rem;
+  font-weight: 900;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.photo-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 .request-card,
@@ -412,6 +548,16 @@
 
   .request-row {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .modal-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-modal header,
+  .modal-actions {
+    align-items: stretch;
     flex-direction: column;
   }
 }

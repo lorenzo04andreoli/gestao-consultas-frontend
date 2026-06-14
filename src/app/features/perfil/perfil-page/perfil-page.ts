@@ -9,7 +9,7 @@ import { DentistaResponseModel } from '../../dentistas/dentista.model';
 import { DentistaService } from '../../dentistas/dentista';
 import { SolicitacaoAlteracaoResponseModel } from '../../solicitacoes-alteracao/solicitacao-alteracao.model';
 import { SolicitacaoAlteracaoService } from '../../solicitacoes-alteracao/solicitacao-alteracao';
-import { UsuarioResponseModel } from '../../usuarios/usuario.model';
+import { UsuarioAtualizacaoModel, UsuarioResponseModel } from '../../usuarios/usuario.model';
 import { UsuarioService } from '../../usuarios/usuario';
 
 @Component({
@@ -28,10 +28,13 @@ export class PerfilPage implements OnInit {
   solicitacoes = signal<SolicitacaoAlteracaoResponseModel[]>([]);
   solicitacaoAberta = signal(false);
   modalFotoAberto = signal(false);
+  modalDadosAdminAberto = signal(false);
+  salvandoDadosAdmin = signal(false);
   fotoPendente = signal('');
   solicitacaoAssunto = '';
   solicitacaoDados = '';
   feedback = signal('');
+  adminForm: UsuarioAtualizacaoModel = this.criarAdminFormVazio();
 
   constructor(
     public authService: AuthService,
@@ -97,6 +100,65 @@ export class PerfilPage implements OnInit {
   fecharModalFoto() {
     this.fotoPendente.set('');
     this.modalFotoAberto.set(false);
+  }
+
+  abrirModalDadosAdmin() {
+    const usuario = this.usuario();
+
+    if (!usuario) {
+      this.feedback.set('Dados do usuário ainda não foram carregados.');
+      return;
+    }
+
+    this.adminForm = {
+      nome: usuario.nome,
+      cpf: usuario.cpf,
+      email: usuario.email,
+      perfil: 'ADMIN',
+      ativo: usuario.ativo
+    };
+    this.feedback.set('');
+    this.modalDadosAdminAberto.set(true);
+  }
+
+  fecharModalDadosAdmin() {
+    this.modalDadosAdminAberto.set(false);
+    this.adminForm = this.criarAdminFormVazio();
+  }
+
+  salvarDadosAdmin() {
+    const usuario = this.usuario();
+
+    if (!usuario) return;
+
+    const payload: UsuarioAtualizacaoModel = {
+      nome: this.adminForm.nome.trim(),
+      cpf: this.adminForm.cpf.trim(),
+      email: this.adminForm.email.trim(),
+      perfil: 'ADMIN',
+      ativo: this.adminForm.ativo
+    };
+
+    if (!payload.nome || !payload.cpf || !payload.email) {
+      this.feedback.set('Preencha nome, CPF e e-mail.');
+      return;
+    }
+
+    this.salvandoDadosAdmin.set(true);
+    this.feedback.set('');
+
+    this.usuarioService.atualizar(usuario.id, payload).subscribe({
+      next: usuarioAtualizado => {
+        this.usuario.set(usuarioAtualizado);
+        this.fecharModalDadosAdmin();
+        this.feedback.set('Dados do perfil atualizados.');
+        this.salvandoDadosAdmin.set(false);
+      },
+      error: err => {
+        this.feedback.set(this.extrairMensagemErro(err, 'Erro ao atualizar dados do perfil.'));
+        this.salvandoDadosAdmin.set(false);
+      }
+    });
   }
 
   fotoModal() {
@@ -269,6 +331,16 @@ export class PerfilPage implements OnInit {
     }
 
     return mensagemPadrao;
+  }
+
+  private criarAdminFormVazio(): UsuarioAtualizacaoModel {
+    return {
+      nome: '',
+      cpf: '',
+      email: '',
+      perfil: 'ADMIN',
+      ativo: true
+    };
   }
 
 }

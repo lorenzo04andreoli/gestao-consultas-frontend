@@ -12,6 +12,14 @@ export interface UsuarioModel {
   ultimoLogin?: string;
 }
 
+export interface UsuarioAtualizacaoModel {
+  nome: string;
+  cpf: string;
+  email: string;
+  perfil: PerfilUsuario;
+  ativo: boolean;
+}
+
 export interface UsuarioResponseModel {
   id: number;
   nome: string;
