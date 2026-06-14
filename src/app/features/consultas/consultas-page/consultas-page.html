@@ -2,7 +2,7 @@
   <header class="page-header">
     <div>
       <h1>Consultas</h1>
-      <p>Acompanhe agendamentos, cancelamentos e finalizações.</p>
+      <p>Acompanhe agendamentos, cancelamentos e finalizacoes.</p>
     </div>
 
     <button type="button" class="primary-button" (click)="abrirModalCadastro()">
@@ -22,78 +22,22 @@
     <header class="schedule-toolbar">
       <div class="dentist-filter">
         <label>Profissional</label>
-        <select name="dentistaFiltroId" [(ngModel)]="dentistaFiltroId">
+        <select name="dentistaFiltroId" [(ngModel)]="dentistaFiltroId" (ngModelChange)="aoAlterarFiltroDentista()">
           <option [ngValue]="null">Todos os dentistas</option>
           @for (dentista of dentistas(); track dentista.id) {
             <option [ngValue]="dentista.id">{{ dentista.nome }}</option>
           }
         </select>
       </div>
-
-      <div class="week-controls">
-        <button type="button" class="secondary-button compact" (click)="voltarParaHoje()">Hoje</button>
-        <button type="button" class="icon-button" (click)="navegarSemana(-1)" aria-label="Semana anterior">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <button type="button" class="icon-button" (click)="navegarSemana(1)" aria-label="Próxima semana">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-        <strong>{{ tituloSemana() }}</strong>
-      </div>
     </header>
 
-    <div class="schedule-grid">
-      <div class="time-column header-cell"></div>
-
-      @for (dia of diasSemana; track dia.iso) {
-        <div class="day-header">
-          {{ formatarDiaAgenda(dia.data) }}
-        </div>
-      }
-
-      @for (hora of horarios; track hora) {
-        <div class="time-column">{{ formatarHoraAgenda(hora) }}</div>
-
-        @for (dia of diasSemana; track dia.iso) {
-          <div
-            class="schedule-slot"
-            [class.drop-target]="slotEstaAtivo(dia.data, hora)"
-            (click)="abrirModalHorario(dia.data, hora)"
-            (dragover)="permitirSoltarConsulta($event, dia.data, hora)"
-            (dragleave)="sairSlotArraste(dia.data, hora)"
-            (drop)="soltarConsulta($event, dia.data, hora)"
-          >
-            @for (consulta of consultasDoHorario(dia.data, hora); track consulta.id; let indice = $index; let total = $count) {
-              <article
-                class="appointment"
-                [class.compact]="consultaCompacta(consulta)"
-                [class.tiny]="consultaMuitoCurta(consulta)"
-                [class.dragging]="consultaEstaArrastando(consulta)"
-                [class.cancelled]="consulta.status === 'CANCELADA'"
-                [class.done]="consulta.status === 'FINALIZADA'"
-                [style.top.px]="deslocamentoConsulta(consulta)"
-                [style.height.px]="alturaConsulta(consulta)"
-                [style.left]="posicaoConsulta(indice, total)"
-                [style.width]="larguraConsulta(total)"
-                [attr.tabindex]="podeMoverConsulta(consulta) ? 0 : null"
-                [attr.role]="podeMoverConsulta(consulta) ? 'button' : null"
-                [attr.draggable]="podeMoverConsulta(consulta) ? true : null"
-                [title]="resumoConsulta(consulta)"
-                (dragstart)="iniciarArrasteConsulta($event, consulta)"
-                (dragend)="finalizarArrasteConsulta()"
-                (click)="$event.stopPropagation(); selecionarConsulta(consulta)"
-                (keydown.enter)="$event.stopPropagation(); selecionarConsulta(consulta)"
-              >
-                <strong>{{ consulta.pacienteNome }}</strong>
-                <small>{{ formatarIntervalo(consulta) }}</small>
-                @if (!consultaCompacta(consulta)) {
-                  <span>{{ consulta.dentistaNome }}</span>
-                }
-              </article>
-            }
-          </div>
-        }
-      }
+    <div class="calendar-shell">
+      <full-calendar
+        #calendar
+        [options]="calendarOptions"
+        [events]="calendarEvents"
+        [deepChangeDetection]="true"
+      ></full-calendar>
     </div>
   </section>
 
@@ -105,7 +49,7 @@
             <h2>
               {{
                 confirmandoReagendamento
-                  ? 'Confirmar novo horário'
+                  ? 'Confirmar novo horario'
                   : modoModal === 'edicao'
                     ? 'Editar consulta'
                     : 'Agendar consulta'
@@ -114,8 +58,8 @@
             <p>
               {{
                 confirmandoReagendamento
-                  ? 'Confira os dados antes de salvar a alteração.'
-                  : 'Selecione paciente, dentista e horário da consulta.'
+                  ? 'Confira os dados antes de salvar a alteracao.'
+                  : 'Selecione paciente, dentista e horario da consulta.'
               }}
             </p>
           </div>
@@ -138,7 +82,7 @@
                 }
               </select>
               @if (pacientes().length === 0) {
-                <small>Nenhum paciente disponível.</small>
+                <small>Nenhum paciente disponivel.</small>
               }
             </div>
 
@@ -151,7 +95,7 @@
                 }
               </select>
               @if (dentistas().length === 0) {
-                <small>Nenhum dentista ativo disponível.</small>
+                <small>Nenhum dentista ativo disponivel.</small>
               }
             </div>
 
@@ -174,12 +118,12 @@
             </div>
 
             <div class="form-group">
-              <label>Horário de início</label>
+              <label>Horario de inicio</label>
               <input type="time" name="horarioInicio" [(ngModel)]="consultaForm.horarioInicio" required />
             </div>
 
             <div class="form-group">
-              <label>Duração da consulta (min)</label>
+              <label>Duracao da consulta (min)</label>
               <input
                 type="number"
                 name="duracaoMinutos"
@@ -191,7 +135,7 @@
             </div>
 
             <div class="form-group full-width">
-              <label>Descrição</label>
+              <label>Descricao</label>
               <textarea name="descricao" [(ngModel)]="consultaForm.descricao" required></textarea>
             </div>
           </div>
@@ -229,7 +173,7 @@
         <header class="modal-header">
           <div>
             <h2>Cancelar consulta</h2>
-            <p>O motivo é obrigatório para cancelar uma consulta.</p>
+            <p>O motivo e obrigatorio para cancelar uma consulta.</p>
             @if (resumoConsultaCancelamento()) {
               <p class="modal-summary">{{ resumoConsultaCancelamento() }}</p>
             }

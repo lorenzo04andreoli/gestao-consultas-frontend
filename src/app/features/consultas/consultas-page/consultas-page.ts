@@ -1,6 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarOptions, EventClickArg, EventInput } from '@fullcalendar/core';
+import ptBrLocale from '@fullcalendar/core/locales/pt-br';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
+import timeGridPlugin from '@fullcalendar/timegrid';
 import { AuthService } from '../../../core/auth/auth';
 import { DentistaService } from '../../dentistas/dentista';
 import { DentistaResponseModel } from '../../dentistas/dentista.model';
@@ -14,11 +20,13 @@ import { ConsultaModel, ConsultaRequestModel } from '../consulta.model';
 @Component({
   selector: 'app-consultas-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, FullCalendarModule],
   templateUrl: './consultas-page.html',
   styleUrl: './consultas-page.scss'
 })
 export class ConsultasPage implements OnInit {
+  @ViewChild('calendar') private calendarComponent?: FullCalendarComponent;
+
   private consultaService = inject(ConsultaService);
   private pacienteService = inject(PacienteService);
   private dentistaService = inject(DentistaService);
@@ -38,11 +46,47 @@ export class ConsultasPage implements OnInit {
   confirmandoReagendamento = false;
   consultaSelecionadaId: number | null = null;
   dentistaFiltroId: number | null = null;
-  consultaArrastada: ConsultaModel | null = null;
-  slotArrasteAtivo: string | null = null;
-  private readonly alturaHoraAgenda = 92;
-  horarios = Array.from({ length: 13 }, (_, index) => index + 6);
-  diasSemana = this.montarSemana(new Date());
+  calendarEvents: EventInput[] = [];
+  calendarOptions: CalendarOptions = {
+    plugins: [timeGridPlugin, interactionPlugin, dayGridPlugin],
+    initialView: 'timeGridWeek',
+    locale: ptBrLocale,
+    firstDay: 0,
+    allDaySlot: false,
+    nowIndicator: true,
+    editable: true,
+    selectable: true,
+    expandRows: true,
+    height: 'auto',
+    slotMinTime: '06:00:00',
+    slotMaxTime: '19:00:00',
+    slotDuration: '00:30:00',
+    slotLabelFormat: {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    },
+    eventTimeFormat: {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    },
+    headerToolbar: {
+      left: 'today prev,next',
+      center: 'title',
+      right: 'timeGridWeek,timeGridDay,dayGridMonth'
+    },
+    buttonText: {
+      today: 'Hoje',
+      month: 'Mes',
+      week: 'Semana',
+      day: 'Dia'
+    },
+    dateClick: (info) => this.abrirModalHorarioCalendario(info),
+    eventClick: (info) => this.selecionarEventoCalendario(info),
+    eventDrop: (info) => this.reagendarEventoCalendario(info),
+    eventAllow: (_dropInfo, draggedEvent) => draggedEvent?.extendedProps['status'] === 'AGENDADA'
+  };
 
   consultaForm = {
     pacienteId: null as number | null,
@@ -71,6 +115,7 @@ export class ConsultasPage implements OnInit {
     this.consultaService.listar().subscribe({
       next: (dados) => {
         this.consultas.set(dados);
+        this.atualizarEventosCalendario();
       },
       error: (err) => {
         this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar consultas.'));
@@ -131,6 +176,14 @@ export class ConsultasPage implements OnInit {
     this.consultaForm.horarioInicio = this.formatarDataParaInputLocal(inicio).slice(11, 16);
   }
 
+  abrirModalHorarioCalendario(info: DateClickArg) {
+    const inicio = new Date(info.date);
+
+    this.abrirModalCadastro();
+    this.consultaForm.dataConsulta = this.formatarDataParaInputLocal(inicio).slice(0, 10);
+    this.consultaForm.horarioInicio = this.formatarDataParaInputLocal(inicio).slice(11, 16);
+  }
+
   abrirModalEdicao(consulta: ConsultaModel) {
     if (!consulta.id) return;
 
@@ -162,65 +215,6 @@ export class ConsultasPage implements OnInit {
     this.abrirModalEdicao(consulta);
   }
 
-  podeMoverConsulta(consulta: ConsultaModel) {
-    return consulta.status === 'AGENDADA';
-  }
-
-  iniciarArrasteConsulta(event: DragEvent, consulta: ConsultaModel) {
-    if (!this.podeMoverConsulta(consulta)) {
-      event.preventDefault();
-      return;
-    }
-
-    this.consultaArrastada = consulta;
-    event.dataTransfer?.setData('text/plain', String(consulta.id ?? ''));
-    event.dataTransfer?.setDragImage(event.target as Element, 12, 12);
-  }
-
-  finalizarArrasteConsulta() {
-    this.consultaArrastada = null;
-    this.slotArrasteAtivo = null;
-  }
-
-  permitirSoltarConsulta(event: DragEvent, data: Date, hora: number) {
-    if (!this.consultaArrastada) return;
-
-    event.preventDefault();
-    this.slotArrasteAtivo = this.chaveSlotAgenda(data, hora);
-  }
-
-  soltarConsulta(event: DragEvent, data: Date, hora: number) {
-    if (!this.consultaArrastada) return;
-
-    event.preventDefault();
-    const consulta = this.consultaArrastada;
-    this.finalizarArrasteConsulta();
-
-    if (this.consultaEstaNoSlot(consulta, data, hora)) return;
-
-    this.abrirModalReagendamento(consulta, data, hora);
-  }
-
-  sairSlotArraste(data: Date, hora: number) {
-    if (this.slotArrasteAtivo === this.chaveSlotAgenda(data, hora)) {
-      this.slotArrasteAtivo = null;
-    }
-  }
-
-  slotEstaAtivo(data: Date, hora: number) {
-    return this.slotArrasteAtivo === this.chaveSlotAgenda(data, hora);
-  }
-
-  consultaEstaArrastando(consulta: ConsultaModel) {
-    return !!consulta.id && this.consultaArrastada?.id === consulta.id;
-  }
-
-  private consultaEstaNoSlot(consulta: ConsultaModel, data: Date, hora: number) {
-    const inicio = new Date(consulta.dataInicio);
-
-    return inicio.toDateString() === data.toDateString() && inicio.getHours() === hora;
-  }
-
   abrirModalReagendamento(consulta: ConsultaModel, data: Date, hora: number) {
     if (!consulta.id) return;
 
@@ -240,6 +234,28 @@ export class ConsultasPage implements OnInit {
       descricao: consulta.descricao,
       dataConsulta: this.formatarDataParaInputLocal(novoInicio).slice(0, 10),
       horarioInicio: this.formatarDataParaInputLocal(novoInicio).slice(11, 16),
+      duracaoMinutos: Math.max(this.duracaoConsultaMinutos(consulta), 15)
+    };
+
+    this.modalCadastroAberto.set(true);
+  }
+
+  abrirModalReagendamentoCalendario(consulta: ConsultaModel, inicio: Date) {
+    if (!consulta.id) return;
+
+    this.modoModal = 'edicao';
+    this.confirmandoReagendamento = true;
+    this.consultaSelecionadaId = consulta.id;
+    this.carregarPacientes();
+    this.carregarDentistas();
+
+    this.consultaForm = {
+      pacienteId: consulta.pacienteId,
+      dentistaId: consulta.dentistaId,
+      especialidadeId: consulta.especialidadeId ?? null,
+      descricao: consulta.descricao,
+      dataConsulta: this.formatarDataParaInputLocal(inicio).slice(0, 10),
+      horarioInicio: this.formatarDataParaInputLocal(inicio).slice(11, 16),
       duracaoMinutos: Math.max(this.duracaoConsultaMinutos(consulta), 15)
     };
 
@@ -395,59 +411,11 @@ export class ConsultasPage implements OnInit {
     });
   }
 
-  voltarParaHoje() {
-    this.diasSemana = this.montarSemana(new Date());
-  }
-
-  navegarSemana(direcao: -1 | 1) {
-    const referencia = new Date(this.diasSemana[0].data);
-    referencia.setDate(referencia.getDate() + direcao * 7);
-    this.diasSemana = this.montarSemana(referencia);
-  }
-
-  tituloSemana() {
-    const primeiroDia = this.diasSemana[0].data;
-    const ultimoDia = this.diasSemana[this.diasSemana.length - 1].data;
-
-    return `${this.formatarDiaCurto(primeiroDia)} - ${this.formatarDiaCurto(ultimoDia)}`;
-  }
-
-  consultasDoHorario(data: Date, hora: number) {
-    return this.consultas()
-      .filter(consulta => consulta.status !== 'CANCELADA')
-      .filter(consulta => this.consultaPertenceAoHorario(consulta, data, hora))
-      .filter(consulta => !this.dentistaFiltroId || consulta.dentistaId === this.dentistaFiltroId)
-      .sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
-  }
-
-  formatarDiaAgenda(data: Date) {
-    return new Intl.DateTimeFormat('pt-BR', {
-      weekday: 'short',
-      day: '2-digit',
-      month: '2-digit'
-    }).format(data);
-  }
-
-  formatarHoraAgenda(hora: number) {
-    return `${String(hora).padStart(2, '0')}:00`;
-  }
-
   formatarIntervalo(consulta: ConsultaModel) {
     const inicio = new Date(consulta.dataInicio);
     const fim = new Date(consulta.dataFim);
 
     return `${this.formatarHoraMinuto(inicio)} - ${this.formatarHoraMinuto(fim)}`;
-  }
-
-  deslocamentoConsulta(consulta: ConsultaModel) {
-    const inicio = new Date(consulta.dataInicio);
-    return (inicio.getMinutes() / 60) * this.alturaHoraAgenda + 4;
-  }
-
-  alturaConsulta(consulta: ConsultaModel) {
-    const duracaoMinutos = this.duracaoConsultaMinutos(consulta);
-
-    return Math.max((duracaoMinutos / 60) * this.alturaHoraAgenda - 8, 42);
   }
 
   duracaoConsultaMinutos(consulta: ConsultaModel) {
@@ -457,16 +425,12 @@ export class ConsultasPage implements OnInit {
     return Math.max((fim - inicio) / 60000, 0);
   }
 
-  consultaCompacta(consulta: ConsultaModel) {
-    return this.duracaoConsultaMinutos(consulta) < 60;
-  }
-
-  consultaMuitoCurta(consulta: ConsultaModel) {
-    return this.duracaoConsultaMinutos(consulta) <= 30;
-  }
-
   podeExibirAcoesModal() {
     return !!this.consultaEmEdicao() && this.modoModal === 'edicao';
+  }
+
+  aoAlterarFiltroDentista() {
+    this.atualizarEventosCalendario();
   }
 
   aoSelecionarDentista() {
@@ -507,14 +471,6 @@ export class ConsultasPage implements OnInit {
 
   resumoConsultaCancelamento() {
     return this.consultaCancelamento ? this.resumoConsulta(this.consultaCancelamento) : '';
-  }
-
-  larguraConsulta(total: number) {
-    return `calc(${100 / total}% - 8px)`;
-  }
-
-  posicaoConsulta(indice: number, total: number) {
-    return `calc(${indice * (100 / total)}% + 4px)`;
   }
 
   formatarData(data: string) {
@@ -571,10 +527,6 @@ export class ConsultasPage implements OnInit {
     };
   }
 
-  private chaveSlotAgenda(data: Date, hora: number) {
-    return `${this.formatarDataParaInputLocal(data).slice(0, 10)}-${hora}`;
-  }
-
   private filtrarDentistasPermitidos(dentistas: DentistaResponseModel[]) {
     if (!this.authService.isDentista()) return dentistas;
 
@@ -590,40 +542,70 @@ export class ConsultasPage implements OnInit {
       .replace(/[\u0300-\u036f]/g, '');
   }
 
-  private montarSemana(referencia: Date) {
-    const inicio = new Date(referencia);
-    const diaSemana = inicio.getDay();
-    inicio.setDate(inicio.getDate() - diaSemana);
-    inicio.setHours(0, 0, 0, 0);
-
-    return Array.from({ length: 7 }, (_, index) => {
-      const data = new Date(inicio);
-      data.setDate(inicio.getDate() + index);
-
-      return {
-        data,
-        iso: data.toISOString()
-      };
-    });
-  }
-
-  private consultaPertenceAoHorario(consulta: ConsultaModel, data: Date, hora: number) {
-    const inicio = new Date(consulta.dataInicio);
-
-    return inicio.toDateString() === data.toDateString() && inicio.getHours() === hora;
-  }
-
-  private formatarDiaCurto(data: Date) {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: 'short'
-    }).format(data);
-  }
-
   private formatarHoraMinuto(data: Date) {
     return new Intl.DateTimeFormat('pt-BR', {
       hour: '2-digit',
       minute: '2-digit'
     }).format(data);
+  }
+
+  private selecionarEventoCalendario(info: EventClickArg) {
+    const consulta = info.event.extendedProps['consulta'] as ConsultaModel | undefined;
+
+    if (consulta) {
+      this.selecionarConsulta(consulta);
+    }
+  }
+
+  private reagendarEventoCalendario(info: {
+    event: {
+      start: Date | null;
+      extendedProps: Record<string, unknown>;
+    };
+    revert: () => void;
+  }) {
+    const consulta = info.event.extendedProps['consulta'] as ConsultaModel | undefined;
+    const novoInicio = info.event.start;
+
+    info.revert();
+
+    if (consulta && novoInicio) {
+      this.abrirModalReagendamentoCalendario(consulta, novoInicio);
+    }
+  }
+
+  private atualizarEventosCalendario() {
+    const eventos = this.eventosCalendario();
+    this.calendarEvents = eventos;
+
+    const calendarApi = this.calendarComponent?.getApi();
+
+    if (calendarApi) {
+      calendarApi.removeAllEvents();
+      calendarApi.addEventSource(eventos);
+      calendarApi.render();
+    }
+  }
+
+  private eventosCalendario(): EventInput[] {
+    return this.consultas()
+      .filter(consulta => consulta.status !== 'CANCELADA')
+      .filter(consulta => !this.dentistaFiltroId || consulta.dentistaId === this.dentistaFiltroId)
+      .map(consulta => ({
+        id: String(consulta.id),
+        title: `${consulta.pacienteNome} - ${consulta.dentistaNome}`,
+        start: consulta.dataInicio,
+        end: consulta.dataFim,
+        editable: consulta.status === 'AGENDADA',
+        classNames: [
+          'appointment-event',
+          consulta.status === 'CANCELADA' ? 'cancelled' : '',
+          consulta.status === 'FINALIZADA' ? 'done' : ''
+        ].filter(Boolean),
+        extendedProps: {
+          consulta,
+          status: consulta.status
+        }
+      }));
   }
 }

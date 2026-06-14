@@ -79,121 +79,84 @@
   }
 }
 
-.week-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-primary-dark);
+.calendar-shell {
+  min-width: 960px;
+  padding: 18px 20px 22px;
 }
 
-.schedule-grid {
-  min-width: 1080px;
-  display: grid;
-  grid-template-columns: 64px repeat(7, minmax(132px, 1fr));
-}
-
-.time-column,
-.day-header,
-.schedule-slot {
-  border-right: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.time-column {
-  min-height: 92px;
-  padding: 12px 10px;
-  color: var(--color-muted);
-  font-size: 13px;
-  text-align: right;
-  background: #f8fbfc;
-
-  &.header-cell {
-    min-height: 48px;
-  }
-}
-
-.day-header {
-  min-height: 48px;
-  padding: 14px 10px;
-  color: var(--color-primary-dark);
-  font-weight: 700;
-  text-align: center;
-  text-transform: capitalize;
-  background: #f8fbfc;
-}
-
-.schedule-slot {
-  position: relative;
-  min-height: 92px;
-  background: #fff;
-
-  &.drop-target {
-    background: #eef9ff;
-    box-shadow: inset 0 0 0 2px var(--color-primary-soft);
-  }
-}
-
-.appointment {
-  position: absolute;
-  z-index: 1;
-  display: grid;
-  align-content: start;
-  gap: 3px;
-  padding: 8px;
-  border-radius: var(--radius-sm);
-  background: var(--color-primary);
-  color: #fff;
-  box-shadow: 0 6px 14px rgba(13, 178, 247, 0.2);
-  line-height: 1.15;
-  overflow: hidden;
-  cursor: grab;
-
-  strong,
-  span,
-  small {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+:host ::ng-deep {
+  .fc {
+    --fc-border-color: var(--color-border);
+    --fc-page-bg-color: var(--color-surface);
+    --fc-neutral-bg-color: color-mix(in srgb, var(--color-surface) 92%, var(--color-primary) 8%);
+    --fc-today-bg-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    color: var(--color-text);
+    font-family: inherit;
   }
 
-  span,
-  small {
-    opacity: 0.9;
-    font-size: 12px;
+  .fc .fc-toolbar {
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
   }
 
-  &.cancelled {
-    background: var(--color-danger);
+  .fc .fc-toolbar-title {
+    color: var(--color-primary-dark);
+    font-size: 1.2rem;
+    text-transform: capitalize;
+  }
+
+  .fc .fc-button {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-primary-dark);
+    font-weight: 800;
     box-shadow: none;
+    text-transform: capitalize;
   }
 
-  &.done {
+  .fc .fc-button-primary:not(:disabled):hover,
+  .fc .fc-button-primary:not(:disabled).fc-button-active {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .fc .fc-col-header-cell-cushion,
+  .fc .fc-timegrid-slot-label-cushion {
+    color: var(--color-muted);
+    text-decoration: none;
+    text-transform: capitalize;
+  }
+
+  .fc .fc-timegrid-slot {
+    height: 46px;
+  }
+
+  .fc .fc-event {
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(13, 178, 247, 0.2);
+    cursor: pointer;
+  }
+
+  .fc .fc-event.done {
     background: var(--color-success);
     box-shadow: none;
   }
 
-  &.cancelled,
-  &.done {
-    cursor: default;
+  .fc .fc-event.cancelled {
+    background: var(--color-danger);
+    box-shadow: none;
+    opacity: 0.75;
   }
 
-  &.dragging {
-    opacity: 0.65;
-    cursor: grabbing;
-  }
-
-  &.compact {
-    gap: 2px;
-    padding: 6px 8px;
-  }
-
-  &.tiny {
-    gap: 1px;
-    padding: 4px 8px;
-
-    strong {
-      line-height: 1.1;
-    }
+  .fc .fc-event-main {
+    padding: 4px 6px;
+    font-weight: 800;
   }
 }
 
