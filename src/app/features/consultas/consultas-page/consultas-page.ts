@@ -145,16 +145,14 @@ export class ConsultasPage implements OnInit {
     inicio.setHours(hora, 0, 0, 0);
 
     this.abrirModalCadastro();
-    this.consultaForm.dataConsulta = this.formatarDataParaInputLocal(inicio).slice(0, 10);
-    this.consultaForm.horarioInicio = this.formatarDataParaInputLocal(inicio).slice(11, 16);
+    this.consultaForm = consultaFormParaHorario(inicio);
   }
 
   abrirModalHorarioCalendario(info: DateClickArg) {
     const inicio = new Date(info.date);
 
     this.abrirModalCadastro();
-    this.consultaForm.dataConsulta = this.formatarDataParaInputLocal(inicio).slice(0, 10);
-    this.consultaForm.horarioInicio = this.formatarDataParaInputLocal(inicio).slice(11, 16);
+    this.consultaForm = consultaFormParaHorario(inicio);
   }
 
   abrirModalEdicao(consulta: ConsultaModel) {
@@ -166,18 +164,7 @@ export class ConsultasPage implements OnInit {
     this.carregarPacientes();
     this.carregarDentistas();
 
-    const inicio = new Date(consulta.dataInicio);
-    const fim = new Date(consulta.dataFim);
-
-    this.consultaForm = {
-      pacienteId: consulta.pacienteId,
-      dentistaId: consulta.dentistaId,
-      especialidadeId: consulta.especialidadeId ?? null,
-      descricao: consulta.descricao,
-      dataConsulta: this.formatarDataParaInput(consulta.dataInicio).slice(0, 10),
-      horarioInicio: this.formatarDataParaInput(consulta.dataInicio).slice(11, 16),
-      duracaoMinutos: Math.max((fim.getTime() - inicio.getTime()) / 60000, 15)
-    };
+    this.consultaForm = consultaParaForm(consulta);
 
     this.modalCadastroAberto.set(true);
   }
@@ -200,15 +187,7 @@ export class ConsultasPage implements OnInit {
     const novoInicio = new Date(data);
     novoInicio.setHours(hora, 0, 0, 0);
 
-    this.consultaForm = {
-      pacienteId: consulta.pacienteId,
-      dentistaId: consulta.dentistaId,
-      especialidadeId: consulta.especialidadeId ?? null,
-      descricao: consulta.descricao,
-      dataConsulta: this.formatarDataParaInputLocal(novoInicio).slice(0, 10),
-      horarioInicio: this.formatarDataParaInputLocal(novoInicio).slice(11, 16),
-      duracaoMinutos: Math.max(this.duracaoConsultaMinutos(consulta), 15)
-    };
+    this.consultaForm = consultaParaFormReagendamento(consulta, novoInicio);
 
     this.modalCadastroAberto.set(true);
   }
@@ -222,15 +201,7 @@ export class ConsultasPage implements OnInit {
     this.carregarPacientes();
     this.carregarDentistas();
 
-    this.consultaForm = {
-      pacienteId: consulta.pacienteId,
-      dentistaId: consulta.dentistaId,
-      especialidadeId: consulta.especialidadeId ?? null,
-      descricao: consulta.descricao,
-      dataConsulta: this.formatarDataParaInputLocal(inicio).slice(0, 10),
-      horarioInicio: this.formatarDataParaInputLocal(inicio).slice(11, 16),
-      duracaoMinutos: Math.max(this.duracaoConsultaMinutos(consulta), 15)
-    };
+    this.consultaForm = consultaParaFormReagendamento(consulta, inicio);
 
     this.modalCadastroAberto.set(true);
   }
@@ -250,7 +221,6 @@ export class ConsultasPage implements OnInit {
     this.sucesso.set('');
     this.consultaCancelamentoId = consulta.id;
     this.consultaCancelamento = consulta;
-    this.motivoCancelamento = '';
     this.modalCancelamentoAberto.set(true);
   }
 
@@ -274,44 +244,20 @@ export class ConsultasPage implements OnInit {
     this.modalCancelamentoAberto.set(false);
     this.consultaCancelamentoId = null;
     this.consultaCancelamento = null;
-    this.motivoCancelamento = '';
   }
 
   salvar() {
     this.erro.set('');
     this.sucesso.set('');
 
-    if (!this.consultaForm.pacienteId || !this.consultaForm.dentistaId || !this.consultaForm.especialidadeId) {
-      this.erro.set('Selecione paciente, dentista e especialidade.');
+    const erroFormulario = validarConsultaForm(this.consultaForm);
+
+    if (erroFormulario) {
+      this.erro.set(erroFormulario);
       return;
     }
 
-    if (!this.consultaForm.dataConsulta || !this.consultaForm.horarioInicio) {
-      this.erro.set('Informe data e horário inicial.');
-      return;
-    }
-
-    if (!this.consultaForm.duracaoMinutos || this.consultaForm.duracaoMinutos < 15) {
-      this.erro.set('Informe uma duração de pelo menos 15 minutos.');
-      return;
-    }
-
-    if (!this.consultaForm.descricao.trim()) {
-      this.erro.set('Informe a descrição da consulta.');
-      return;
-    }
-
-
-    const { dataInicio, dataFim } = this.montarPeriodoConsulta();
-
-    const payload: ConsultaRequestModel = {
-      pacienteId: this.consultaForm.pacienteId,
-      dentistaId: this.consultaForm.dentistaId,
-      especialidadeId: this.consultaForm.especialidadeId,
-      descricao: this.consultaForm.descricao.trim(),
-      dataInicio,
-      dataFim
-    };
+    const payload = consultaFormParaRequest(this.consultaForm);
 
     const request$ = this.modoModal === 'edicao' && this.consultaSelecionadaId
       ? this.consultaService.atualizar(this.consultaSelecionadaId, payload)
@@ -342,9 +288,7 @@ export class ConsultasPage implements OnInit {
     });
   }
 
-  cancelarConsulta() {
-    const motivo = this.motivoCancelamento.trim();
-
+  cancelarConsulta(motivo: string) {
     this.erro.set('');
     this.sucesso.set('');
 
@@ -385,17 +329,11 @@ export class ConsultasPage implements OnInit {
   }
 
   formatarIntervalo(consulta: ConsultaModel) {
-    const inicio = new Date(consulta.dataInicio);
-    const fim = new Date(consulta.dataFim);
-
-    return `${this.formatarHoraMinuto(inicio)} - ${this.formatarHoraMinuto(fim)}`;
+    return formatarIntervaloConsulta(consulta);
   }
 
   duracaoConsultaMinutos(consulta: ConsultaModel) {
-    const inicio = new Date(consulta.dataInicio).getTime();
-    const fim = new Date(consulta.dataFim).getTime();
-
-    return Math.max((fim - inicio) / 60000, 0);
+    return duracaoConsultaMinutos(consulta);
   }
 
   podeExibirAcoesModal() {
@@ -419,17 +357,11 @@ export class ConsultasPage implements OnInit {
   }
 
   especialidadesDoDentistaSelecionado() {
-    const dentista = this.dentistas().find(item => item.id === this.consultaForm.dentistaId);
-
-    if (!dentista) return [];
-
-    const nomesDentista = new Set(
-      dentista.especialidades.map(nome => this.normalizarTexto(nome))
+    return especialidadesDoDentista(
+      this.consultaForm.dentistaId,
+      this.dentistas(),
+      this.especialidades()
     );
-
-    return this.especialidades()
-      .filter(especialidade => nomesDentista.has(this.normalizarTexto(especialidade.nome)))
-      .sort((a, b) => a.nome.localeCompare(b.nome));
   }
 
   consultaEmEdicao() {
@@ -447,24 +379,11 @@ export class ConsultasPage implements OnInit {
   }
 
   formatarData(data: string) {
-    if (!data) return '-';
-
-    return new Intl.DateTimeFormat('pt-BR', {
-      dateStyle: 'short',
-      timeStyle: 'short'
-    }).format(new Date(data));
+    return formatarDataConsulta(data);
   }
 
   limparFormulario() {
-    this.consultaForm = {
-      pacienteId: null,
-      dentistaId: null,
-      especialidadeId: null,
-      descricao: '',
-      dataConsulta: '',
-      horarioInicio: '',
-      duracaoMinutos: 60
-    };
+    this.consultaForm = criarConsultaFormVazio();
   }
 
   private extrairMensagemErro(err: unknown, mensagemPadrao: string) {
@@ -480,21 +399,6 @@ export class ConsultasPage implements OnInit {
 
     const emailUsuario = this.authService.email();
     return dentistas.filter(dentista => dentista.email === emailUsuario);
-  }
-
-  private normalizarTexto(valor: string) {
-    return valor
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-  }
-
-  private formatarHoraMinuto(data: Date) {
-    return new Intl.DateTimeFormat('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(data);
   }
 
   private selecionarEventoCalendario(info: EventClickArg) {
