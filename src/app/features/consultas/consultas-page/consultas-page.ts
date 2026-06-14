@@ -3,10 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventClickArg, EventInput } from '@fullcalendar/core';
-import ptBrLocale from '@fullcalendar/core/locales/pt-br';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
-import timeGridPlugin from '@fullcalendar/timegrid';
+import { DateClickArg } from '@fullcalendar/interaction';
 import { AuthService } from '../../../core/auth/auth';
 import { DentistaService } from '../../dentistas/dentista';
 import { DentistaResponseModel } from '../../dentistas/dentista.model';
@@ -14,13 +11,33 @@ import { EspecialidadeService } from '../../especialidades/especialidade';
 import { EspecialidadeModel } from '../../especialidades/especialidade.model';
 import { PacienteService } from '../../pacientes/paciente';
 import { PacienteModel } from '../../pacientes/paciente.model';
+import { ConsultaCancelamentoModal } from '../consulta-cancelamento-modal/consulta-cancelamento-modal';
 import { ConsultaService } from '../consulta';
-import { ConsultaModel, ConsultaRequestModel } from '../consulta.model';
+import { ConsultaModel } from '../consulta.model';
+import {
+  ConsultaEventDropArg,
+  criarConsultaCalendarOptions
+} from '../consulta-calendar.config';
+import { consultasParaEventosCalendario } from '../consulta-calendar.mapper';
+import {
+  consultaFormParaHorario,
+  consultaFormParaRequest,
+  consultaParaForm,
+  consultaParaFormReagendamento,
+  validarConsultaForm
+} from '../consulta-form.mapper';
+import { especialidadesDoDentista } from '../consulta-options.mapper';
+import { ConsultaFormModel, criarConsultaFormVazio } from '../consulta-form.model';
+import {
+  duracaoConsultaMinutos,
+  formatarDataConsulta,
+  formatarIntervaloConsulta
+} from '../consulta-date.utils';
 
 @Component({
   selector: 'app-consultas-page',
   standalone: true,
-  imports: [FormsModule, FullCalendarModule],
+  imports: [FormsModule, FullCalendarModule, ConsultaCancelamentoModal],
   templateUrl: './consultas-page.html',
   styleUrl: './consultas-page.scss'
 })
@@ -47,60 +64,16 @@ export class ConsultasPage implements OnInit {
   consultaSelecionadaId: number | null = null;
   dentistaFiltroId: number | null = null;
   calendarEvents: EventInput[] = [];
-  calendarOptions: CalendarOptions = {
-    plugins: [timeGridPlugin, interactionPlugin, dayGridPlugin],
-    initialView: 'timeGridWeek',
-    locale: ptBrLocale,
-    firstDay: 0,
-    allDaySlot: false,
-    nowIndicator: true,
-    editable: true,
-    selectable: true,
-    expandRows: true,
-    height: 'auto',
-    slotMinTime: '06:00:00',
-    slotMaxTime: '19:00:00',
-    slotDuration: '00:30:00',
-    slotLabelFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    },
-    eventTimeFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    },
-    headerToolbar: {
-      left: 'today prev,next',
-      center: 'title',
-      right: 'timeGridWeek,timeGridDay,dayGridMonth'
-    },
-    buttonText: {
-      today: 'Hoje',
-      month: 'Mes',
-      week: 'Semana',
-      day: 'Dia'
-    },
-    dateClick: (info) => this.abrirModalHorarioCalendario(info),
-    eventClick: (info) => this.selecionarEventoCalendario(info),
-    eventDrop: (info) => this.reagendarEventoCalendario(info),
-    eventAllow: (_dropInfo, draggedEvent) => draggedEvent?.extendedProps['status'] === 'AGENDADA'
-  };
+  calendarOptions: CalendarOptions = criarConsultaCalendarOptions({
+    onDateClick: (info) => this.abrirModalHorarioCalendario(info),
+    onEventClick: (info) => this.selecionarEventoCalendario(info),
+    onEventDrop: (info) => this.reagendarEventoCalendario(info)
+  });
 
-  consultaForm = {
-    pacienteId: null as number | null,
-    dentistaId: null as number | null,
-    especialidadeId: null as number | null,
-    descricao: '',
-    dataConsulta: '',
-    horarioInicio: '',
-    duracaoMinutos: 60
-  };
+  consultaForm: ConsultaFormModel = criarConsultaFormVazio();
 
   consultaCancelamentoId: number | null = null;
   consultaCancelamento: ConsultaModel | null = null;
-  motivoCancelamento = '';
 
   ngOnInit() {
     this.carregarConsultas();
@@ -502,31 +475,6 @@ export class ConsultasPage implements OnInit {
     return mensagemPadrao;
   }
 
-  private formatarDataParaInput(data: string) {
-    return data ? data.slice(0, 16) : '';
-  }
-
-  private formatarDataParaInputLocal(data: Date) {
-    const ano = data.getFullYear();
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const dia = String(data.getDate()).padStart(2, '0');
-    const hora = String(data.getHours()).padStart(2, '0');
-    const minuto = String(data.getMinutes()).padStart(2, '0');
-
-    return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
-  }
-
-  private montarPeriodoConsulta() {
-    const dataInicio = `${this.consultaForm.dataConsulta}T${this.consultaForm.horarioInicio}`;
-    const fim = new Date(dataInicio);
-    fim.setMinutes(fim.getMinutes() + Number(this.consultaForm.duracaoMinutos));
-
-    return {
-      dataInicio,
-      dataFim: this.formatarDataParaInputLocal(fim)
-    };
-  }
-
   private filtrarDentistasPermitidos(dentistas: DentistaResponseModel[]) {
     if (!this.authService.isDentista()) return dentistas;
 
@@ -557,13 +505,7 @@ export class ConsultasPage implements OnInit {
     }
   }
 
-  private reagendarEventoCalendario(info: {
-    event: {
-      start: Date | null;
-      extendedProps: Record<string, unknown>;
-    };
-    revert: () => void;
-  }) {
+  private reagendarEventoCalendario(info: ConsultaEventDropArg) {
     const consulta = info.event.extendedProps['consulta'] as ConsultaModel | undefined;
     const novoInicio = info.event.start;
 
@@ -588,24 +530,6 @@ export class ConsultasPage implements OnInit {
   }
 
   private eventosCalendario(): EventInput[] {
-    return this.consultas()
-      .filter(consulta => consulta.status !== 'CANCELADA')
-      .filter(consulta => !this.dentistaFiltroId || consulta.dentistaId === this.dentistaFiltroId)
-      .map(consulta => ({
-        id: String(consulta.id),
-        title: `${consulta.pacienteNome} - ${consulta.dentistaNome}`,
-        start: consulta.dataInicio,
-        end: consulta.dataFim,
-        editable: consulta.status === 'AGENDADA',
-        classNames: [
-          'appointment-event',
-          consulta.status === 'CANCELADA' ? 'cancelled' : '',
-          consulta.status === 'FINALIZADA' ? 'done' : ''
-        ].filter(Boolean),
-        extendedProps: {
-          consulta,
-          status: consulta.status
-        }
-      }));
+    return consultasParaEventosCalendario(this.consultas(), this.dentistaFiltroId);
   }
 }
