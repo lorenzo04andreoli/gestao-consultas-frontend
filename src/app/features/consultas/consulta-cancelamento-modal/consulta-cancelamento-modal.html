@@ -1,0 +1,36 @@
+<div class="modal-backdrop" (click)="fechar.emit()">
+  <section class="modal small" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <h2>Cancelar consulta</h2>
+        <p>O motivo e obrigatorio para cancelar uma consulta.</p>
+        @if (resumo) {
+          <p class="modal-summary">{{ resumo }}</p>
+        }
+      </div>
+
+      <button type="button" class="close-button" (click)="fechar.emit()">
+        &times;
+      </button>
+    </header>
+
+    <form (ngSubmit)="confirmarCancelamento()">
+      <div class="form-group">
+        <label>Motivo</label>
+        <textarea name="motivoCancelamento" [(ngModel)]="motivo" required></textarea>
+      </div>
+
+      <footer class="modal-actions end">
+        <div class="right-actions">
+          <button type="button" class="secondary-button" (click)="fechar.emit()">
+            Voltar
+          </button>
+
+          <button type="submit" class="danger-button">
+            Cancelar consulta
+          </button>
+        </div>
+      </footer>
+    </form>
+  </section>
+</div>

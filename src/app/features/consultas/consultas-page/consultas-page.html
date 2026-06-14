@@ -168,41 +168,10 @@
   }
 
   @if (modalCancelamentoAberto()) {
-    <div class="modal-backdrop" (click)="fecharModalCancelamento()">
-      <section class="modal small" (click)="$event.stopPropagation()">
-        <header class="modal-header">
-          <div>
-            <h2>Cancelar consulta</h2>
-            <p>O motivo e obrigatorio para cancelar uma consulta.</p>
-            @if (resumoConsultaCancelamento()) {
-              <p class="modal-summary">{{ resumoConsultaCancelamento() }}</p>
-            }
-          </div>
-
-          <button type="button" class="close-button" (click)="fecharModalCancelamento()">
-            &times;
-          </button>
-        </header>
-
-        <form (ngSubmit)="cancelarConsulta()">
-          <div class="form-group">
-            <label>Motivo</label>
-            <textarea name="motivoCancelamento" [(ngModel)]="motivoCancelamento" required></textarea>
-          </div>
-
-          <footer class="modal-actions end">
-            <div class="right-actions">
-              <button type="button" class="secondary-button" (click)="fecharModalCancelamento()">
-                Voltar
-              </button>
-
-              <button type="submit" class="danger-button">
-                Cancelar consulta
-              </button>
-            </div>
-          </footer>
-        </form>
-      </section>
-    </div>
+    <app-consulta-cancelamento-modal
+      [resumo]="resumoConsultaCancelamento()"
+      (fechar)="fecharModalCancelamento()"
+      (confirmar)="cancelarConsulta($event)"
+    />
   }
 </section>
