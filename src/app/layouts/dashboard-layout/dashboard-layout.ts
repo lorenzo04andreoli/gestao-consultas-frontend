@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener } from '@angular/core';
+import { Component, ElementRef, HostListener, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
 import { NotificacaoResponseModel } from '../../core/notifications/notification.model';
@@ -15,6 +15,8 @@ import { ConfirmationDialog } from '../../shared/confirmation/confirmation-dialo
   styleUrl: './dashboard-layout.scss'
 })
 export class DashboardLayout {
+  sidebarRecolhida = signal(false);
+
   constructor(
     public authService: AuthService,
     private profilePhotoService: ProfilePhotoService,
@@ -51,6 +53,14 @@ export class DashboardLayout {
     return this.themeService.tema() === 'escuro'
       ? '/dentix-logo copy.svg'
       : '/dentix-logo.svg';
+  }
+
+  alternarSidebar() {
+    this.sidebarRecolhida.update(recolhida => !recolhida);
+  }
+
+  mostrarSidebar() {
+    this.sidebarRecolhida.set(false);
   }
 
   @HostListener('document:click', ['$event'])
