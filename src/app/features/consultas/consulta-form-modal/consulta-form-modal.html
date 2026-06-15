@@ -15,34 +15,87 @@
       <div class="form-grid">
         <div class="form-group">
           <label>Paciente</label>
-          <select name="pacienteId" [(ngModel)]="form.pacienteId" required>
-            <option [ngValue]="null">Selecione</option>
-            @for (paciente of pacientes; track paciente.id ?? paciente.cpf) {
-              @if (paciente.id) {
-                <option [ngValue]="paciente.id">{{ paciente.nome }}</option>
-              }
+          <div class="patient-search">
+            <input
+              type="text"
+              name="pacienteBusca"
+              autocomplete="off"
+              placeholder="Pesquisar por nome, e-mail, CPF ou telefone"
+              [ngModel]="buscaPaciente()"
+              (ngModelChange)="pesquisarPaciente($event)"
+              (focus)="abrirPacientes()"
+              (blur)="fecharPacientes()"
+              required
+            />
+
+            @if (pacientesAbertos()) {
+              <div class="patient-results">
+                @for (paciente of pacientesFiltrados(); track paciente.id ?? paciente.cpf) {
+                  <button
+                    type="button"
+                    class="patient-option"
+                    (mousedown)="selecionarPaciente(paciente)"
+                  >
+                    <span class="patient-avatar">{{ inicialPaciente(paciente) }}</span>
+                    <span>
+                      <strong>{{ paciente.nome }}</strong>
+                      <small>{{ paciente.email }} | {{ paciente.telefone || 'Sem telefone' }}</small>
+                    </span>
+                  </button>
+                } @empty {
+                  <p class="patient-empty">Nenhum paciente encontrado.</p>
+                }
+              </div>
             }
-          </select>
+          </div>
+          <input type="hidden" name="pacienteId" [(ngModel)]="form.pacienteId" required />
           @if (pacientes.length === 0) {
             <small>Nenhum paciente disponivel.</small>
+          } @else if (!form.pacienteId && buscaPaciente()) {
+            <small>Selecione um paciente da lista para continuar.</small>
           }
         </div>
 
         <div class="form-group">
           <label>Dentista</label>
-          <select
-            name="dentistaId"
-            [ngModel]="form.dentistaId"
-            (ngModelChange)="alterarDentista($event)"
-            required
-          >
-            <option [ngValue]="null">Selecione</option>
-            @for (dentista of dentistas; track dentista.id) {
-              <option [ngValue]="dentista.id">{{ dentista.nome }} - {{ dentista.cro }}</option>
+          <div class="entity-search">
+            <input
+              type="text"
+              name="dentistaBusca"
+              autocomplete="off"
+              placeholder="Pesquisar por nome, e-mail, CPF, CRO ou especialidade"
+              [ngModel]="buscaDentista()"
+              (ngModelChange)="pesquisarDentista($event)"
+              (focus)="abrirDentistas()"
+              (blur)="fecharDentistas()"
+              required
+            />
+
+            @if (dentistasAbertos()) {
+              <div class="entity-results">
+                @for (dentista of dentistasFiltrados(); track dentista.id) {
+                  <button
+                    type="button"
+                    class="entity-option"
+                    (mousedown)="selecionarDentista(dentista)"
+                  >
+                    <span class="entity-avatar">{{ inicialDentista(dentista) }}</span>
+                    <span>
+                      <strong>{{ dentista.nome }}</strong>
+                      <small>{{ dentista.cro }} | {{ especialidadesDentista(dentista) }}</small>
+                    </span>
+                  </button>
+                } @empty {
+                  <p class="entity-empty">Nenhum dentista encontrado.</p>
+                }
+              </div>
             }
-          </select>
+          </div>
+          <input type="hidden" name="dentistaId" [(ngModel)]="form.dentistaId" required />
           @if (dentistas.length === 0) {
             <small>Nenhum dentista ativo disponivel.</small>
+          } @else if (!form.dentistaId && buscaDentista()) {
+            <small>Selecione um dentista da lista para continuar.</small>
           }
         </div>
 

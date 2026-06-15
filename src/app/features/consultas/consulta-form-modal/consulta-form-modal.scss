@@ -79,6 +79,85 @@
   }
 }
 
+.patient-search,
+.entity-search {
+  position: relative;
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+.patient-results,
+.entity-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 5;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
+}
+
+.patient-option,
+.entity-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid #edf2f7;
+  background: transparent;
+  color: #111827;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: #eff6ff;
+  }
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  strong,
+  small {
+    display: block;
+  }
+
+  small {
+    margin-top: 2px;
+    color: #64748b;
+  }
+}
+
+.patient-avatar,
+.entity-avatar {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e0f2fe;
+  color: #075985;
+  font-weight: 800;
+}
+
+.patient-empty,
+.entity-empty {
+  margin: 0;
+  padding: 12px;
+  color: #64748b;
+}
+
 .modal-actions {
   display: flex;
   align-items: center;
@@ -136,5 +215,43 @@
 @media (max-width: 720px) {
   .form-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+:host-context(body.dark-theme) {
+  .modal {
+    background: #1f2b3a;
+  }
+
+  .patient-results,
+  .entity-results {
+    border-color: #334155;
+    background: #111827;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  .patient-option,
+  .entity-option {
+    border-bottom-color: #263445;
+    color: #f8fafc;
+
+    &:hover {
+      background: #172033;
+    }
+
+    small {
+      color: #b7c9df;
+    }
+  }
+
+  .patient-avatar,
+  .entity-avatar {
+    background: #0f4c68;
+    color: #e0f2fe;
+  }
+
+  .patient-empty,
+  .entity-empty {
+    color: #b7c9df;
   }
 }
