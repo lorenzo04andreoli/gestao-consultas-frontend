@@ -537,6 +537,7 @@ body.theme-dark .security-list article {
 }
 
 body.theme-dark .table-item,
+body.theme-dark .appointment-item,
 body.theme-dark .form-group input,
 body.theme-dark .form-group select,
 body.theme-dark input,
@@ -623,6 +624,28 @@ body.theme-dark .content .patient-info small {
   color: var(--color-muted) !important;
 }
 
+body.theme-dark .content .alert {
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+body.theme-dark .content .alert.info {
+  background: #172236 !important;
+  color: #bfdbfe !important;
+}
+
+body.theme-dark .content .alert.success {
+  background: #10281d !important;
+  border-color: #1f5136 !important;
+  color: #bbf7d0 !important;
+}
+
+body.theme-dark .content .alert.error {
+  background: #311719 !important;
+  border-color: #5f2429 !important;
+  color: #fecaca !important;
+}
+
 body.theme-dark .content table th {
   background: #111827 !important;
 }
@@ -678,35 +701,40 @@ body.theme-dark .content button:not(.primary-button):not(.danger-button) {
 body.theme-dark .content .status,
 body.theme-dark .content .profile,
 body.theme-dark .content .status-pill {
-  background: #dbeafe !important;
-  color: #075985 !important;
+  background: #13283a !important;
+  border: 1px solid #21445f !important;
+  color: #bae6fd !important;
 }
 
 body.theme-dark .content .status.cancelled,
 body.theme-dark .content .status-pill.cancelado,
 body.theme-dark .content .status-badge.cancelada {
-  background: #fecaca !important;
-  color: #7f1d1d !important;
+  background: #35191c !important;
+  border-color: #6b242a !important;
+  color: #fca5a5 !important;
 }
 
 body.theme-dark .content .status.done,
 body.theme-dark .content .status-pill.pago,
 body.theme-dark .content .status-badge.finalizada {
-  background: #bbf7d0 !important;
-  color: #14532d !important;
+  background: #122d20 !important;
+  border-color: #24613d !important;
+  color: #86efac !important;
 }
 
 body.theme-dark .content .status-pill.pendente,
 body.theme-dark .content .profile.admin,
 body.theme-dark .content .status-badge.agendada {
-  background: #fde68a !important;
-  color: #78350f !important;
+  background: #332711 !important;
+  border-color: #7a5415 !important;
+  color: #fcd34d !important;
 }
 
 body.theme-dark .content .status.inactive,
 body.theme-dark .security-list article > span {
-  background: #e5e7eb !important;
-  color: #374151 !important;
+  background: #1f2937 !important;
+  border-color: #4b5563 !important;
+  color: #cbd5e1 !important;
 }
 
 body.theme-dark .content .dashboard-table th,
@@ -720,6 +748,12 @@ body.theme-dark .content .dentist-link span {
 
 body.theme-dark .content .count-cell {
   color: var(--color-primary) !important;
+}
+
+body.theme-dark .content .date-pill {
+  background: #13283a !important;
+  border: 1px solid #21445f !important;
+  color: #7dd3fc !important;
 }
 
 body.theme-dark .content .person-avatar,
