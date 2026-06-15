@@ -61,6 +61,7 @@ export class ConsultasPage implements OnInit, AfterViewInit {
 
   erro = signal('');
   sucesso = signal('');
+  consultaWhatsapp = signal<ConsultaModel | null>(null);
   modalCadastroAberto = signal(false);
   modalCancelamentoAberto = signal(false);
   modoModal: 'cadastro' | 'edicao' = 'cadastro';
@@ -142,6 +143,7 @@ export class ConsultasPage implements OnInit, AfterViewInit {
   }
 
   abrirModalCadastro() {
+    this.consultaWhatsapp.set(null);
     this.modoModal = 'cadastro';
     this.confirmandoReagendamento = false;
     this.consultaSelecionadaId = null;
@@ -263,6 +265,7 @@ export class ConsultasPage implements OnInit, AfterViewInit {
   salvar() {
     this.erro.set('');
     this.sucesso.set('');
+    this.consultaWhatsapp.set(null);
 
     const erroFormulario = validarConsultaForm(this.consultaForm, this.modoModal === 'cadastro');
 
@@ -278,7 +281,7 @@ export class ConsultasPage implements OnInit, AfterViewInit {
       : this.consultaService.criar(payload);
 
     request$.subscribe({
-      next: () => {
+      next: (consultaSalva) => {
         this.sucesso.set(
           this.confirmandoReagendamento
             ? 'Consulta reagendada com sucesso.'
@@ -286,6 +289,9 @@ export class ConsultasPage implements OnInit, AfterViewInit {
             ? 'Consulta atualizada com sucesso.'
             : 'Consulta agendada com sucesso.'
         );
+        if (this.modoModal === 'cadastro') {
+          this.consultaWhatsapp.set(consultaSalva);
+        }
         this.reverterReagendamentoPendente = null;
         this.chaveReagendamentoPendente = null;
         this.fecharModalCadastro();
@@ -401,8 +407,51 @@ export class ConsultasPage implements OnInit, AfterViewInit {
     return formatarDataConsulta(data);
   }
 
+  formatarMoedaConsulta(valor?: number | null) {
+    return this.formatarMoeda(valor);
+  }
+
+  fecharModalWhatsapp() {
+    this.consultaWhatsapp.set(null);
+    this.sucesso.set('');
+  }
+
+  enviarWhatsappConsulta(consulta: ConsultaModel) {
+    const telefone = this.normalizarTelefoneWhatsapp(consulta.pacienteTelefone);
+
+    if (!telefone) {
+      this.erro.set('Paciente sem telefone cadastrado.');
+      return;
+    }
+
+    const mensagem = [
+      `Olá, ${consulta.pacienteNome}!`,
+      `Sua consulta na Dentix foi agendada para ${this.formatarData(consulta.dataInicio)} com ${consulta.dentistaNome}.`,
+      `Valor da consulta: ${this.formatarMoeda(consulta.valor)}.`,
+      'Para confirmar, responda esta mensagem. Obrigado!'
+    ].join(' ');
+
+    window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`, '_blank');
+    this.fecharModalWhatsapp();
+  }
+
   limparFormulario() {
     this.consultaForm = criarConsultaFormVazio();
+  }
+
+  private formatarMoeda(valor?: number | null) {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor ?? this.consultaForm.valor ?? 0);
+  }
+
+  private normalizarTelefoneWhatsapp(telefone?: string | null) {
+    const apenasDigitos = telefone?.replace(/\D/g, '') ?? '';
+
+    if (!apenasDigitos) return '';
+
+    return apenasDigitos.startsWith('55') ? apenasDigitos : `55${apenasDigitos}`;
   }
 
   private extrairMensagemErro(err: unknown, mensagemPadrao: string) {

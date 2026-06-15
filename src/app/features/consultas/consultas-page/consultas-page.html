@@ -14,7 +14,7 @@
     <p class="alert error">{{ erro() }}</p>
   }
 
-  @if (sucesso()) {
+  @if (sucesso() && !consultaWhatsapp()) {
     <p class="alert success">{{ sucesso() }}</p>
   }
 
@@ -64,5 +64,38 @@
       (fechar)="fecharModalCancelamento()"
       (confirmar)="cancelarConsulta($event)"
     />
+  }
+
+  @if (consultaWhatsapp(); as consulta) {
+    <div class="modal-backdrop notification-modal-backdrop" (click)="fecharModalWhatsapp()">
+      <section class="notification-modal" (click)="$event.stopPropagation()">
+        <div class="notification-check" aria-hidden="true">
+          <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h2>Concluído!</h2>
+        <p>
+          Consulta agendada com sucesso. Quer notificar
+          {{ consulta.pacienteNome }} pelo WhatsApp?
+        </p>
+
+        <div class="notification-summary">
+          <span>{{ formatarData(consulta.dataInicio) }}</span>
+          <strong>{{ consulta.dentistaNome }}</strong>
+          <span>{{ formatarMoedaConsulta(consulta.valor) }}</span>
+        </div>
+
+        <footer class="notification-actions">
+          <button type="button" class="whatsapp-button" (click)="enviarWhatsappConsulta(consulta)">
+            <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+            Enviar WhatsApp
+          </button>
+
+          <button type="button" class="secondary-button" (click)="fecharModalWhatsapp()">
+            Fechar
+          </button>
+        </footer>
+      </section>
+    </div>
   }
 </section>

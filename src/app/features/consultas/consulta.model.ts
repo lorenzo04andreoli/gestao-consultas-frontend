@@ -4,6 +4,7 @@ export interface ConsultaModel {
   id?: number;
   pacienteId: number;
   pacienteNome: string;
+  pacienteTelefone?: string | null;
   dentistaId: number;
   dentistaNome: string;
   especialidadeId?: number | null;
@@ -12,6 +13,7 @@ export interface ConsultaModel {
   descricao: string;
   dataInicio: string;
   dataFim: string;
+  valor?: number | null;
   status: StatusConsulta;
   motivoCancelamento?: string;
   paciente?: {
