@@ -6,6 +6,7 @@ export interface ConsultaFormModel {
   dataConsulta: string;
   horarioInicio: string;
   duracaoMinutos: number;
+  valor: number | null;
 }
 
 export function criarConsultaFormVazio(): ConsultaFormModel {
@@ -16,6 +17,7 @@ export function criarConsultaFormVazio(): ConsultaFormModel {
     descricao: '',
     dataConsulta: '',
     horarioInicio: '',
-    duracaoMinutos: 60
+    duracaoMinutos: 60,
+    valor: null
   };
 }

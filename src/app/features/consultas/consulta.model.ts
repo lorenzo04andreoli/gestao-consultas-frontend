@@ -34,6 +34,7 @@ export interface ConsultaRequestModel {
   descricao: string;
   dataInicio: string;
   dataFim: string;
+  valor?: number | null;
 }
 
 export interface ConsultaFiltros {

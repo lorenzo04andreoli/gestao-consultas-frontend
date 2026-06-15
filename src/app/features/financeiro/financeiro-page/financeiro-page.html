@@ -1,0 +1,169 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Financeiro</h1>
+      <p>Acompanhe cobranças geradas a partir das consultas da clínica.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="secondary-button" (click)="carregarDados()">
+        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+        Atualizar
+      </button>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
+  }
+
+  @if (carregando()) {
+    <section class="summary-grid">
+      <article class="summary-card loading-card">
+        <span>Carregando resumo financeiro...</span>
+      </article>
+    </section>
+  } @else if (resumo(); as resumo) {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>Recebido no mês</span>
+        <strong>{{ formatarMoeda(resumo.recebidoMes) }}</strong>
+        <small>Pagamentos registrados no mês atual</small>
+      </article>
+
+      <article class="summary-card">
+        <span>A receber</span>
+        <strong>{{ formatarMoeda(resumo.aReceber) }}</strong>
+        <small>Cobranças pendentes</small>
+      </article>
+
+      <article class="summary-card">
+        <span>Pendentes</span>
+        <strong>{{ resumo.pendentes }}</strong>
+        <small>Aguardando pagamento</small>
+      </article>
+
+      <article class="summary-card">
+        <span>Pagas</span>
+        <strong>{{ resumo.pagas }}</strong>
+        <small>Cobranças liquidadas</small>
+      </article>
+
+      <article class="summary-card">
+        <span>Canceladas</span>
+        <strong>{{ resumo.canceladas }}</strong>
+        <small>Lançamentos descartados</small>
+      </article>
+    </section>
+  }
+
+  <section class="list-panel">
+    <header>
+      <div>
+        <h2>Lançamentos</h2>
+        <p>Cobranças criadas automaticamente ao agendar consultas.</p>
+      </div>
+    </header>
+
+    <div class="filters-grid">
+      <div class="form-group">
+        <label for="termoBusca">Buscar</label>
+        <input
+          id="termoBusca"
+          type="search"
+          name="termoBusca"
+          [(ngModel)]="termoBusca"
+          placeholder="Paciente, dentista ou descrição"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="statusFiltro">Status</label>
+        <select id="statusFiltro" name="statusFiltro" [(ngModel)]="statusFiltro">
+          <option value="">Todos</option>
+          <option value="PENDENTE">Pendente</option>
+          <option value="PAGO">Pago</option>
+          <option value="CANCELADO">Cancelado</option>
+        </select>
+      </div>
+
+      <button type="button" class="secondary-button" (click)="limparFiltros()">
+        Limpar
+      </button>
+    </div>
+
+    @if (carregando()) {
+      <p class="empty-state">Carregando lançamentos...</p>
+    } @else if (lancamentosFiltrados().length > 0) {
+      <div class="finance-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Dentista</th>
+              <th>Descrição</th>
+              <th>Vencimento</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (lancamento of lancamentosFiltrados(); track lancamento.id) {
+              <tr>
+                <td>
+                  <strong>{{ lancamento.pacienteNome }}</strong>
+                </td>
+                <td>{{ lancamento.dentistaNome }}</td>
+                <td>{{ lancamento.descricao }}</td>
+                <td>{{ formatarData(lancamento.dataVencimento) }}</td>
+                <td class="money-cell">{{ formatarMoeda(lancamento.valor) }}</td>
+                <td>
+                  <span class="status-pill {{ statusClass(lancamento.status) }}">
+                    {{ statusLabel(lancamento.status) }}
+                  </span>
+                </td>
+                <td>
+                  @if (lancamento.status === 'PENDENTE') {
+                    <div class="header-actions">
+                      <button
+                        type="button"
+                        class="secondary-button"
+                        title="Marcar como pago"
+                        [disabled]="acaoEmAndamento() === lancamento.id"
+                        (click)="marcarComoPago(lancamento)"
+                      >
+                        <i class="fa-solid fa-check" aria-hidden="true"></i>
+                      </button>
+
+                      <button
+                        type="button"
+                        class="secondary-button"
+                        title="Cancelar cobrança"
+                        [disabled]="acaoEmAndamento() === lancamento.id"
+                        (click)="cancelarLancamento(lancamento)"
+                      >
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  } @else {
+                    <span>-</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="empty-state">
+        {{ lancamentos().length ? 'Nenhum lançamento encontrado para os filtros.' : 'Nenhum lançamento financeiro cadastrado.' }}
+      </p>
+    }
+  </section>
+</section>

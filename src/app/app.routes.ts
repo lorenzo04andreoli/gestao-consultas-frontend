@@ -173,6 +173,14 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'financeiro',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/financeiro/financeiro-page/financeiro-page').then(
+            m => m.FinanceiroPage
+          )
+      },
+      {
         path: 'usuarios',
         canActivate: [adminGuard],
         loadComponent: () =>

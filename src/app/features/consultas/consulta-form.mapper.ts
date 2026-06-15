@@ -29,7 +29,8 @@ export function consultaParaForm(consulta: ConsultaModel): ConsultaFormModel {
     descricao: consulta.descricao,
     dataConsulta: formatarDataParaInput(consulta.dataInicio).slice(0, 10),
     horarioInicio: formatarDataParaInput(consulta.dataInicio).slice(11, 16),
-    duracaoMinutos: Math.max((fim.getTime() - inicio.getTime()) / 60000, 15)
+    duracaoMinutos: Math.max((fim.getTime() - inicio.getTime()) / 60000, 15),
+    valor: null
   };
 }
 
@@ -43,11 +44,12 @@ export function consultaParaFormReagendamento(consulta: ConsultaModel, inicio: D
     descricao: consulta.descricao,
     dataConsulta: valorLocal.slice(0, 10),
     horarioInicio: valorLocal.slice(11, 16),
-    duracaoMinutos: Math.max(duracaoConsultaMinutos(consulta), 15)
+    duracaoMinutos: Math.max(duracaoConsultaMinutos(consulta), 15),
+    valor: null
   };
 }
 
-export function validarConsultaForm(form: ConsultaFormModel) {
+export function validarConsultaForm(form: ConsultaFormModel, exigirValor = false) {
   if (!form.pacienteId || !form.dentistaId || !form.especialidadeId) {
     return 'Selecione paciente, dentista e especialidade.';
   }
@@ -64,6 +66,10 @@ export function validarConsultaForm(form: ConsultaFormModel) {
     return 'Informe a descricao da consulta.';
   }
 
+  if (exigirValor && (!form.valor || form.valor <= 0)) {
+    return 'Informe o valor da consulta.';
+  }
+
   return '';
 }
 
@@ -76,6 +82,7 @@ export function consultaFormParaRequest(form: ConsultaFormModel): ConsultaReques
     especialidadeId: form.especialidadeId as number,
     descricao: form.descricao.trim(),
     dataInicio,
-    dataFim
+    dataFim,
+    valor: form.valor
   };
 }

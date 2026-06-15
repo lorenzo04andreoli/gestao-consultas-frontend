@@ -264,7 +264,7 @@ export class ConsultasPage implements OnInit, AfterViewInit {
     this.erro.set('');
     this.sucesso.set('');
 
-    const erroFormulario = validarConsultaForm(this.consultaForm);
+    const erroFormulario = validarConsultaForm(this.consultaForm, this.modoModal === 'cadastro');
 
     if (erroFormulario) {
       this.erro.set(erroFormulario);
