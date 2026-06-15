@@ -1,4 +1,4 @@
-import { CalendarOptions, EventClickArg } from '@fullcalendar/core';
+import { CalendarOptions, EventChangeArg, EventClickArg } from '@fullcalendar/core';
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
@@ -6,6 +6,16 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 
 export interface ConsultaEventDropArg {
   event: {
+    id: string;
+    start: Date | null;
+    extendedProps: Record<string, unknown>;
+  };
+  revert: () => void;
+}
+
+export interface ConsultaEventChangeArg {
+  event: {
+    id: string;
     start: Date | null;
     extendedProps: Record<string, unknown>;
   };
@@ -16,6 +26,7 @@ export interface ConsultaCalendarHandlers {
   onDateClick: (info: DateClickArg) => void;
   onEventClick: (info: EventClickArg) => void;
   onEventDrop: (info: ConsultaEventDropArg) => void;
+  onEventChange: (info: ConsultaEventChangeArg) => void;
 }
 
 export function criarConsultaCalendarOptions(handlers: ConsultaCalendarHandlers): CalendarOptions {
@@ -57,6 +68,7 @@ export function criarConsultaCalendarOptions(handlers: ConsultaCalendarHandlers)
     dateClick: handlers.onDateClick,
     eventClick: handlers.onEventClick,
     eventDrop: handlers.onEventDrop,
+    eventChange: (info: EventChangeArg) => handlers.onEventChange(info),
     eventAllow: (_dropInfo, draggedEvent) => draggedEvent?.extendedProps['status'] === 'AGENDADA'
   };
 }

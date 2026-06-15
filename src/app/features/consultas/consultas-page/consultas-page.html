@@ -42,129 +42,20 @@
   </section>
 
   @if (modalCadastroAberto()) {
-    <div class="modal-backdrop" (click)="fecharModalCadastro()">
-      <section class="modal" (click)="$event.stopPropagation()">
-        <header class="modal-header">
-          <div>
-            <h2>
-              {{
-                confirmandoReagendamento
-                  ? 'Confirmar novo horario'
-                  : modoModal === 'edicao'
-                    ? 'Editar consulta'
-                    : 'Agendar consulta'
-              }}
-            </h2>
-            <p>
-              {{
-                confirmandoReagendamento
-                  ? 'Confira os dados antes de salvar a alteracao.'
-                  : 'Selecione paciente, dentista e horario da consulta.'
-              }}
-            </p>
-          </div>
-
-          <button type="button" class="close-button" (click)="fecharModalCadastro()">
-            &times;
-          </button>
-        </header>
-
-        <form (ngSubmit)="salvar()">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Paciente</label>
-              <select name="pacienteId" [(ngModel)]="consultaForm.pacienteId" required>
-                <option [ngValue]="null">Selecione</option>
-                @for (paciente of pacientes(); track paciente.id ?? paciente.cpf) {
-                  @if (paciente.id) {
-                    <option [ngValue]="paciente.id">{{ paciente.nome }}</option>
-                  }
-                }
-              </select>
-              @if (pacientes().length === 0) {
-                <small>Nenhum paciente disponivel.</small>
-              }
-            </div>
-
-            <div class="form-group">
-              <label>Dentista</label>
-              <select name="dentistaId" [(ngModel)]="consultaForm.dentistaId" (ngModelChange)="aoSelecionarDentista()" required>
-                <option [ngValue]="null">Selecione</option>
-                @for (dentista of dentistas(); track dentista.id) {
-                  <option [ngValue]="dentista.id">{{ dentista.nome }} - {{ dentista.cro }}</option>
-                }
-              </select>
-              @if (dentistas().length === 0) {
-                <small>Nenhum dentista ativo disponivel.</small>
-              }
-            </div>
-
-            <div class="form-group">
-              <label>Especialidade</label>
-              <select name="especialidadeId" [(ngModel)]="consultaForm.especialidadeId" required>
-                <option [ngValue]="null">Selecione</option>
-                @for (especialidade of especialidadesDoDentistaSelecionado(); track especialidade.id) {
-                  <option [ngValue]="especialidade.id">{{ especialidade.nome }}</option>
-                }
-              </select>
-              @if (consultaForm.dentistaId && especialidadesDoDentistaSelecionado().length === 0) {
-                <small>Nenhuma especialidade vinculada a este dentista.</small>
-              }
-            </div>
-
-            <div class="form-group">
-              <label>Data da consulta</label>
-              <input type="date" name="dataConsulta" [(ngModel)]="consultaForm.dataConsulta" required />
-            </div>
-
-            <div class="form-group">
-              <label>Horario de inicio</label>
-              <input type="time" name="horarioInicio" [(ngModel)]="consultaForm.horarioInicio" required />
-            </div>
-
-            <div class="form-group">
-              <label>Duracao da consulta (min)</label>
-              <input
-                type="number"
-                name="duracaoMinutos"
-                min="15"
-                step="15"
-                [(ngModel)]="consultaForm.duracaoMinutos"
-                required
-              />
-            </div>
-
-            <div class="form-group full-width">
-              <label>Descricao</label>
-              <textarea name="descricao" [(ngModel)]="consultaForm.descricao" required></textarea>
-            </div>
-          </div>
-
-          <footer class="modal-actions" [class.end]="!podeExibirAcoesModal()">
-            @if (podeExibirAcoesModal()) {
-              <div class="left-actions">
-                <button type="button" class="secondary-button" (click)="finalizarConsultaSelecionada()">
-                  Finalizar
-                </button>
-                <button type="button" class="danger-button" (click)="cancelarConsultaSelecionada()">
-                  Cancelar consulta
-                </button>
-              </div>
-            }
-
-            <div class="right-actions">
-              <button type="button" class="secondary-button" (click)="fecharModalCadastro()">
-                Cancelar
-              </button>
-
-              <button type="submit" class="primary-button">
-                {{ modoModal === 'edicao' ? 'Salvar' : 'Agendar' }}
-              </button>
-            </div>
-          </footer>
-        </form>
-      </section>
-    </div>
+    <app-consulta-form-modal
+      [form]="consultaForm"
+      [modo]="modoModal"
+      [confirmandoReagendamento]="confirmandoReagendamento"
+      [podeExibirAcoes]="podeExibirAcoesModal()"
+      [pacientes]="pacientes()"
+      [dentistas]="dentistas()"
+      [especialidades]="especialidadesDoDentistaSelecionado()"
+      (fechar)="fecharModalCadastro()"
+      (salvar)="salvar()"
+      (dentistaAlterado)="aoSelecionarDentista()"
+      (finalizar)="finalizarConsultaSelecionada()"
+      (cancelarConsulta)="cancelarConsultaSelecionada()"
+    />
   }
 
   @if (modalCancelamentoAberto()) {

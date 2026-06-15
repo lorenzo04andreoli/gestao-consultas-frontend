@@ -1,0 +1,114 @@
+<div class="modal-backdrop" (click)="fechar.emit()">
+  <section class="modal" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <h2>{{ titulo() }}</h2>
+        <p>{{ subtitulo() }}</p>
+      </div>
+
+      <button type="button" class="close-button" (click)="fechar.emit()">
+        &times;
+      </button>
+    </header>
+
+    <form (ngSubmit)="salvar.emit()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Paciente</label>
+          <select name="pacienteId" [(ngModel)]="form.pacienteId" required>
+            <option [ngValue]="null">Selecione</option>
+            @for (paciente of pacientes; track paciente.id ?? paciente.cpf) {
+              @if (paciente.id) {
+                <option [ngValue]="paciente.id">{{ paciente.nome }}</option>
+              }
+            }
+          </select>
+          @if (pacientes.length === 0) {
+            <small>Nenhum paciente disponivel.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Dentista</label>
+          <select
+            name="dentistaId"
+            [ngModel]="form.dentistaId"
+            (ngModelChange)="alterarDentista($event)"
+            required
+          >
+            <option [ngValue]="null">Selecione</option>
+            @for (dentista of dentistas; track dentista.id) {
+              <option [ngValue]="dentista.id">{{ dentista.nome }} - {{ dentista.cro }}</option>
+            }
+          </select>
+          @if (dentistas.length === 0) {
+            <small>Nenhum dentista ativo disponivel.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Especialidade</label>
+          <select name="especialidadeId" [(ngModel)]="form.especialidadeId" required>
+            <option [ngValue]="null">Selecione</option>
+            @for (especialidade of especialidades; track especialidade.id) {
+              <option [ngValue]="especialidade.id">{{ especialidade.nome }}</option>
+            }
+          </select>
+          @if (form.dentistaId && especialidades.length === 0) {
+            <small>Nenhuma especialidade vinculada a este dentista.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Data da consulta</label>
+          <input type="date" name="dataConsulta" [(ngModel)]="form.dataConsulta" required />
+        </div>
+
+        <div class="form-group">
+          <label>Horario de inicio</label>
+          <input type="time" name="horarioInicio" [(ngModel)]="form.horarioInicio" required />
+        </div>
+
+        <div class="form-group">
+          <label>Duracao da consulta (min)</label>
+          <input
+            type="number"
+            name="duracaoMinutos"
+            min="15"
+            step="15"
+            [(ngModel)]="form.duracaoMinutos"
+            required
+          />
+        </div>
+
+        <div class="form-group full-width">
+          <label>Descricao</label>
+          <textarea name="descricao" [(ngModel)]="form.descricao" required></textarea>
+        </div>
+      </div>
+
+      <footer class="modal-actions" [class.end]="!podeExibirAcoes">
+        @if (podeExibirAcoes) {
+          <div class="left-actions">
+            <button type="button" class="secondary-button" (click)="finalizar.emit()">
+              Finalizar
+            </button>
+            <button type="button" class="danger-button" (click)="cancelarConsulta.emit()">
+              Cancelar consulta
+            </button>
+          </div>
+        }
+
+        <div class="right-actions">
+          <button type="button" class="secondary-button" (click)="fechar.emit()">
+            Cancelar
+          </button>
+
+          <button type="submit" class="primary-button">
+            {{ textoBotaoPrincipal() }}
+          </button>
+        </div>
+      </footer>
+    </form>
+  </section>
+</div>

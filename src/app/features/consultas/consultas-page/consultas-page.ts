@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions, EventClickArg, EventInput } from '@fullcalendar/core';
+import { CalendarOptions, EventApi, EventClickArg, EventInput } from '@fullcalendar/core';
 import { DateClickArg } from '@fullcalendar/interaction';
 import { AuthService } from '../../../core/auth/auth';
 import { DentistaService } from '../../dentistas/dentista';
@@ -12,9 +12,11 @@ import { EspecialidadeModel } from '../../especialidades/especialidade.model';
 import { PacienteService } from '../../pacientes/paciente';
 import { PacienteModel } from '../../pacientes/paciente.model';
 import { ConsultaCancelamentoModal } from '../consulta-cancelamento-modal/consulta-cancelamento-modal';
+import { ConsultaFormModal } from '../consulta-form-modal/consulta-form-modal';
 import { ConsultaService } from '../consulta';
 import { ConsultaModel } from '../consulta.model';
 import {
+  ConsultaEventChangeArg,
   ConsultaEventDropArg,
   criarConsultaCalendarOptions
 } from '../consulta-calendar.config';
@@ -37,11 +39,11 @@ import {
 @Component({
   selector: 'app-consultas-page',
   standalone: true,
-  imports: [FormsModule, FullCalendarModule, ConsultaCancelamentoModal],
+  imports: [FormsModule, FullCalendarModule, ConsultaCancelamentoModal, ConsultaFormModal],
   templateUrl: './consultas-page.html',
   styleUrl: './consultas-page.scss'
 })
-export class ConsultasPage implements OnInit {
+export class ConsultasPage implements OnInit, AfterViewInit {
   @ViewChild('calendar') private calendarComponent?: FullCalendarComponent;
 
   private consultaService = inject(ConsultaService);
@@ -49,6 +51,8 @@ export class ConsultasPage implements OnInit {
   private dentistaService = inject(DentistaService);
   private especialidadeService = inject(EspecialidadeService);
   private authService = inject(AuthService);
+  private ngZone = inject(NgZone);
+  private changeDetector = inject(ChangeDetectorRef);
 
   consultas = signal<ConsultaModel[]>([]);
   pacientes = signal<PacienteModel[]>([]);
@@ -63,11 +67,14 @@ export class ConsultasPage implements OnInit {
   confirmandoReagendamento = false;
   consultaSelecionadaId: number | null = null;
   dentistaFiltroId: number | null = null;
+  private reverterReagendamentoPendente: (() => void) | null = null;
+  private chaveReagendamentoPendente: string | null = null;
   calendarEvents: EventInput[] = [];
   calendarOptions: CalendarOptions = criarConsultaCalendarOptions({
-    onDateClick: (info) => this.abrirModalHorarioCalendario(info),
-    onEventClick: (info) => this.selecionarEventoCalendario(info),
-    onEventDrop: (info) => this.reagendarEventoCalendario(info)
+    onDateClick: (info) => this.executarNaZonaAngular(() => this.abrirModalHorarioCalendario(info)),
+    onEventClick: (info) => this.executarNaZonaAngular(() => this.selecionarEventoCalendario(info)),
+    onEventDrop: (info) => this.executarNaZonaAngular(() => this.reagendarEventoCalendario(info)),
+    onEventChange: (info) => this.executarNaZonaAngular(() => this.reagendarEventoAlteradoCalendario(info))
   });
 
   consultaForm: ConsultaFormModel = criarConsultaFormVazio();
@@ -80,6 +87,10 @@ export class ConsultasPage implements OnInit {
     this.carregarPacientes();
     this.carregarDentistas();
     this.carregarEspecialidades();
+  }
+
+  ngAfterViewInit() {
+    this.agendarRecalculoCalendario();
   }
 
   carregarConsultas() {
@@ -207,6 +218,9 @@ export class ConsultasPage implements OnInit {
   }
 
   fecharModalCadastro() {
+    this.reverterReagendamentoPendente?.();
+    this.reverterReagendamentoPendente = null;
+    this.chaveReagendamentoPendente = null;
     this.modalCadastroAberto.set(false);
     this.modoModal = 'cadastro';
     this.confirmandoReagendamento = false;
@@ -272,10 +286,15 @@ export class ConsultasPage implements OnInit {
             ? 'Consulta atualizada com sucesso.'
             : 'Consulta agendada com sucesso.'
         );
+        this.reverterReagendamentoPendente = null;
+        this.chaveReagendamentoPendente = null;
         this.fecharModalCadastro();
         this.carregarConsultas();
       },
       error: (err) => {
+        this.reverterReagendamentoPendente?.();
+        this.reverterReagendamentoPendente = null;
+        this.chaveReagendamentoPendente = null;
         this.erro.set(
           this.extrairMensagemErro(
             err,
@@ -402,7 +421,7 @@ export class ConsultasPage implements OnInit {
   }
 
   private selecionarEventoCalendario(info: EventClickArg) {
-    const consulta = info.event.extendedProps['consulta'] as ConsultaModel | undefined;
+    const consulta = this.consultaDoEvento(info.event);
 
     if (consulta) {
       this.selecionarConsulta(consulta);
@@ -410,30 +429,73 @@ export class ConsultasPage implements OnInit {
   }
 
   private reagendarEventoCalendario(info: ConsultaEventDropArg) {
-    const consulta = info.event.extendedProps['consulta'] as ConsultaModel | undefined;
-    const novoInicio = info.event.start;
+    this.processarReagendamentoCalendario(info);
+  }
 
-    info.revert();
-
-    if (consulta && novoInicio) {
-      this.abrirModalReagendamentoCalendario(consulta, novoInicio);
-    }
+  private reagendarEventoAlteradoCalendario(info: ConsultaEventChangeArg) {
+    this.processarReagendamentoCalendario(info);
   }
 
   private atualizarEventosCalendario() {
     const eventos = this.eventosCalendario();
-    this.calendarEvents = eventos;
-
-    const calendarApi = this.calendarComponent?.getApi();
-
-    if (calendarApi) {
-      calendarApi.removeAllEvents();
-      calendarApi.addEventSource(eventos);
-      calendarApi.render();
-    }
+    this.calendarEvents = [...eventos];
+    this.changeDetector.detectChanges();
+    this.agendarRecalculoCalendario();
   }
 
   private eventosCalendario(): EventInput[] {
     return consultasParaEventosCalendario(this.consultas(), this.dentistaFiltroId);
+  }
+
+  private executarNaZonaAngular(acao: () => void) {
+    this.ngZone.run(() => {
+      acao();
+      this.changeDetector.detectChanges();
+    });
+  }
+
+  private consultaDoEvento(evento: Pick<EventApi, 'id' | 'extendedProps'>) {
+    const consulta = evento.extendedProps['consulta'] as ConsultaModel | undefined;
+
+    if (consulta) return consulta;
+
+    const consultaId = Number(evento.id);
+    return this.consultas().find(item => item.id === consultaId);
+  }
+
+  private processarReagendamentoCalendario(info: ConsultaEventDropArg | ConsultaEventChangeArg) {
+    const consulta = this.consultaDoEvento(info.event);
+    const novoInicio = info.event.start;
+
+    if (!consulta || !novoInicio) {
+      info.revert();
+      return;
+    }
+
+    const chave = `${info.event.id}-${novoInicio.toISOString()}`;
+
+    if (this.chaveReagendamentoPendente === chave) return;
+
+    this.chaveReagendamentoPendente = chave;
+    this.reverterReagendamentoPendente = info.revert;
+
+    window.setTimeout(() => {
+      this.executarNaZonaAngular(() => this.abrirModalReagendamentoCalendario(consulta, novoInicio));
+    });
+  }
+
+  private agendarRecalculoCalendario() {
+    [0, 80, 180].forEach(atraso => {
+      window.setTimeout(() => {
+        window.requestAnimationFrame(() => {
+          const calendarApi = this.calendarComponent?.getApi();
+
+          if (!calendarApi) return;
+
+          calendarApi.updateSize();
+          calendarApi.render();
+        });
+      }, atraso);
+    });
   }
 }
