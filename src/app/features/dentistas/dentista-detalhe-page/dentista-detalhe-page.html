@@ -6,12 +6,16 @@
 
     <div>
       <h1>Ficha do dentista</h1>
-      <p>Consulte os principais dados profissionais.</p>
+      <p>Consulte os principais dados profissionais e de acesso.</p>
     </div>
   </header>
 
   @if (erro()) {
     <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (feedback()) {
+    <p class="alert success">{{ feedback() }}</p>
   }
 
   @if (carregando()) {
@@ -23,13 +27,21 @@
   @if (dentista(); as dentista) {
     <section class="profile-card">
       <header class="profile-header">
-        <span class="avatar">
-          @if (dentista.fotoPerfil) {
-            <img [src]="dentista.fotoPerfil" alt="" />
-          } @else {
-            {{ dentista.nome.charAt(0) }}
+        <div class="avatar-wrap">
+          <span class="avatar">
+            @if (dentista.fotoPerfil) {
+              <img [src]="dentista.fotoPerfil" alt="" />
+            } @else {
+              {{ dentista.nome.charAt(0) }}
+            }
+          </span>
+
+          @if (podeGerenciarPerfil(dentista)) {
+            <button type="button" class="photo-edit-button" aria-label="Editar foto de perfil" (click)="abrirModalFoto()">
+              <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+            </button>
           }
-        </span>
+        </div>
 
         <div>
           <h2>{{ dentista.nome }}</h2>
@@ -43,7 +55,7 @@
           </p>
         </div>
 
-        @if (dentista.ativo !== false) {
+        @if (authService.isAdmin() && dentista.ativo !== false) {
           <a
             class="primary-button"
             [routerLink]="['/dentistas', dentista.id, 'editar']"
@@ -86,6 +98,49 @@
         </div>
       </div>
     </section>
+
+    @if (modalFotoAberto()) {
+      <div class="profile-modal-backdrop" (click)="fecharModalFoto()">
+        <section class="profile-modal photo-modal" aria-label="Foto de perfil" (click)="$event.stopPropagation()">
+          <header>
+            <h3>Foto de perfil</h3>
+            <button type="button" class="close-button" aria-label="Fechar" (click)="fecharModalFoto()">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </header>
+
+          <div class="photo-preview">
+            @if (fotoModal()) {
+              <img [src]="fotoModal()" alt="" />
+            } @else {
+              <span>{{ dentista.nome.charAt(0) }}</span>
+            }
+          </div>
+
+          <div class="photo-modal-actions">
+            <label class="secondary-button" for="fotoDentista">
+              <i class="fa-regular fa-image" aria-hidden="true"></i>
+              <span>Alterar foto</span>
+            </label>
+            <input id="fotoDentista" type="file" accept="image/*" hidden (change)="alterarFoto($event)" />
+
+            @if (dentista.fotoPerfil) {
+              <button type="button" class="ghost-button danger" (click)="confirmarRemocaoFoto()">
+                <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                <span>Excluir</span>
+              </button>
+            }
+
+            @if (fotoPendente()) {
+              <button type="button" class="primary-button" [disabled]="salvandoFoto()" (click)="salvarFoto()">
+                <i class="fa-regular fa-floppy-disk" aria-hidden="true"></i>
+                <span>{{ salvandoFoto() ? 'Salvando...' : 'Salvar' }}</span>
+              </button>
+            }
+          </div>
+        </section>
+      </div>
+    }
 
     <section class="summary-grid">
       <article class="summary-card">

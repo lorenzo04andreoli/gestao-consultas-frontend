@@ -31,6 +31,14 @@ export class UsuarioService {
     return this.http.get<UsuarioResponseModel>(`${this.apiUrl}/me`);
   }
 
+  atualizarFoto(id: number, fotoPerfil: string) {
+    return this.http.put<UsuarioResponseModel>(`${this.apiUrl}/${id}/foto`, { fotoPerfil });
+  }
+
+  removerFoto(id: number) {
+    return this.http.delete<UsuarioResponseModel>(`${this.apiUrl}/${id}/foto`);
+  }
+
   deletar(id: number) {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }

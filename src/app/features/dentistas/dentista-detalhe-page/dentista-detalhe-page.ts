@@ -1,7 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth';
+import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { ConsultaService } from '../../consultas/consulta';
 import { ConsultaModel, StatusConsulta } from '../../consultas/consulta.model';
+import { UsuarioService } from '../../usuarios/usuario';
 import { DentistaResponseModel } from '../dentista.model';
 import { DentistaService } from '../dentista';
 
@@ -18,12 +22,19 @@ export class DentistaDetalhePage implements OnInit {
   carregando = signal(true);
   carregandoConsultas = signal(true);
   erro = signal('');
+  feedback = signal('');
+  modalFotoAberto = signal(false);
+  fotoPendente = signal('');
+  salvandoFoto = signal(false);
   voltarPara = '/dentistas/pesquisar';
 
   constructor(
+    public authService: AuthService,
     private route: ActivatedRoute,
     private dentistaService: DentistaService,
-    private consultaService: ConsultaService
+    private consultaService: ConsultaService,
+    private usuarioService: UsuarioService,
+    private confirmation: ConfirmationService
   ) {}
 
   ngOnInit() {
@@ -109,6 +120,104 @@ export class DentistaDetalhePage implements OnInit {
     return labels[status];
   }
 
+  podeGerenciarPerfil(dentista: DentistaResponseModel) {
+    return this.authService.isAdmin() && Boolean(dentista.usuarioId);
+  }
+
+  fotoModal() {
+    return this.fotoPendente() || this.dentista()?.fotoPerfil || '';
+  }
+
+  abrirModalFoto() {
+    this.feedback.set('');
+    this.fotoPendente.set('');
+    this.modalFotoAberto.set(true);
+  }
+
+  fecharModalFoto() {
+    this.fotoPendente.set('');
+    this.modalFotoAberto.set(false);
+  }
+
+  alterarFoto(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const arquivo = input.files?.[0];
+
+    if (!arquivo) return;
+
+    if (!arquivo.type.startsWith('image/')) {
+      this.feedback.set('Selecione um arquivo de imagem.');
+      input.value = '';
+      return;
+    }
+
+    if (arquivo.size > 2_000_000) {
+      this.feedback.set('A foto deve ter no máximo 2 MB.');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      this.fotoPendente.set(String(reader.result || ''));
+      this.feedback.set('');
+    };
+
+    reader.readAsDataURL(arquivo);
+    input.value = '';
+  }
+
+  salvarFoto() {
+    const dentista = this.dentista();
+    const foto = this.fotoPendente();
+
+    if (!dentista?.usuarioId || !foto) return;
+
+    this.salvandoFoto.set(true);
+    this.feedback.set('');
+
+    this.usuarioService.atualizarFoto(dentista.usuarioId, foto).subscribe({
+      next: usuario => {
+        this.atualizarFotoDentista(usuario.fotoPerfil ?? null);
+        this.fecharModalFoto();
+        this.feedback.set('Foto de perfil atualizada.');
+        this.salvandoFoto.set(false);
+      },
+      error: err => {
+        this.feedback.set(this.extrairMensagemErro(err, 'Erro ao atualizar foto de perfil.'));
+        this.salvandoFoto.set(false);
+      }
+    });
+  }
+
+  async confirmarRemocaoFoto() {
+    const dentista = this.dentista();
+
+    if (!dentista?.usuarioId) return;
+
+    const confirmar = await this.confirmation.confirmar({
+      title: 'Remover foto',
+      message: 'A foto do perfil deste dentista será removida.',
+      confirmLabel: 'Remover',
+      cancelLabel: 'Cancelar',
+      tone: 'danger'
+    });
+
+    if (!confirmar) return;
+
+    this.usuarioService.removerFoto(dentista.usuarioId).subscribe({
+      next: usuario => {
+        this.atualizarFotoDentista(usuario.fotoPerfil ?? null);
+        this.fecharModalFoto();
+        this.feedback.set('Foto de perfil removida.');
+      },
+      error: err => {
+        this.feedback.set(this.extrairMensagemErro(err, 'Erro ao remover foto de perfil.'));
+      }
+    });
+  }
+
   private definirRetorno() {
     const origem = this.route.snapshot.queryParamMap.get('origem');
 
@@ -135,5 +244,21 @@ export class DentistaDetalhePage implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     }).format(data);
+  }
+
+  private atualizarFotoDentista(fotoPerfil: string | null) {
+    const dentista = this.dentista();
+
+    if (!dentista) return;
+
+    this.dentista.set({ ...dentista, fotoPerfil });
+  }
+
+  private extrairMensagemErro(err: unknown, mensagemPadrao: string) {
+    if (err instanceof HttpErrorResponse) {
+      return err.error?.message ?? err.error?.erro ?? mensagemPadrao;
+    }
+
+    return mensagemPadrao;
   }
 }
