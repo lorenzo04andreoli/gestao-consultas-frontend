@@ -14,24 +14,102 @@
     <form class="filter-grid" (ngSubmit)="filtrar()">
       <div class="form-group">
         <label>Paciente</label>
-        <select name="pacienteId" [(ngModel)]="filtros.pacienteId">
-          <option [ngValue]="null">Todos</option>
-          @for (paciente of pacientes(); track paciente.id ?? paciente.cpf) {
-            @if (paciente.id) {
-              <option [ngValue]="paciente.id">{{ paciente.nome }}</option>
-            }
+        <div class="entity-search">
+          <input
+            type="text"
+            name="pacienteBusca"
+            autocomplete="off"
+            placeholder="Pesquisar por nome, e-mail, CPF ou telefone"
+            [ngModel]="buscaPaciente()"
+            (ngModelChange)="pesquisarPaciente($event)"
+            (focus)="abrirPacientes()"
+            (blur)="fecharPacientes()"
+          />
+
+          @if (pacientesAbertos()) {
+            <div class="entity-results">
+              <button type="button" class="entity-option" (mousedown)="selecionarTodosPacientes()">
+                <span class="entity-avatar all">
+                  <i class="fa-solid fa-users" aria-hidden="true"></i>
+                </span>
+                <span>
+                  <strong>Todos os pacientes</strong>
+                  <small>Remover filtro por paciente</small>
+                </span>
+              </button>
+
+              @for (paciente of pacientesFiltrados(); track paciente.id ?? paciente.cpf) {
+                <button
+                  type="button"
+                  class="entity-option"
+                  (mousedown)="selecionarPaciente(paciente)"
+                >
+                  <span class="entity-avatar">{{ inicialPaciente(paciente) }}</span>
+                  <span>
+                    <strong>{{ paciente.nome }}</strong>
+                    <small>{{ paciente.email }} | {{ paciente.telefone || 'Sem telefone' }}</small>
+                  </span>
+                </button>
+              } @empty {
+                <p class="entity-empty">Nenhum paciente encontrado.</p>
+              }
+            </div>
           }
-        </select>
+        </div>
       </div>
 
       <div class="form-group">
         <label>Dentista</label>
-        <select name="dentistaId" [(ngModel)]="filtros.dentistaId">
-          <option [ngValue]="null">Todos</option>
-          @for (dentista of dentistas(); track dentista.id) {
-            <option [ngValue]="dentista.id">{{ dentista.nome }} - {{ dentista.cro }}</option>
+        <div class="entity-search">
+          <input
+            type="text"
+            name="dentistaBusca"
+            autocomplete="off"
+            placeholder="Pesquisar por nome, e-mail, CPF, CRO ou especialidade"
+            [ngModel]="buscaDentista()"
+            (ngModelChange)="pesquisarDentista($event)"
+            (focus)="abrirDentistas()"
+            (blur)="fecharDentistas()"
+          />
+
+          @if (dentistasAbertos()) {
+            <div class="entity-results">
+              @if (authService.isAdmin()) {
+                <button type="button" class="entity-option" (mousedown)="selecionarTodosDentistas()">
+                  <span class="entity-avatar all">
+                    <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
+                  </span>
+                  <span>
+                    <strong>Todos os dentistas</strong>
+                    <small>Remover filtro por dentista</small>
+                  </span>
+                </button>
+              }
+
+              @for (dentista of dentistasFiltrados(); track dentista.id) {
+                <button
+                  type="button"
+                  class="entity-option"
+                  (mousedown)="selecionarDentista(dentista)"
+                >
+                  <span class="entity-avatar">
+                    @if (dentista.fotoPerfil) {
+                      <img [src]="dentista.fotoPerfil" alt="" />
+                    } @else {
+                      {{ inicialDentista(dentista) }}
+                    }
+                  </span>
+                  <span>
+                    <strong>{{ dentista.nome }}</strong>
+                    <small>{{ dentista.cro }} | {{ especialidadesDentista(dentista) }}</small>
+                  </span>
+                </button>
+              } @empty {
+                <p class="entity-empty">Nenhum dentista encontrado.</p>
+              }
+            </div>
           }
-        </select>
+        </div>
       </div>
 
       <div class="form-group">

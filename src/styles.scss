@@ -551,7 +551,9 @@ body.theme-dark .clear-button,
 body.theme-dark .time-column,
 body.theme-dark .day-header,
 body.theme-dark .schedule-slot,
-body.theme-dark .patient-result {
+body.theme-dark .patient-result,
+body.theme-dark .entity-results,
+body.theme-dark .entity-option {
   background: #111827 !important;
   border-color: var(--color-border) !important;
   color: var(--color-text) !important;
@@ -566,7 +568,8 @@ body.theme-dark .nav-group summary:hover,
 body.theme-dark .menu-button:hover,
 body.theme-dark .logout-button:hover,
 body.theme-dark tbody tr:hover,
-body.theme-dark .patient-result:hover {
+body.theme-dark .patient-result:hover,
+body.theme-dark .entity-option:hover {
   background: #182131 !important;
 }
 
@@ -620,7 +623,9 @@ body.theme-dark .content .summary-card span,
 body.theme-dark .content .table-header p,
 body.theme-dark .content .section-heading p,
 body.theme-dark .content .results-header span,
-body.theme-dark .content .patient-info small {
+body.theme-dark .content .patient-info small,
+body.theme-dark .content .entity-option small,
+body.theme-dark .content .entity-empty {
   color: var(--color-muted) !important;
 }
 

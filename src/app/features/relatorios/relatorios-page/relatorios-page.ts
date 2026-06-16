@@ -34,6 +34,10 @@ export class RelatoriosPage implements OnInit {
   usuarios = signal<UsuarioResponseModel[]>([]);
   carregando = signal(false);
   erro = signal('');
+  buscaPaciente = signal('');
+  pacientesAbertos = signal(false);
+  buscaDentista = signal('');
+  dentistasAbertos = signal(false);
 
   filtros: ConsultaFiltros = {
     pacienteId: null,
@@ -48,6 +52,26 @@ export class RelatoriosPage implements OnInit {
   consultasAgendadas = computed(() => this.contarPorStatus('AGENDADA'));
   consultasCanceladas = computed(() => this.contarPorStatus('CANCELADA'));
   consultasFinalizadas = computed(() => this.contarPorStatus('FINALIZADA'));
+  pacientesFiltrados = computed(() => {
+    const termo = this.normalizarTexto(this.buscaPaciente());
+    const pacientesAtivos = this.pacientes().filter(paciente => paciente.ativo !== false);
+
+    if (!termo) return pacientesAtivos.slice(0, 12);
+
+    return pacientesAtivos
+      .filter(paciente => this.pacienteContemTermo(paciente, termo))
+      .slice(0, 12);
+  });
+  dentistasFiltrados = computed(() => {
+    const termo = this.normalizarTexto(this.buscaDentista());
+    const dentistasAtivos = this.dentistas().filter(dentista => dentista.ativo !== false);
+
+    if (!termo) return dentistasAtivos.slice(0, 12);
+
+    return dentistasAtivos
+      .filter(dentista => this.dentistaContemTermo(dentista, termo))
+      .slice(0, 12);
+  });
 
   ngOnInit() {
     this.carregarFiltros();
@@ -87,6 +111,8 @@ export class RelatoriosPage implements OnInit {
       dataInicio: '',
       dataFim: ''
     };
+    this.buscaPaciente.set('');
+    this.buscaDentista.set('');
 
     this.filtrar();
   }
@@ -116,6 +142,76 @@ export class RelatoriosPage implements OnInit {
     }).format(new Date(data));
   }
 
+  pesquisarPaciente(valor: string) {
+    this.buscaPaciente.set(valor);
+    this.filtros.pacienteId = null;
+    this.pacientesAbertos.set(true);
+  }
+
+  abrirPacientes() {
+    this.pacientesAbertos.set(true);
+  }
+
+  fecharPacientes() {
+    window.setTimeout(() => this.pacientesAbertos.set(false), 120);
+  }
+
+  selecionarTodosPacientes() {
+    this.filtros.pacienteId = null;
+    this.buscaPaciente.set('');
+    this.pacientesAbertos.set(false);
+  }
+
+  selecionarPaciente(paciente: PacienteModel) {
+    if (!paciente.id) return;
+
+    this.filtros.pacienteId = paciente.id;
+    this.buscaPaciente.set(paciente.nome);
+    this.pacientesAbertos.set(false);
+  }
+
+  pesquisarDentista(valor: string) {
+    this.buscaDentista.set(valor);
+    this.filtros.dentistaId = null;
+    this.dentistasAbertos.set(true);
+  }
+
+  abrirDentistas() {
+    this.dentistasAbertos.set(true);
+  }
+
+  fecharDentistas() {
+    window.setTimeout(() => this.dentistasAbertos.set(false), 120);
+  }
+
+  selecionarTodosDentistas() {
+    this.filtros.dentistaId = null;
+    this.buscaDentista.set('');
+    this.dentistasAbertos.set(false);
+  }
+
+  selecionarDentista(dentista: DentistaResponseModel) {
+    this.filtros.dentistaId = dentista.id;
+    this.buscaDentista.set(this.nomeDentista(dentista));
+    this.dentistasAbertos.set(false);
+  }
+
+  inicialPaciente(paciente: PacienteModel) {
+    return paciente.nome.trim().charAt(0).toUpperCase() || 'P';
+  }
+
+  inicialDentista(dentista: DentistaResponseModel) {
+    return dentista.nome.trim().charAt(0).toUpperCase() || 'D';
+  }
+
+  especialidadesDentista(dentista: DentistaResponseModel) {
+    return dentista.especialidades?.join(', ') || 'Sem especialidade';
+  }
+
+  nomeDentista(dentista: DentistaResponseModel) {
+    return `${dentista.nome} - ${dentista.cro}`;
+  }
+
   private contarPorStatus(status: StatusConsulta) {
     return this.consultas().filter(consulta => consulta.status === status).length;
   }
@@ -125,5 +221,30 @@ export class RelatoriosPage implements OnInit {
 
     const emailUsuario = this.authService.email();
     return dentistas.filter(dentista => dentista.email === emailUsuario);
+  }
+
+  private pacienteContemTermo(paciente: PacienteModel, termo: string) {
+    return [paciente.nome, paciente.email, paciente.cpf, paciente.telefone]
+      .filter((valor): valor is string => Boolean(valor))
+      .some(valor => this.normalizarTexto(valor).includes(termo));
+  }
+
+  private dentistaContemTermo(dentista: DentistaResponseModel, termo: string) {
+    return [
+      dentista.nome,
+      dentista.email,
+      dentista.cpf,
+      dentista.cro,
+      dentista.especialidades?.join(' ')
+    ]
+      .filter((valor): valor is string => Boolean(valor))
+      .some(valor => this.normalizarTexto(valor).includes(termo));
+  }
+
+  private normalizarTexto(valor: string) {
+    return valor
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 }
