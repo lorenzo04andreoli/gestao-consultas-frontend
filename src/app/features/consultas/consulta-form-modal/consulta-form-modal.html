@@ -79,7 +79,13 @@
                     class="entity-option"
                     (mousedown)="selecionarDentista(dentista)"
                   >
-                    <span class="entity-avatar">{{ inicialDentista(dentista) }}</span>
+                    <span class="entity-avatar">
+                      @if (dentista.fotoPerfil) {
+                        <img [src]="dentista.fotoPerfil" alt="" />
+                      } @else {
+                        {{ inicialDentista(dentista) }}
+                      }
+                    </span>
                     <span>
                       <strong>{{ dentista.nome }}</strong>
                       <small>{{ dentista.cro }} | {{ especialidadesDentista(dentista) }}</small>
