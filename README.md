@@ -1,59 +1,193 @@
-# GestaoDental
+# Dentix - Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+Interface web do Dentix, um sistema de gestão para clínica odontológica desenvolvido como projeto final do programa Wise Start.
 
-## Development server
+O frontend foi construído em Angular e consome uma API REST em Java Spring Boot. A aplicação permite administrar pacientes, dentistas, especialidades, consultas, usuários, relatórios, notificações, perfil, autenticação em dois fatores e lançamentos financeiros gerados a partir dos agendamentos.
 
-To start a local development server, run:
+## Tecnologias
 
-```bash
-ng serve
+- Angular 21
+- TypeScript
+- RxJS
+- Angular Router
+- Angular Forms
+- Angular CDK
+- Angular Material
+- Font Awesome
+- FullCalendar
+- Chart.js
+- SCSS
+- Vitest
+- Prettier
+
+## Funcionalidades principais
+
+- Login com autenticação JWT.
+- Controle de acesso por perfil de usuário.
+- Dashboard com indicadores da clínica.
+- Gerenciamento de usuários administrativos e dentistas.
+- Cadastro, listagem, edição, pesquisa e arquivamento de pacientes.
+- Cadastro, listagem, edição, pesquisa e arquivamento de dentistas.
+- Cadastro e listagem de especialidades.
+- Vinculação de dentistas com múltiplas especialidades.
+- Agenda de consultas com FullCalendar.
+- Criação, edição, reagendamento, finalização e cancelamento de consultas.
+- Cancelamento de consulta com motivo obrigatório.
+- Relatórios com filtros por paciente, dentista, especialidade, usuário responsável e período.
+- Paginação em telas de listagem.
+- Consumo da API REST com `HttpClient`.
+- Interceptor para envio automático do token JWT.
+- Guardas de rota para proteger páginas autenticadas e páginas exclusivas de admin.
+
+## Extras implementados
+
+- Tema claro e escuro com persistência da preferência do usuário.
+- Perfil do usuário com dados da conta e foto de perfil.
+- Upload, alteração e remoção de foto de perfil.
+- Autenticação em dois fatores com código de 6 dígitos.
+- QR Code para configuração do aplicativo autenticador.
+- Notificações internas para solicitações e retornos.
+- Solicitação de alteração de dados pelo usuário.
+- Área administrativa para responder solicitações de alteração.
+- Menu superior com avatar e ações de perfil.
+- Sidebar recolhível.
+- Dashboard com gráficos em Chart.js.
+- Agenda semanal adaptada para dentistas.
+- Pesquisa dinâmica com `signal` em campos de busca.
+- Busca de paciente e dentista dentro do formulário de consulta.
+- Envio de mensagem pelo WhatsApp após agendamento.
+- Módulo financeiro com lançamentos gerados a partir de consultas.
+- Tela de preferências do usuário.
+- Tratamento visual para tema escuro em tabelas, formulários, cards e modais.
+
+## Requisitos
+
+- Node.js
+- npm
+- Angular CLI
+- API backend do Dentix em execução
+
+Em desenvolvimento, o projeto usa proxy do Angular para encaminhar as chamadas de `/api` para:
+
+```ts
+http://localhost:8080
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+A URL base utilizada pelo frontend está configurada em:
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```text
+src/app/core/api.ts
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+O proxy local está configurado em:
 
-```bash
-ng generate --help
+```text
+proxy.conf.json
 ```
 
-## Building
+## Instalação
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Clone o repositório:
 
 ```bash
-ng test
+git clone <url-do-repositorio-frontend>
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Acesse a pasta do projeto:
 
 ```bash
-ng e2e
+cd gestao-dental
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Instale as dependências:
 
-## Additional Resources
+```bash
+npm install
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Execute o servidor de desenvolvimento:
+
+```bash
+npm start
+```
+
+Acesse a aplicação em:
+
+```text
+http://localhost:4200
+```
+
+## Build
+
+Para gerar a versão de build:
+
+```bash
+npm run build
+```
+
+Os arquivos gerados ficam na pasta:
+
+```text
+dist/gestao-dental
+```
+
+## Docker
+
+O frontend possui um `Dockerfile` multi-stage:
+
+1. Usa Node.js para instalar dependências e gerar o build Angular.
+2. Usa Nginx para servir os arquivos estáticos.
+3. Encaminha chamadas iniciadas por `/api` para o serviço `backend` na porta `8080`.
+
+Para construir a imagem manualmente:
+
+```bash
+docker build -t dentix-frontend .
+```
+
+Para executar apenas o frontend em Docker, ele precisa estar na mesma rede do backend ou ter o Nginx ajustado para apontar para a URL correta da API.
+
+## Testes
+
+Para executar os testes configurados no projeto:
+
+```bash
+npm test
+```
+
+## Estrutura principal
+
+```text
+src/app/core
+```
+
+Serviços centrais, autenticação, interceptors, guards, tema, perfil e notificações.
+
+```text
+src/app/features
+```
+
+Páginas e funcionalidades do sistema, como login, dashboard, consultas, pacientes, dentistas, especialidades, relatórios, financeiro, perfil e solicitações.
+
+```text
+src/app/layouts
+```
+
+Layouts da aplicação, incluindo layout autenticado e layout de login.
+
+## Integração com o backend
+
+O frontend consome os endpoints da API Spring Boot do Dentix. Para utilizar o sistema corretamente, o backend deve estar em execução antes do login.
+
+Fluxo básico:
+
+1. O usuário acessa a tela de login.
+2. O frontend envia as credenciais para a API.
+3. A API retorna o token JWT ou solicita a etapa de 2FA quando configurada.
+4. O token é salvo no navegador.
+5. O interceptor adiciona o token automaticamente nas requisições protegidas.
+6. As rotas são liberadas conforme o perfil do usuário.
+
+## Autor
+
+Lorenzo Carneiro Andreoli
