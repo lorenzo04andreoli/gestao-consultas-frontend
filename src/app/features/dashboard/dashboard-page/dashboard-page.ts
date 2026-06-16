@@ -4,15 +4,12 @@ import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { forkJoin } from 'rxjs';
 import { ConsultaService } from '../../consultas/consulta';
 import { ConsultaModel, StatusConsulta } from '../../consultas/consulta.model';
-import { DentistaService } from '../../dentistas/dentista';
-import { DentistaResponseModel } from '../../dentistas/dentista.model';
 import { PacienteService } from '../../pacientes/paciente';
 import { PacienteModel } from '../../pacientes/paciente.model';
 
 Chart.register(...registerables);
 
-interface RankingDentista {
-  id?: number;
+interface RankingEspecialidade {
   nome: string;
   total: number;
 }
@@ -26,7 +23,7 @@ interface RankingDentista {
 })
 export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('statusChart') statusChartRef?: ElementRef<HTMLCanvasElement>;
-  @ViewChild('dentistasChart') dentistasChartRef?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('especialidadesChart') especialidadesChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('mensalChart') mensalChartRef?: ElementRef<HTMLCanvasElement>;
   @ViewChild('cancelamentosChart') cancelamentosChartRef?: ElementRef<HTMLCanvasElement>;
 
@@ -41,19 +38,18 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   consultasCanceladas = signal(0);
   consultasFinalizadas = signal(0);
   pacientesRecentes = signal<PacienteModel[]>([]);
-  rankingDentistas = signal<RankingDentista[]>([]);
+  rankingEspecialidades = signal<RankingEspecialidade[]>([]);
   proximasConsultas = signal<ConsultaModel[]>([]);
 
   private consultas: ConsultaModel[] = [];
   private graficosProntos = false;
   private statusChart?: Chart;
-  private dentistasChart?: Chart;
+  private especialidadesChart?: Chart;
   private mensalChart?: Chart;
   private cancelamentosChart?: Chart;
 
   constructor(
     private pacienteService: PacienteService,
-    private dentistaService: DentistaService,
     private consultaService: ConsultaService
   ) {}
 
@@ -68,7 +64,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.statusChart?.destroy();
-    this.dentistasChart?.destroy();
+    this.especialidadesChart?.destroy();
     this.mensalChart?.destroy();
     this.cancelamentosChart?.destroy();
   }
@@ -79,12 +75,11 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
     forkJoin({
       pacientes: this.pacienteService.listar(),
-      dentistas: this.dentistaService.listar(),
       consultas: this.consultaService.listar()
     }).subscribe({
-      next: ({ pacientes, dentistas, consultas }) => {
+      next: ({ pacientes, consultas }) => {
         this.consultas = consultas;
-        this.atualizarResumo(pacientes, dentistas, consultas);
+        this.atualizarResumo(pacientes, consultas);
         this.carregando.set(false);
         this.renderizarGraficos();
       },
@@ -95,13 +90,9 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private atualizarResumo(
-    pacientes: PacienteModel[],
-    dentistas: DentistaResponseModel[],
-    consultas: ConsultaModel[]
-  ) {
+  private atualizarResumo(pacientes: PacienteModel[], consultas: ConsultaModel[]) {
     this.atualizarIndicadores(pacientes, consultas);
-    this.atualizarListas(pacientes, dentistas, consultas);
+    this.atualizarListas(pacientes, consultas);
   }
 
   private atualizarIndicadores(pacientes: PacienteModel[], consultas: ConsultaModel[]) {
@@ -125,13 +116,9 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.consultasFinalizadas.set(this.contarConsultasPorStatus(consultas, 'FINALIZADA'));
   }
 
-  private atualizarListas(
-    pacientes: PacienteModel[],
-    dentistas: DentistaResponseModel[],
-    consultas: ConsultaModel[]
-  ) {
+  private atualizarListas(pacientes: PacienteModel[], consultas: ConsultaModel[]) {
     this.pacientesRecentes.set(this.montarPacientesRecentes(pacientes));
-    this.rankingDentistas.set(this.montarRankingDentistas(dentistas, consultas));
+    this.rankingEspecialidades.set(this.montarRankingEspecialidades(consultas));
     this.proximasConsultas.set(this.montarProximasConsultas(consultas));
   }
 
@@ -185,7 +172,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     if (!this.graficosProntos || this.carregando()) return;
 
     this.renderizarGraficoStatus();
-    this.renderizarGraficoDentistas();
+    this.renderizarGraficoEspecialidades();
     this.renderizarGraficoMensal();
     this.renderizarGraficoCancelamentos();
   }
@@ -231,23 +218,23 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.statusChart = new Chart(canvas, config);
   }
 
-  private renderizarGraficoDentistas() {
-    const canvas = this.dentistasChartRef?.nativeElement;
+  private renderizarGraficoEspecialidades() {
+    const canvas = this.especialidadesChartRef?.nativeElement;
     if (!canvas) return;
 
-    this.dentistasChart?.destroy();
+    this.especialidadesChart?.destroy();
     const primaryColor = this.corPrimaria();
     const textColor = this.corTextoGrafico();
     const gridColor = this.corGradeGrafico();
 
-    const totaisPorDentista = this.rankingDentistas();
+    const totaisPorEspecialidade = this.rankingEspecialidades();
 
-    const labels = totaisPorDentista.length
-      ? totaisPorDentista.map(item => item.nome)
+    const labels = totaisPorEspecialidade.length
+      ? totaisPorEspecialidade.map(item => item.nome)
       : ['Sem consultas'];
 
-    const dados = totaisPorDentista.length
-      ? totaisPorDentista.map(item => item.total)
+    const dados = totaisPorEspecialidade.length
+      ? totaisPorEspecialidade.map(item => item.total)
       : [0];
 
     const config: ChartConfiguration<'bar'> = {
@@ -259,7 +246,9 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
             label: 'Consultas',
             data: dados,
             backgroundColor: primaryColor,
-            borderRadius: 6
+            borderRadius: 6,
+            categoryPercentage: 0.7,
+            barPercentage: 0.8
           }
         ]
       },
@@ -269,10 +258,14 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
         scales: {
           x: {
             grid: {
-              color: gridColor
+              display: false
             },
             ticks: {
-              color: textColor
+              color: textColor,
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: false,
+              callback: (_value, index) => this.abreviarRotulo(labels[index] ?? '')
             }
           },
           y: {
@@ -289,12 +282,17 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
         plugins: {
           legend: {
             display: false
+          },
+          tooltip: {
+            callbacks: {
+              title: itens => labels[itens[0]?.dataIndex ?? 0] ?? ''
+            }
           }
         }
       }
     };
 
-    this.dentistasChart = new Chart(canvas, config);
+    this.especialidadesChart = new Chart(canvas, config);
   }
 
   private renderizarGraficoMensal() {
@@ -433,16 +431,25 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.cancelamentosChart = new Chart(canvas, config);
   }
 
-  private montarRankingDentistas(dentistas: DentistaResponseModel[], consultas: ConsultaModel[]) {
-    return dentistas
-      .map(dentista => ({
-        id: dentista.id,
-        nome: dentista.nome,
-        total: consultas.filter(consulta => consulta.dentistaId === dentista.id).length
-      }))
+  private montarRankingEspecialidades(consultas: ConsultaModel[]) {
+    const totais = new Map<string, number>();
+
+    consultas.forEach(consulta => {
+      const nome = consulta.especialidadeNome?.trim();
+      if (!nome) return;
+
+      totais.set(nome, (totais.get(nome) ?? 0) + 1);
+    });
+
+    return Array.from(totais.entries())
+      .map(([nome, total]) => ({ nome, total }))
       .filter(item => item.total > 0)
       .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome))
       .slice(0, 6);
+  }
+
+  private abreviarRotulo(valor: string, limite = 18) {
+    return valor.length > limite ? `${valor.slice(0, limite - 3)}...` : valor;
   }
 
   private montarPacientesRecentes(pacientes: PacienteModel[]) {

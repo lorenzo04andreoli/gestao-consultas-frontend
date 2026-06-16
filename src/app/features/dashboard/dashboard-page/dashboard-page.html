@@ -58,39 +58,35 @@
 
     <article class="chart-panel">
       <header>
-        <h2>Consultas por dentista</h2>
-        <p>Quantidade de consultas vinculadas aos profissionais.</p>
+        <h2>Consultas por especialidade</h2>
+        <p>Distribuição dos atendimentos por área odontológica.</p>
       </header>
 
       <div class="chart-box">
-        <canvas #dentistasChart></canvas>
+        <canvas #especialidadesChart></canvas>
       </div>
 
-      @if (rankingDentistas().length) {
+      @if (rankingEspecialidades().length) {
         <div class="dashboard-table">
           <table>
             <thead>
               <tr>
-                <th>Profissional</th>
-                <th>Consultas</th>
+                <th>Especialidade</th>
+                <th class="numeric-column">Consultas</th>
               </tr>
             </thead>
 
             <tbody>
-              @for (dentista of rankingDentistas(); track dentista.id ?? dentista.nome) {
+              @for (especialidade of rankingEspecialidades(); track especialidade.nome) {
                 <tr>
                   <td>
-                    <a
-                      class="person-link"
-                      [routerLink]="['/dentistas', dentista.id]"
-                      [queryParams]="{ origem: 'dashboard' }"
-                    >
-                      <span class="person-avatar">{{ inicialPessoa(dentista.nome) }}</span>
-                      <span>{{ dentista.nome }}</span>
-                    </a>
+                    <span class="person-link">
+                      <span class="person-avatar">{{ inicialPessoa(especialidade.nome) }}</span>
+                      <span>{{ especialidade.nome }}</span>
+                    </span>
                   </td>
-                  <td>
-                    <span class="count-cell">{{ dentista.total }}</span>
+                  <td class="numeric-column">
+                    <span class="count-cell">{{ especialidade.total }}</span>
                   </td>
                 </tr>
               }
@@ -98,7 +94,7 @@
           </table>
         </div>
       } @else {
-        <p class="empty-state">Nenhuma consulta vinculada aos dentistas.</p>
+        <p class="empty-state">Nenhuma consulta vinculada a especialidades.</p>
       }
     </article>
 
@@ -203,6 +199,7 @@
         <canvas #mensalChart></canvas>
       </div>
     </article>
+
     <article class="chart-panel chart-panel-wide">
       <header>
         <h2>Cancelamentos dos últimos 7 dias</h2>

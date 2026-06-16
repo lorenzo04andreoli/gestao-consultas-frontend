@@ -162,6 +162,11 @@
     color: #444;
     font-weight: 600;
   }
+
+  .numeric-column {
+    width: 160px;
+    text-align: center;
+  }
 }
 
 .person-link {
@@ -198,6 +203,9 @@
 
 .count-cell {
   color: var(--color-primary);
+  display: inline-flex;
+  justify-content: center;
+  min-width: 28px;
   font-size: 17px;
   font-weight: 800;
 }
