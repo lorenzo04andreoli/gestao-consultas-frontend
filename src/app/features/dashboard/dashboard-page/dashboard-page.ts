@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, sig
 import { RouterLink } from '@angular/router';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { forkJoin } from 'rxjs';
+import { AuthService } from '../../../core/auth/auth';
 import { ConsultaService } from '../../consultas/consulta';
 import { ConsultaModel, StatusConsulta } from '../../consultas/consulta.model';
 import { PacienteService } from '../../pacientes/paciente';
@@ -12,6 +13,13 @@ Chart.register(...registerables);
 interface RankingEspecialidade {
   nome: string;
   total: number;
+}
+
+interface AgendaDia {
+  nome: string;
+  data: string;
+  total: number;
+  consultas: ConsultaModel[];
 }
 
 @Component({
@@ -39,6 +47,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   consultasFinalizadas = signal(0);
   pacientesRecentes = signal<PacienteModel[]>([]);
   rankingEspecialidades = signal<RankingEspecialidade[]>([]);
+  agendaSemana = signal<AgendaDia[]>([]);
   proximasConsultas = signal<ConsultaModel[]>([]);
 
   private consultas: ConsultaModel[] = [];
@@ -49,6 +58,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   private cancelamentosChart?: Chart;
 
   constructor(
+    public authService: AuthService,
     private pacienteService: PacienteService,
     private consultaService: ConsultaService
   ) {}
@@ -119,6 +129,7 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
   private atualizarListas(pacientes: PacienteModel[], consultas: ConsultaModel[]) {
     this.pacientesRecentes.set(this.montarPacientesRecentes(pacientes));
     this.rankingEspecialidades.set(this.montarRankingEspecialidades(consultas));
+    this.agendaSemana.set(this.montarAgendaSemana(consultas));
     this.proximasConsultas.set(this.montarProximasConsultas(consultas));
   }
 
@@ -227,14 +238,14 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
     const textColor = this.corTextoGrafico();
     const gridColor = this.corGradeGrafico();
 
-    const totaisPorEspecialidade = this.rankingEspecialidades();
+    const ranking = this.rankingEspecialidades();
 
-    const labels = totaisPorEspecialidade.length
-      ? totaisPorEspecialidade.map(item => item.nome)
+    const labels = ranking.length
+      ? ranking.map(item => item.nome)
       : ['Sem consultas'];
 
-    const dados = totaisPorEspecialidade.length
-      ? totaisPorEspecialidade.map(item => item.total)
+    const dados = ranking.length
+      ? ranking.map(item => item.total)
       : [0];
 
     const config: ChartConfiguration<'bar'> = {
@@ -448,6 +459,32 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
       .slice(0, 6);
   }
 
+  private montarAgendaSemana(consultas: ConsultaModel[]) {
+    const hoje = this.inicioDoDia(new Date());
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const data = new Date(hoje);
+      data.setDate(hoje.getDate() + index);
+
+      const consultasDoDia = consultas
+        .filter(consulta =>
+          consulta.status === 'AGENDADA' &&
+          this.mesmoDia(new Date(consulta.dataInicio), data)
+        )
+        .sort((a, b) => this.timestampData(a.dataInicio) - this.timestampData(b.dataInicio));
+
+      return {
+        nome: index === 0 ? 'Hoje' : this.formatarDiaSemana(data),
+        data: new Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit'
+        }).format(data),
+        total: consultasDoDia.length,
+        consultas: consultasDoDia
+      };
+    });
+  }
+
   private abreviarRotulo(valor: string, limite = 18) {
     return valor.length > limite ? `${valor.slice(0, limite - 3)}...` : valor;
   }
@@ -505,6 +542,25 @@ export class DashboardPage implements OnInit, AfterViewInit, OnDestroy {
         }).format(data)
       };
     });
+  }
+
+  private inicioDoDia(data: Date) {
+    const inicio = new Date(data);
+    inicio.setHours(0, 0, 0, 0);
+    return inicio;
+  }
+
+  private mesmoDia(data: Date, referencia: Date) {
+    return this.inicioDoDia(data).getTime() === this.inicioDoDia(referencia).getTime();
+  }
+
+  private formatarDiaSemana(data: Date) {
+    return new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'short',
+      day: '2-digit'
+    })
+      .format(data)
+      .replace('.', '');
   }
 
   private contarConsultasNoMes(data: Date, status: StatusConsulta) {

@@ -57,44 +57,111 @@
     </article>
 
     <article class="chart-panel">
-      <header>
-        <h2>Consultas por especialidade</h2>
-        <p>Distribuição dos atendimentos por área odontológica.</p>
-      </header>
+      @if (authService.isDentista()) {
+        <header>
+          <h2>Agenda da semana</h2>
+          <p>Consultas agendadas para os próximos 7 dias.</p>
+        </header>
 
-      <div class="chart-box">
-        <canvas #especialidadesChart></canvas>
-      </div>
-
-      @if (rankingEspecialidades().length) {
-        <div class="dashboard-table">
+        <div class="mini-schedule">
           <table>
             <thead>
               <tr>
-                <th>Especialidade</th>
-                <th class="numeric-column">Consultas</th>
+                <th>Dia</th>
+                <th>Horário</th>
+                <th>Paciente</th>
+                <th class="numeric-column">Total</th>
               </tr>
             </thead>
 
             <tbody>
-              @for (especialidade of rankingEspecialidades(); track especialidade.nome) {
-                <tr>
-                  <td>
-                    <span class="person-link">
-                      <span class="person-avatar">{{ inicialPessoa(especialidade.nome) }}</span>
-                      <span>{{ especialidade.nome }}</span>
-                    </span>
-                  </td>
-                  <td class="numeric-column">
-                    <span class="count-cell">{{ especialidade.total }}</span>
-                  </td>
-                </tr>
+              @for (dia of agendaSemana(); track dia.nome) {
+                @if (dia.consultas.length) {
+                  @for (consulta of dia.consultas.slice(0, 2); track consulta.id ?? consulta.dataInicio; let index = $index) {
+                    <tr>
+                      <td>
+                        @if (index === 0) {
+                          <span class="schedule-day">
+                            <strong>{{ dia.nome }}</strong>
+                            <small>{{ dia.data }}</small>
+                          </span>
+                        }
+                      </td>
+                      <td>{{ formatarDataConsulta(consulta.dataInicio) }}</td>
+                      <td>{{ consulta.pacienteNome }}</td>
+                      <td class="numeric-column">
+                        @if (index === 0) {
+                          <span class="count-cell">{{ dia.total }}</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+
+                  @if (dia.consultas.length > 2) {
+                    <tr class="schedule-extra">
+                      <td></td>
+                      <td colspan="3">+{{ dia.consultas.length - 2 }} consulta(s) neste dia</td>
+                    </tr>
+                  }
+                } @else {
+                  <tr class="schedule-empty-row">
+                    <td>
+                      <span class="schedule-day">
+                        <strong>{{ dia.nome }}</strong>
+                        <small>{{ dia.data }}</small>
+                      </span>
+                    </td>
+                    <td>-</td>
+                    <td>Nenhuma consulta agendada</td>
+                    <td class="numeric-column">
+                      <span class="count-cell muted">0</span>
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>
         </div>
       } @else {
-        <p class="empty-state">Nenhuma consulta vinculada a especialidades.</p>
+        <header>
+          <h2>Consultas por especialidade</h2>
+          <p>Distribuição dos atendimentos por área odontológica.</p>
+        </header>
+
+        <div class="chart-box">
+          <canvas #especialidadesChart></canvas>
+        </div>
+
+        @if (rankingEspecialidades().length) {
+          <div class="dashboard-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Especialidade</th>
+                  <th class="numeric-column">Consultas</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (especialidade of rankingEspecialidades(); track especialidade.nome) {
+                  <tr>
+                    <td>
+                      <span class="person-link">
+                        <span class="person-avatar">{{ inicialPessoa(especialidade.nome) }}</span>
+                        <span>{{ especialidade.nome }}</span>
+                      </span>
+                    </td>
+                    <td class="numeric-column">
+                      <span class="count-cell">{{ especialidade.total }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="empty-state">Nenhuma consulta vinculada a especialidades.</p>
+        }
       }
     </article>
 
