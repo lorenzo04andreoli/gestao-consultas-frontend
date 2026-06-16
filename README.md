@@ -4,6 +4,14 @@ Interface web do Dentix, um sistema de gestão para clínica odontológica desen
 
 O frontend foi construído em Angular e consome uma API REST em Java Spring Boot. A aplicação permite administrar pacientes, dentistas, especialidades, consultas, usuários, relatórios, notificações, perfil, autenticação em dois fatores e lançamentos financeiros gerados a partir dos agendamentos.
 
+## Aplicação em produção
+
+```text
+https://dentix.app.br
+```
+
+O deploy foi realizado em uma instância AWS EC2 usando Docker, Docker Compose, Nginx e Certbot. Em produção, as chamadas iniciadas por `/api` são encaminhadas pelo Nginx para o backend Spring Boot.
+
 ## Tecnologias
 
 - Angular 21
@@ -146,6 +154,34 @@ docker build -t dentix-frontend .
 ```
 
 Para executar apenas o frontend em Docker, ele precisa estar na mesma rede do backend ou ter o Nginx ajustado para apontar para a URL correta da API.
+
+## Deploy
+
+A aplicação em produção está hospedada em:
+
+```text
+https://dentix.app.br
+```
+
+Arquitetura utilizada:
+
+```text
+Internet
+  |
+  v
+Nginx na EC2 com HTTPS
+  |
+  v
+Container frontend Nginx
+  |
+  v
+/api -> Container backend Spring Boot
+  |
+  v
+Container MySQL
+```
+
+O backend e o MySQL não ficam expostos publicamente. Apenas as portas `80` e `443` da EC2 são abertas para acesso externo.
 
 ## Testes
 
