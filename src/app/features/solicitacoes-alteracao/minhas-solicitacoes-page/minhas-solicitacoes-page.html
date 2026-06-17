@@ -1,0 +1,175 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h2>Minhas solicitações</h2>
+      <p>Acompanhe os pedidos enviados ao administrador.</p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="secondary-button" [disabled]="carregando()" (click)="carregarSolicitacoes()">
+        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+        Atualizar
+      </button>
+
+      <button type="button" class="primary-button" (click)="abrirNovaSolicitacao()">
+        <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+        Solicitar alteração
+      </button>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="alert error">{{ erro() }}</p>
+  }
+
+  @if (sucesso()) {
+    <p class="alert success">{{ sucesso() }}</p>
+  }
+
+  <div class="summary-grid">
+    <button type="button" class="summary-card" [class.active]="filtroStatus() === 'TODAS'" (click)="alterarFiltro('TODAS')">
+      <span>Total</span>
+      <strong>{{ solicitacoes().length }}</strong>
+    </button>
+
+    <button type="button" class="summary-card pending" [class.active]="filtroStatus() === 'PENDENTE'" (click)="alterarFiltro('PENDENTE')">
+      <span>Pendentes</span>
+      <strong>{{ totalPendentes() }}</strong>
+    </button>
+
+    <button type="button" class="summary-card answered" [class.active]="filtroStatus() === 'RESPONDIDA'" (click)="alterarFiltro('RESPONDIDA')">
+      <span>Respondidas</span>
+      <strong>{{ totalRespondidas() }}</strong>
+    </button>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Assunto</th>
+          <th>Enviado em</th>
+          <th>Status</th>
+          <th>Resposta</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (solicitacao of solicitacoesFiltradas(); track solicitacao.id) {
+          <tr
+            class="clickable-row"
+            tabindex="0"
+            (click)="abrirDetalhe(solicitacao)"
+            (keydown.enter)="abrirDetalhe(solicitacao)"
+          >
+            <td class="subject-cell">
+              <strong>{{ assuntoSolicitacao(solicitacao) }}</strong>
+              <small>Clique para abrir a mensagem</small>
+            </td>
+            <td>{{ dataFormatada(solicitacao.dataCriacao) }}</td>
+            <td>
+              <span class="status" [class.answered]="solicitacao.status === 'RESPONDIDA'">
+                {{ statusLabel(solicitacao.status) }}
+              </span>
+            </td>
+            <td class="answer-cell">
+              {{ solicitacao.resposta ? 'Recebida' : '-' }}
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="empty-state">Nenhuma solicitação encontrada.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (modalNovaSolicitacaoAberto()) {
+    <div class="modal-backdrop" (click)="fecharNovaSolicitacao()">
+      <form class="modal" aria-label="Nova solicitação" (ngSubmit)="enviarSolicitacao()" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>Solicitar alteração</h2>
+            <p>Informe ao administrador quais dados precisam de revisão.</p>
+          </div>
+
+          <button type="button" class="close-button" aria-label="Fechar" (click)="fecharNovaSolicitacao()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </header>
+
+        <label class="form-group">
+          <span>Assunto</span>
+          <input
+            type="text"
+            name="assunto"
+            maxlength="120"
+            placeholder="Ex.: Atualização de telefone"
+            [(ngModel)]="assunto"
+            required
+          />
+        </label>
+
+        <label class="form-group">
+          <span>Mensagem</span>
+          <textarea
+            name="descricao"
+            rows="5"
+            placeholder="Descreva a alteração necessária..."
+            [(ngModel)]="descricao"
+            required
+          ></textarea>
+        </label>
+
+        <footer class="modal-actions">
+          <button type="button" class="secondary-button" [disabled]="enviando()" (click)="fecharNovaSolicitacao()">
+            Cancelar
+          </button>
+          <button type="submit" class="primary-button" [disabled]="enviando()">
+            {{ enviando() ? 'Enviando...' : 'Enviar solicitação' }}
+          </button>
+        </footer>
+      </form>
+    </div>
+  }
+
+  @if (solicitacaoSelecionada(); as solicitacao) {
+    <div class="modal-backdrop" (click)="fecharDetalhe()">
+      <section class="modal" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <h2>{{ assuntoSolicitacao(solicitacao) }}</h2>
+            <p>{{ dataFormatada(solicitacao.dataCriacao) }}</p>
+          </div>
+
+          <button type="button" class="close-button" aria-label="Fechar" (click)="fecharDetalhe()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </header>
+
+        <div class="request-detail">
+          <span>Mensagem enviada</span>
+          <p>{{ solicitacao.descricao }}</p>
+        </div>
+
+        @if (solicitacao.resposta) {
+          <div class="request-detail answer">
+            <span>Resposta do admin</span>
+            <p>{{ solicitacao.resposta }}</p>
+            <small>{{ dataFormatada(solicitacao.dataResposta) }}</small>
+          </div>
+        } @else {
+          <div class="request-detail">
+            <span>Status</span>
+            <strong>Aguardando resposta do administrador.</strong>
+          </div>
+        }
+
+        <footer class="modal-actions">
+          <button type="button" class="secondary-button" (click)="fecharDetalhe()">Fechar</button>
+        </footer>
+      </section>
+    </div>
+  }
+</section>

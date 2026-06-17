@@ -13,6 +13,11 @@
         <a routerLink="/perfil/preferencias" routerLinkActive="active">
           Preferências
         </a>
+        @if (!authService.isAdmin()) {
+          <a routerLink="/perfil/solicitacoes" routerLinkActive="active">
+            Solicitações
+          </a>
+        }
       </nav>
     </header>
 

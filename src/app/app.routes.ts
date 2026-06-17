@@ -39,6 +39,13 @@ export const routes: Routes = [
             path: 'preferencias',
             loadComponent: () =>
               import('./features/perfil/preferencias-page/preferencias-page').then(m => m.PreferenciasPage)
+          },
+          {
+            path: 'solicitacoes',
+            loadComponent: () =>
+              import('./features/solicitacoes-alteracao/minhas-solicitacoes-page/minhas-solicitacoes-page').then(
+                m => m.MinhasSolicitacoesPage
+              )
           }
         ]
       },

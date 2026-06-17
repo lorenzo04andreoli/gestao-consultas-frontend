@@ -5,20 +5,23 @@ import { SolicitacaoAlteracaoResponseModel } from '../solicitacao-alteracao.mode
 import { SolicitacaoAlteracaoService } from '../solicitacao-alteracao';
 
 @Component({
-  selector: 'app-solicitacoes-alteracao-admin-page',
+  selector: 'app-minhas-solicitacoes-page',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './solicitacoes-alteracao-admin-page.html',
-  styleUrl: './solicitacoes-alteracao-admin-page.scss'
+  templateUrl: './minhas-solicitacoes-page.html',
+  styleUrl: './minhas-solicitacoes-page.scss'
 })
-export class SolicitacoesAlteracaoAdminPage implements OnInit {
+export class MinhasSolicitacoesPage implements OnInit {
   solicitacoes = signal<SolicitacaoAlteracaoResponseModel[]>([]);
   solicitacaoSelecionada = signal<SolicitacaoAlteracaoResponseModel | null>(null);
+  modalNovaSolicitacaoAberto = signal(false);
   filtroStatus = signal<'TODAS' | 'PENDENTE' | 'RESPONDIDA'>('TODAS');
   carregando = signal(false);
+  enviando = signal(false);
   erro = signal('');
   sucesso = signal('');
-  resposta = '';
+  assunto = '';
+  descricao = '';
 
   solicitacoesFiltradas = computed(() => {
     const filtro = this.filtroStatus();
@@ -46,7 +49,7 @@ export class SolicitacoesAlteracaoAdminPage implements OnInit {
     this.carregando.set(true);
     this.erro.set('');
 
-    this.solicitacaoService.listarAdmin().subscribe({
+    this.solicitacaoService.listarMinhas().subscribe({
       next: solicitacoes => {
         this.solicitacoes.set(solicitacoes);
         this.carregando.set(false);
@@ -62,45 +65,56 @@ export class SolicitacoesAlteracaoAdminPage implements OnInit {
     this.filtroStatus.set(filtro);
   }
 
-  abrirResposta(solicitacao: SolicitacaoAlteracaoResponseModel) {
-    this.solicitacaoSelecionada.set(solicitacao);
-    this.resposta = solicitacao.resposta ?? '';
+  abrirNovaSolicitacao() {
+    this.assunto = '';
+    this.descricao = '';
     this.erro.set('');
     this.sucesso.set('');
+    this.modalNovaSolicitacaoAberto.set(true);
   }
 
-  fecharResposta() {
-    this.solicitacaoSelecionada.set(null);
-    this.resposta = '';
+  fecharNovaSolicitacao() {
+    this.modalNovaSolicitacaoAberto.set(false);
   }
 
-  responder() {
-    const solicitacao = this.solicitacaoSelecionada();
-    const resposta = this.resposta.trim();
+  enviarSolicitacao() {
+    const assunto = this.assunto.trim();
+    const descricao = this.descricao.trim();
 
-    if (!solicitacao || !resposta) {
-      this.erro.set('Informe a resposta para a solicitação.');
+    if (!assunto) {
+      this.erro.set('Informe o assunto da solicitação.');
       return;
     }
 
-    this.carregando.set(true);
+    if (!descricao) {
+      this.erro.set('Descreva quais dados precisam ser alterados.');
+      return;
+    }
+
+    this.enviando.set(true);
     this.erro.set('');
     this.sucesso.set('');
 
-    this.solicitacaoService.responder(solicitacao.id, { resposta }).subscribe({
-      next: solicitacaoAtualizada => {
-        this.solicitacoes.update(solicitacoes =>
-          solicitacoes.map(item => item.id === solicitacaoAtualizada.id ? solicitacaoAtualizada : item)
-        );
-        this.sucesso.set('Resposta enviada ao usuário.');
-        this.fecharResposta();
-        this.carregando.set(false);
+    this.solicitacaoService.criar({ assunto, descricao }).subscribe({
+      next: solicitacao => {
+        this.solicitacoes.update(solicitacoes => [solicitacao, ...solicitacoes]);
+        this.fecharNovaSolicitacao();
+        this.sucesso.set('Solicitação enviada ao administrador.');
+        this.enviando.set(false);
       },
       error: err => {
-        this.erro.set(this.extrairMensagemErro(err, 'Erro ao responder solicitação.'));
-        this.carregando.set(false);
+        this.erro.set(this.extrairMensagemErro(err, 'Erro ao enviar solicitação.'));
+        this.enviando.set(false);
       }
     });
+  }
+
+  abrirDetalhe(solicitacao: SolicitacaoAlteracaoResponseModel) {
+    this.solicitacaoSelecionada.set(solicitacao);
+  }
+
+  fecharDetalhe() {
+    this.solicitacaoSelecionada.set(null);
   }
 
   statusLabel(status: string) {

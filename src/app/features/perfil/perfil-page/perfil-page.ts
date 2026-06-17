@@ -7,8 +7,6 @@ import { ProfilePhotoService } from '../../../core/profile/profile-photo';
 import { ConfirmationService } from '../../../shared/confirmation/confirmation.service';
 import { DentistaResponseModel } from '../../dentistas/dentista.model';
 import { DentistaService } from '../../dentistas/dentista';
-import { SolicitacaoAlteracaoResponseModel } from '../../solicitacoes-alteracao/solicitacao-alteracao.model';
-import { SolicitacaoAlteracaoService } from '../../solicitacoes-alteracao/solicitacao-alteracao';
 import { UsuarioAtualizacaoModel, UsuarioResponseModel } from '../../usuarios/usuario.model';
 import { UsuarioService } from '../../usuarios/usuario';
 
@@ -23,16 +21,11 @@ export class PerfilPage implements OnInit {
   usuario = signal<UsuarioResponseModel | null>(null);
   dentista = signal<DentistaResponseModel | null>(null);
   carregando = signal(true);
-  enviandoSolicitacao = signal(false);
   erro = signal('');
-  solicitacoes = signal<SolicitacaoAlteracaoResponseModel[]>([]);
-  solicitacaoAberta = signal(false);
   modalFotoAberto = signal(false);
   modalDadosAdminAberto = signal(false);
   salvandoDadosAdmin = signal(false);
   fotoPendente = signal('');
-  solicitacaoAssunto = '';
-  solicitacaoDados = '';
   feedback = signal('');
   adminForm: UsuarioAtualizacaoModel = this.criarAdminFormVazio();
 
@@ -41,14 +34,12 @@ export class PerfilPage implements OnInit {
     private profilePhotoService: ProfilePhotoService,
     private confirmation: ConfirmationService,
     private usuarioService: UsuarioService,
-    private dentistaService: DentistaService,
-    private solicitacaoService: SolicitacaoAlteracaoService
+    private dentistaService: DentistaService
   ) {}
 
   ngOnInit() {
     this.profilePhotoService.carregar();
     this.carregarPerfil();
-    this.carregarSolicitacoes();
   }
 
   carregarPerfil() {
@@ -233,57 +224,6 @@ export class PerfilPage implements OnInit {
     });
   }
 
-  alternarSolicitacao() {
-    this.solicitacaoAberta.update(aberta => !aberta);
-    this.feedback.set('');
-  }
-
-  enviarSolicitacao() {
-    const assunto = this.solicitacaoAssunto.trim();
-    const texto = this.solicitacaoDados.trim();
-
-    if (!assunto) {
-      this.feedback.set('Informe o assunto da solicitacao.');
-      return;
-    }
-
-    if (!texto) {
-      this.feedback.set('Descreva quais dados precisam ser alterados.');
-      return;
-    }
-
-    this.enviandoSolicitacao.set(true);
-    this.feedback.set('');
-
-    this.solicitacaoService.criar({ assunto, descricao: texto }).subscribe({
-      next: solicitacao => {
-        this.solicitacoes.update(solicitacoes => [solicitacao, ...solicitacoes]);
-        this.solicitacaoAssunto = '';
-        this.solicitacaoDados = '';
-        this.solicitacaoAberta.set(false);
-        this.feedback.set('Solicitação enviada ao administrador.');
-        this.enviandoSolicitacao.set(false);
-      },
-      error: err => {
-        this.feedback.set(this.extrairMensagemErro(err, 'Erro ao enviar solicitação.'));
-        this.enviandoSolicitacao.set(false);
-      }
-    });
-  }
-
-  statusSolicitacaoLabel(status: string) {
-    return status === 'PENDENTE' ? 'Pendente' : 'Respondida';
-  }
-
-  dataFormatada(data?: string | null) {
-    if (!data) return '-';
-
-    return new Intl.DateTimeFormat('pt-BR', {
-      dateStyle: 'short',
-      timeStyle: 'short'
-    }).format(new Date(data));
-  }
-
   private carregarPerfilAdmin() {
     this.usuarioService.listar().subscribe({
       next: usuarios => {
@@ -308,19 +248,6 @@ export class PerfilPage implements OnInit {
       error: err => {
         this.erro.set(this.extrairMensagemErro(err, 'Erro ao carregar perfil.'));
         this.carregando.set(false);
-      }
-    });
-  }
-
-  private carregarSolicitacoes() {
-    if (this.authService.isAdmin()) return;
-
-    this.solicitacaoService.listarMinhas().subscribe({
-      next: solicitacoes => {
-        this.solicitacoes.set(solicitacoes);
-      },
-      error: err => {
-        this.feedback.set(this.extrairMensagemErro(err, 'Erro ao carregar solicitações.'));
       }
     });
   }

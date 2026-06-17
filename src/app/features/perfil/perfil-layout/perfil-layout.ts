@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth';
 
 @Component({
   selector: 'app-perfil-layout',
@@ -8,4 +9,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   templateUrl: './perfil-layout.html',
   styleUrl: './perfil-layout.scss'
 })
-export class PerfilLayout {}
+export class PerfilLayout {
+  constructor(public authService: AuthService) {}
+}

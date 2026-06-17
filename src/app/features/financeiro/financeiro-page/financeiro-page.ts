@@ -72,9 +72,9 @@ export class FinanceiroPage implements OnInit {
 
   async cancelarLancamento(lancamento: FinanceiroLancamentoModel) {
     const confirmar = await this.confirmation.confirmar({
-      title: 'Cancelar cobranca',
-      message: `Cancelar a cobranca de ${lancamento.pacienteNome}? Ela deixara de contar nos valores a receber.`,
-      confirmLabel: 'Cancelar cobranca',
+      title: 'Cancelar cobrança',
+      message: `Cancelar a cobrança de ${lancamento.pacienteNome}? Ela deixará de contar nos valores a receber.`,
+      confirmLabel: 'Cancelar cobrança',
       cancelLabel: 'Voltar',
       tone: 'danger'
     });
